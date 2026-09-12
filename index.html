@@ -6878,7 +6878,7 @@ function renderRpgQuests(){
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible') primeAudioContext();
 });
-  
+
   function pomodoroTick(){
     const p = state.pomodoro;
     if(p.phase === 'focus' && p.endAt - Date.now() <= 0){ pomodoroCompleteFocus(); return; }
