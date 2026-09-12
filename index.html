@@ -6854,14 +6854,21 @@ function renderRpgQuests(){
 
   const audio = ensureBellAudio();
   if(audio && audio.paused){
+    // iOS Safari는 audio.volume 변경을 무시하고 항상 시스템 볼륨으로 재생하기 때문에,
+    // volume=0으로만 무음 처리하면 이 프라이밍 재생 자체가 실제 소리로 들려버린다.
+    // muted 속성은 iOS에서도 확실히 적용되므로 이걸로 무음 처리한다.
     const prevVolume = audio.volume;
+    const wasMuted = audio.muted;
+    audio.muted = true;
     audio.volume = 0;
     audio.play().then(() => {
       audio.pause();
       audio.currentTime = 0;
       audio.volume = prevVolume;
+      audio.muted = wasMuted;
     }).catch(() => {
       audio.volume = prevVolume;
+      audio.muted = wasMuted;
     });
   }
 }
