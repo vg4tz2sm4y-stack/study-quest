@@ -6860,9 +6860,11 @@ function renderRpgQuests(){
   ['pointerdown','keydown','touchstart'].forEach(evt => {
     document.addEventListener(evt, primeAudioContext, { passive:true });
   });
-  document.addEventListener('visibilitychange', () => {
-    if(document.visibilityState === 'visible') primeAudioContext();
-  });
+ document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible'){
+    setTimeout(() => primeAudioContext(), 300);
+  }
+});
   function pomodoroTick(){
     const p = state.pomodoro;
     if(p.phase === 'focus' && p.endAt - Date.now() <= 0){ pomodoroCompleteFocus(); return; }
