@@ -6853,19 +6853,6 @@ function renderRpgQuests(){
   if(ctx && ctx.state === 'suspended'){
     ctx.resume().catch(() => {});
   }
-
-  const audio = ensureBellAudio();
-  if(audio && audio.paused){
-    const prevVolume = audio.volume;
-    audio.volume = 0;
-    audio.play().then(() => {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.volume = prevVolume;
-    }).catch(() => {
-      audio.volume = prevVolume;
-    });
-  }
 }
 
 ['pointerdown','keydown','touchstart'].forEach(evt => {
