@@ -6843,27 +6843,41 @@ function renderRpgQuests(){
   // 시간을 아무 클릭 없이 그대로 흘러가는 걸 전제로 하는 기능이라 이 문제에 특히 취약하다. 그래서
   // 페이지 아무 곳이나 누르거나 탭을 다시 볼 때마다 오디오를 무음으로 한 번 미리 재생해둬서, 정작
   // 종이 울려야 할 시점엔 이미 재생이 허용된 상태로 만들어 둔다.
+  // 모바일 웹사이트 첫 접속 시 학교 종소리 울리는 현상 해결 목적 코드 수정 시도함
+  let hasUserInteracted = false;
+
   function primeAudioContext(){
-    const ctx = ensureAudioCtx();
-    if(ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
-    const audio = ensureBellAudio();
-    if(audio && audio.paused){
-      const prevVolume = audio.volume;
-      audio.volume = 0;
-      audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.volume = prevVolume;
-      }).catch(() => { audio.volume = prevVolume; });
-    }
+  if(!hasUserInteracted) return;
+
+  const ctx = ensureAudioCtx();
+  if(ctx && ctx.state === 'suspended'){
+    ctx.resume().catch(() => {});
   }
-  ['pointerdown','keydown','touchstart'].forEach(evt => {
-    document.addEventListener(evt, primeAudioContext, { passive:true });
-  });
- document.addEventListener('visibilitychange', () => {
-  if(document.visibilityState === 'visible'){
-    setTimeout(() => primeAudioContext(), 300);
+
+  const audio = ensureBellAudio();
+  if(audio && audio.paused){
+    const prevVolume = audio.volume;
+    audio.volume = 0;
+    audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = prevVolume;
+    }).catch(() => {
+      audio.volume = prevVolume;
+    });
   }
+}
+
+['pointerdown','keydown','touchstart'].forEach(evt => {
+  document.addEventListener(evt, () => {
+    hasUserInteracted = true;
+    primeAudioContext();
+  }, { passive:true });
+});
+
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') primeAudioContext();
+});
 });
   function pomodoroTick(){
     const p = state.pomodoro;
