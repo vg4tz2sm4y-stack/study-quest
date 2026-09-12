@@ -3952,6 +3952,10 @@ activeBuffs: [], equipment: {weapon:null, armor:null, accessory:null}, inventory
           state.missions = (parsed.missions && typeof parsed.missions === 'object') ? parsed.missions : {};
           state.identity = (parsed.identity && typeof parsed.identity === 'object') ? parsed.identity : {};
           state.soundOn = (typeof parsed.soundOn === 'boolean') ? parsed.soundOn : true;
+          state.bgmOn = (typeof parsed.bgmOn === 'boolean') ? parsed.bgmOn : true;
+          state.bgmVolume = (typeof parsed.bgmVolume === 'number' && Number.isFinite(parsed.bgmVolume))
+            ? Math.max(0, Math.min(1, parsed.bgmVolume))
+            : 0.6;
           state.dailyGoalHistory = (parsed.dailyGoalHistory && typeof parsed.dailyGoalHistory === 'object') ? parsed.dailyGoalHistory : {};
           state.calendarDense = (typeof parsed.calendarDense === 'boolean') ? parsed.calendarDense : true;
           state.lastBackupAt = (typeof parsed.lastBackupAt === 'string') ? parsed.lastBackupAt : null;
@@ -8054,6 +8058,10 @@ function renderRpgQuests(){
         normalizeMissions();
         state.identity = (parsed.identity && typeof parsed.identity === 'object') ? parsed.identity : {};
         state.soundOn = (typeof parsed.soundOn === 'boolean') ? parsed.soundOn : true;
+        state.bgmOn = (typeof parsed.bgmOn === 'boolean') ? parsed.bgmOn : true;
+        state.bgmVolume = (typeof parsed.bgmVolume === 'number' && Number.isFinite(parsed.bgmVolume))
+          ? Math.max(0, Math.min(1, parsed.bgmVolume))
+          : 0.6;
         // 골드/인장/운동기록/행운 등은 원래 여기서 복원되지 않아 백업을 불러오면 조용히 사라지는
         // 문제가 있었다 — loadState()와 동일한 필드를 여기서도 똑같이 복원하도록 보강.
         state.coins = (typeof parsed.coins === 'number' && parsed.coins >= 0) ? parsed.coins : 0;
