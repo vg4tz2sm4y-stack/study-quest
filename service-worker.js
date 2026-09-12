@@ -1,5 +1,5 @@
-const CACHE = 'study-quest-v1';
-const ASSETS = ['./study-quest.html', './manifest.webmanifest', './quest-emblem.svg'];
+const CACHE = 'study-quest-v2';
+const ASSETS = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)));
