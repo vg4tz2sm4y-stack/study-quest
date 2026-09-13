@@ -8584,14 +8584,123 @@ function renderRpgQuests(){
 
 // 모바일에서만 여정 지도 영역의 터치가 부모 Swiper로 전파되지 않게 한다.
 // 지도 자체의 가로 스크롤은 유지하고, 지도 밖 터치는 기존 Swiper 동작을 그대로 둔다.
+// 였는데 롱프레스 접근법 시도함
 const journeyMap = document.getElementById('journey-map');
-if(journeyMap){
-  const stopJourneyMapSwipe = event => {
-    if(window.matchMedia('(max-width: 759px)').matches) event.stopPropagation();
+
+if (journeyMap) {
+  let longPressTimer = null;
+  let longPressActive = false;
+  let lastTouchX = 0;
+
+  // 1보다 크면 손가락 이동보다 지도가 더 빠르게 움직임
+  const DRAG_SPEED = 1.4;
+
+  const clearLongPress = () => {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
   };
-  ['touchstart','touchmove','touchend','touchcancel'].forEach(type => {
-    journeyMap.addEventListener(type, stopJourneyMapSwipe, {passive:true});
-  });
+
+  const unlockSwiper = () => {
+    if (window.__gameTabsSwiper) {
+      window.__gameTabsSwiper.allowTouchMove = true;
+    }
+  };
+
+  const resetLongPress = () => {
+    clearLongPress();
+
+    if (longPressActive) {
+      longPressActive = false;
+      unlockSwiper();
+
+      journeyMap
+        .querySelectorAll('.long-press-active')
+        .forEach(node => node.classList.remove('long-press-active'));
+    }
+  };
+
+  // 터치 시작
+  journeyMap.addEventListener('touchstart', event => {
+    if (!window.matchMedia('(max-width: 759px)').matches) return;
+
+    // 지도 터치가 부모 Swiper로 올라가지 않도록 차단
+    event.stopPropagation();
+
+    const touch = event.touches[0];
+    if (!touch) return;
+
+    lastTouchX = touch.clientX;
+
+    // 실제 층/지역 노드를 눌렀을 때만 롱프레스 시작
+    const node = event.target.closest('.journey-map__node');
+
+    if (!node) {
+      clearLongPress();
+      return;
+    }
+
+    clearLongPress();
+    longPressActive = false;
+
+    longPressTimer = setTimeout(() => {
+      longPressActive = true;
+
+      // 롱프레스가 성립하면 부모 Swiper 잠금
+      if (window.__gameTabsSwiper) {
+        window.__gameTabsSwiper.allowTouchMove = false;
+      }
+
+      node.classList.add('long-press-active');
+
+      // 롱프레스 직후의 현재 손가락 위치를 기준점으로 다시 잡음
+      const currentTouch = event.touches[0];
+      if (currentTouch) {
+        lastTouchX = currentTouch.clientX;
+      }
+    }, 2000);
+  }, { passive: true });
+
+
+  // 손가락 이동
+  journeyMap.addEventListener('touchmove', event => {
+  if (!window.matchMedia('(max-width: 759px)').matches) return;
+
+  event.stopPropagation();
+
+  if (!longPressActive) return;
+
+  // 롱프레스 이후에는 기본 브라우저 스크롤을 막고
+  // 우리가 직접 scrollLeft를 조작한다.
+  event.preventDefault();
+
+  const touch = event.touches[0];
+  if (!touch) return;
+
+  const currentX = touch.clientX;
+  const deltaX = currentX - lastTouchX;
+
+  journeyMap.scrollLeft -= deltaX * DRAG_SPEED;
+
+  lastTouchX = currentX;
+}, { passive: false });
+
+
+  // 손가락을 뗌
+  journeyMap.addEventListener('touchend', event => {
+    if (!window.matchMedia('(max-width: 759px)').matches) return;
+
+    event.stopPropagation();
+    resetLongPress();
+  }, { passive: true });
+
+
+  // 터치가 취소된 경우
+  journeyMap.addEventListener('touchcancel', event => {
+    if (!window.matchMedia('(max-width: 759px)').matches) return;
+
+    event.stopPropagation();
+    resetLongPress();
+  }, { passive: true });
 }
 
     // 탭 버튼은 동일한 Swiper 인스턴스를 사용한다. 별도의 터치 엔진은 없다.
