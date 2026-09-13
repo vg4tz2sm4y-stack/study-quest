@@ -675,6 +675,8 @@
     height:auto;
     flex-shrink:0;
     box-sizing:border-box;
+    display:flex;
+    flex-direction:column;
   }
   .game-tabs-swiper .swiper-slide > [data-tab-panel],
   .game-tabs-swiper .swiper-slide > .game-tabs__panel{
@@ -685,6 +687,18 @@
       touch-action:pan-y;
       overscroll-behavior-x:contain;
     }
+  }
+
+  /* 탭별 최상위 섹션 사이 간격은 성장 탭(.game-tabs__panel)의 14px와 동일하게.
+     섹션 내부 spacing과 Swiper 동작은 건드리지 않는다. */
+  .game-tabs-swiper .swiper-slide[data-tab-slide="study"],
+  .game-tabs-swiper .swiper-slide[data-tab-slide="adventure"],
+  .game-tabs-swiper .swiper-slide[data-tab-slide="record"]{
+    gap:14px;
+  }
+  .game-tabs-swiper .swiper-slide[data-tab-slide="record"] > .grid-top{
+    gap:14px;
+    align-items:start;
   }
 
   .game-tabs__nav{
@@ -826,8 +840,19 @@
   .fold-panel > summary::-webkit-details-marker{display:none;}
   .fold-panel > summary.quest-panel__header{margin:0;}
   .fold-panel > summary.quest-panel__header::after{content:'▸';margin-left:auto;color:var(--gold);transition:transform .2s ease;}
+  .fold-panel > summary.quest-panel__header:has(.quest-panel__header-sub:not(:empty))::after{margin-left:8px;}
   .fold-panel[open] > summary.quest-panel__header::after{transform:rotate(90deg);}
   .fold-panel__body{padding-top:8px;}
+
+  /* 기록 탭 접이식 섹션 — 업적 접기 UI와 같은 감각 */
+  .record-fold{border:0;}
+  .record-fold > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;}
+  .record-fold > summary::-webkit-details-marker{display:none;}
+  .record-fold > summary h2{margin:0;flex:0 1 auto;}
+  .record-fold > summary::after{content:'▸';margin-left:8px;color:var(--gold);font-size:.9rem;transition:transform .2s ease;}
+  .record-fold > summary .quest-panel__header-sub{margin-left:auto;}
+  .record-fold[open] > summary::after{transform:rotate(90deg);}
+  .record-fold__body{padding-top:2px;}
 
   /* ---------- 업적 ---------- */
   .achievement-list{display:flex;flex-direction:column;gap:8px;}
@@ -2592,7 +2617,9 @@
     </div>
 
     <div class="card">
-      <h2>📜 모험 기록부</h2>
+      <details class="record-fold" open>
+        <summary><h2>📜 모험 기록부</h2></summary>
+        <div class="record-fold__body">
       <div class="weekly-gate" id="weekly-gate">
         <div class="weekly-gate__top">
           <span class="weekly-gate__name" id="gate-name">🗿 관문지기</span>
@@ -2659,6 +2686,8 @@
         <span class="stat-name">📚 이달 과목별 미션</span>
         <div class="mission-stat-chips" id="mission-stat-chips"></div>
       </div>
+        </div>
+      </details>
     </div>
   </section>
 
@@ -2673,13 +2702,29 @@
   </section>
 
   <section class="quest-panel tab-content" data-tab-panel="record" hidden>
-    <div class="quest-panel__header"><span class="quest-panel__header-icon">👻</span><span class="quest-panel__header-title">몬스터 도감</span><span class="quest-panel__header-sub" id="monster-codex-count">0/5</span></div>
-    <div class="monster-grid" id="monster-codex"></div>
+    <details class="fold-panel" open>
+      <summary class="quest-panel__header">
+        <span class="quest-panel__header-icon">👻</span>
+        <span class="quest-panel__header-title">몬스터 도감</span>
+        <span class="quest-panel__header-sub" id="monster-codex-count">0/5</span>
+      </summary>
+      <div class="fold-panel__body">
+        <div class="monster-grid" id="monster-codex"></div>
+      </div>
+    </details>
   </section>
 
   <section class="quest-panel tab-content" data-tab-panel="record" hidden>
-    <div class="quest-panel__header"><span class="quest-panel__header-icon">📜</span><span class="quest-panel__header-title">모험 연대기</span><span class="quest-panel__header-sub"></span></div>
-    <div class="chronicle-list" id="adventure-chronicle"></div>
+    <details class="fold-panel" open>
+      <summary class="quest-panel__header">
+        <span class="quest-panel__header-icon">📜</span>
+        <span class="quest-panel__header-title">모험 연대기</span>
+        <span class="quest-panel__header-sub"></span>
+      </summary>
+      <div class="fold-panel__body">
+        <div class="chronicle-list" id="adventure-chronicle"></div>
+      </div>
+    </details>
   </section>
 
   <div class="game-tab-panels quest-family">
