@@ -1061,7 +1061,7 @@
   .journey-region__bar-fill{height:100%;background:linear-gradient(90deg,#b49a62,var(--gold));border-radius:999px;transition:width .25s ease;}
   .journey-region__detail{font-size:0.78rem;line-height:1.6;color:var(--ink-soft);}
 
-  .journey-map{display:flex;align-items:stretch;gap:18px;overflow-x:auto;padding:1px 12px 8px;margin:18px 0 0;scrollbar-width:thin;}
+  .journey-map{display:flex;align-items:stretch;gap:18px;overflow-x:auto;padding:1px 12px 8px;margin:18px 0 0;scrollbar-width:thin;touch-action: pan-x;}
   .journey-map__node{position:relative;min-width:104px;flex:0 0 104px;padding:9px 8px;border:1px solid var(--line);border-radius:11px;background:#f5f0e5;text-align:center;color:var(--muted);}
   .journey-map__node:not(:last-child)::after{content:'›';position:absolute;right:-14px;top:50%;transform:translateY(-50%);z-index:2;font-size:1rem;color:var(--gold);font-weight:700;}
   .journey-map__node.current{border-color:var(--gold);background:#fdf6e6;box-shadow:0 2px 8px rgba(163,130,63,.10);color:var(--ink-soft);}
