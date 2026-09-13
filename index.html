@@ -664,6 +664,14 @@
     gap:6px;
     margin-bottom:12px;
     border-bottom:1px solid var(--line);
+    /* 탭 바를 화면 상단에 고정 — 콘텐츠를 내려서 보다가도 위로 스크롤하지 않고 바로 탭 전환 가능 */
+    position:sticky;
+    top:0;
+    z-index:30;
+    background:var(--paper);
+    padding-top:6px;
+    margin-top:-6px;
+    box-shadow:0 8px 14px -12px rgba(28,35,51,0.3);
   }
   .game-tab-btn{
     position:relative;
@@ -680,18 +688,27 @@
     font-size:0.82rem;
     color:var(--muted);
     padding:8px 4px 10px;
+    min-height:44px;
     cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
   }
   .game-tab-btn:hover{color:var(--ink-soft);}
   .game-tab-btn.active{color:var(--seal);border-bottom-color:var(--seal);}
+  .game-tab-btn:active{transform:scale(0.96);}
   .game-tab-btn__dot{
     width:7px;height:7px;border-radius:50%;
     background:var(--gold);
     box-shadow:0 0 0 2px var(--paper-card);
   }
-  .game-tabs__panel{display:flex;flex-direction:column;gap:14px;}
+  .game-tabs__panel{display:flex;flex-direction:column;gap:14px;animation:tabPanelIn 0.24s ease;}
   .game-tabs__panel[hidden]{display:none;}
   .tab-content[hidden]{display:none;}
+  .tab-content{animation:tabPanelIn 0.24s ease;}
+  @keyframes tabPanelIn{
+    from{opacity:0;transform:translateY(6px);}
+    to{opacity:1;transform:translateY(0);}
+  }
 
   /* ---------- 레벨 · 칭호 스트립 ---------- */
   .level-strip{
@@ -2121,6 +2138,7 @@
 
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important;}
+    button:active, .day-cell:active, .game-tab-btn:active{transform:none !important;}
   }
 
   @media print{
@@ -2161,6 +2179,21 @@
   }
 
   :focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+  /* ---------- 모바일 터치 피드백 통일 ----------
+     버튼마다 :hover만 있고 실제 탭 시 눌리는 느낌이 없던 문제를 한 번에 보완.
+     :where()로 감싸서 특이도를 낮춰뒀기 때문에, 이미 자체 :active 연출이 있는
+     버튼(예: .gacha-draw-btn, .exercise-opt 등)은 기존 연출을 그대로 유지한다. */
+  button, .day-cell{-webkit-tap-highlight-color:transparent;}
+  button{touch-action:manipulation;}
+  button:where(:not(:disabled)):active{
+    transform:scale(0.96);
+    filter:brightness(0.95);
+  }
+  .day-cell:not(.blank):not(.future):active{
+    transform:scale(0.96);
+    filter:brightness(0.97);
+  }
 
   /* ---------- 토스트 메시지 ---------- */
   .toast-container{
@@ -2617,7 +2650,7 @@
   </section>
 
   <section class="quest-panel tab-content" data-tab-panel="record" hidden>
-    <div class="quest-panel__header"><span class="quest-panel__header-icon">📜</span><span class="quest-panel__header-title">모험 연대기</span><span class="quest-panel__header-sub">주요 순간을 시간순으로</span></div>
+    <div class="quest-panel__header"><span class="quest-panel__header-icon">📜</span><span class="quest-panel__header-title">모험 연대기</span><span class="quest-panel__header-sub"></span></div>
     <div class="chronicle-list" id="adventure-chronicle"></div>
   </section>
 
@@ -6113,11 +6146,11 @@ function renderRpgQuests(){
   // 시험 준비 초반에 이미 최고 신뢰도(Lv.5)에 도달해버리는 문제가 있었다.
   // 5단계 임계값을 D-day 전체 준비 기간(약 4개월)에 걸쳐 고르게 도달하도록 다시 설계한다.
   const NPC_TRUST_THRESHOLDS = {
-    innkeeper: [10, 20, 30, 50, 75, 100],       // 여관에서 먹은 끼니 수
-    sage:      [0, 2, 4, 6, 9, 12],         // 달성한 업적 수 (전체 14개 중)
+    innkeeper: [0, 30, 60, 90, 150, 200],       // 여관에서 먹은 끼니 수
+    sage:      [0, 3, 5, 7, 10, 12],         // 달성한 업적 수 (전체 14개 중)
     archivist: [0, 30, 50, 70, 90, 100],      // 누적 활동일수
-    knight:    [0, 60, 150, 300, 500, 750], // 누적 스탬프 수
-    merchant:  [0, 100, 200, 400, 600, 900]  // 잡화상에서 쓴 누적 골드
+    knight:    [0, 100, 200, 400, 700, 1000], // 누적 스탬프 수
+    merchant:  [0, 250, 500, 1000, 1500, 3000]  // 잡화상에서 쓴 누적 골드
   };
   function trustLevelFor(value, thresholds){
     let idx = 0;
@@ -8283,6 +8316,62 @@ function renderRpgQuests(){
       updateAmbientAudioForContext();
     });
   });
+
+  // ---------- 탭 좌우 스와이프 전환 ----------
+  // 탭 버튼을 직접 누르지 않아도, 화면을 좌우로 스와이프해서 공부/모험/성장/기록 탭을
+  // 넘길 수 있게 한다. 세로 스크롤이나, 자체적으로 가로 스크롤을 쓰는 영역
+  // (단계 트랙 .phase-steps, 모험 지도 .journey-map)과는 충돌하지 않도록 조건을 둔다.
+  (function setupTabSwipe(){
+    const TAB_ORDER = ['study', 'adventure', 'growth', 'record'];
+    const SWIPE_MIN_DISTANCE = 60;   // 이 정도는 움직여야 '스와이프'로 인정
+    const SWIPE_MAX_OFF_AXIS = 70;   // 세로로 이만큼 이상 움직였으면 스크롤로 간주하고 무시
+    let startX = 0, startY = 0, tracking = false;
+
+    function isSwipeBlocked(target){
+      if(!(target instanceof Element)) return false;
+      // 가로 스크롤 영역 안에서는 스와이프를 그 영역의 스크롤에 맡긴다.
+      if(target.closest('.phase-steps, .journey-map')) return true;
+      // 모달이 떠 있을 때는 뒤쪽 탭이 바뀌면 안 된다.
+      const modal1 = document.getElementById('modal-backdrop');
+      const modal2 = document.getElementById('phase-modal-backdrop');
+      if(modal1 && !modal1.classList.contains('hidden')) return true;
+      if(modal2 && !modal2.classList.contains('hidden')) return true;
+      return false;
+    }
+
+    document.addEventListener('touchstart', (e) => {
+      if(e.touches.length !== 1){ tracking = false; return; }
+      if(isSwipeBlocked(e.target)){ tracking = false; return; }
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = true;
+    }, {passive:true});
+
+    document.addEventListener('touchend', (e) => {
+      if(!tracking) return;
+      tracking = false;
+      const touch = e.changedTouches[0];
+      if(!touch) return;
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      if(Math.abs(dx) < SWIPE_MIN_DISTANCE) return;      // 너무 짧으면 무시
+      if(Math.abs(dy) > SWIPE_MAX_OFF_AXIS) return;       // 대각선/세로 스크롤이면 무시
+      if(Math.abs(dx) < Math.abs(dy)) return;             // 세로 움직임이 더 크면 무시
+
+      const activeBtn = document.querySelector('.game-tab-btn.active');
+      if(!activeBtn) return;
+      const currentIdx = TAB_ORDER.indexOf(activeBtn.dataset.tab);
+      if(currentIdx === -1) return;
+      // 왼쪽으로 스와이프(dx<0) → 다음 탭, 오른쪽으로 스와이프(dx>0) → 이전 탭
+      const nextIdx = dx < 0 ? currentIdx + 1 : currentIdx - 1;
+      if(nextIdx < 0 || nextIdx >= TAB_ORDER.length) return; // 양 끝에서는 반응하지 않음
+
+      const nextTab = TAB_ORDER[nextIdx];
+      // switchGameTab이 버튼의 active/aria-selected 갱신까지 전부 처리해준다.
+      switchGameTab(nextTab);
+      if(typeof updateAmbientAudioForContext === 'function') updateAmbientAudioForContext();
+    }, {passive:true});
+  })();
 
   function init(){
     loadState();
