@@ -667,6 +667,9 @@
   .tab-swipe-track{contain:layout style;}
   .tab-swipe-track{display:flex;align-items:flex-start;width:400%;will-change:transform;transform:translate3d(0,0,0);transition:none;}
   .tab-swipe-slide{flex:0 0 25%;min-width:0;display:flex;flex-direction:column;gap:12px;overflow:visible;}
+  /* 탭 내부 패널과 슬라이드의 간격 체계를 하나로 통일해 중복 여백을 막는다. */
+  .tab-swipe-slide > .game-tabs__panel{gap:12px;}
+  .tab-swipe-slide > .game-tabs__panel > [data-tab-panel]{margin-top:0 !important;}
   .tab-swipe-slide > [data-tab-panel]{width:100%;flex:none;}
   .tab-swipe-slide.swipe-neighbor > [data-tab-panel]{display:block;}
   .tab-swipe-viewport.is-dragging{transition:none;}
@@ -1101,7 +1104,7 @@
   .narrative-quest__reward{margin-top:5px;font-size:.62rem;color:var(--gold);font-weight:700;}
   .narrative-quest__claim{margin-top:7px;width:100%;padding:7px 9px;border:1px solid var(--gold);border-radius:9px;background:#fff;color:var(--ink-soft);font-size:.66rem;font-weight:700;cursor:pointer;}
   .narrative-quest__claim:hover{background:#fdf6e6;}
-  .narrative-study-panel{margin-top:12px;}
+  .narrative-study-panel{margin-top:0;}
   .encounter-memory-panel{margin-top:0;}
   .encounter-memory__item{padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:#fbf8f1;}
   .encounter-memory__item + .encounter-memory__item{margin-top:5px;}
@@ -8550,33 +8553,45 @@ function renderRpgQuests(){
       viewport.style.height = `${Math.max(currentSlide.scrollHeight, neighborSlide.scrollHeight)}px`;
       return idx;
     }
-    function finishTo(index){
+    function stopSnap(){
+      if(snapRafId){
+        cancelAnimationFrame(snapRafId);
+        snapRafId = 0;
+      }
+    }
+
+    function finishTo(index, initialVelocity=0){
       index = Math.max(0, Math.min(TAB_ORDER.length - 1, index));
       const tab = TAB_ORDER[index];
       cancelDragRender();
       viewport.classList.remove('is-dragging');
-      if(snapRafId) cancelAnimationFrame(snapRafId);
+      stopSnap();
 
       const width = Math.max(1, viewport.clientWidth);
       const targetX = -index * width;
       const matrix = getComputedStyle(track).transform;
       let x = -activeIndex() * width;
       if(matrix && matrix !== 'none'){
-        const m = new DOMMatrixReadOnly(matrix);
-        if(Number.isFinite(m.m41)) x = m.m41;
+        try{
+          const m = new DOMMatrixReadOnly(matrix);
+          if(Number.isFinite(m.m41)) x = m.m41;
+        }catch(_){ /* older WebKit fallback: keep the calculated base position */ }
       }
-      let v = Math.max(-38, Math.min(38, velocityX * 42));
+
+      // 입력 장치와 무관하게 같은 물리 모델을 사용한다.
+      // initialVelocity는 px/ms이며, 과도한 초기 속도는 제한한다.
+      let v = Math.max(-34, Math.min(34, initialVelocity * 16.667));
       let last = performance.now();
-      const springK = 0.022;
-      const damping = 0.82;
+      const springK = 0.030;
+      const dampingPerFrame = 0.84;
 
       function step(now){
-        const dt = Math.min(32, Math.max(8, now - last));
+        const dt = Math.min(24, Math.max(8, now - last));
         last = now;
         const scale = dt / 16.667;
         const force = (targetX - x) * springK;
         v += force * scale;
-        v *= Math.pow(damping, scale);
+        v *= Math.pow(dampingPerFrame, scale);
         x += v * scale;
         track.style.transform = `translate3d(${x}px,0,0)`;
 
@@ -8611,13 +8626,16 @@ function renderRpgQuests(){
       if(!cancelled && Math.abs(projected) > Math.max(48, width * 0.14)){
         next += projected < 0 ? 1 : -1;
       }
-      finishTo(next);
+      finishTo(next, cancelled ? 0 : velocityX);
     }
 
     // touch는 실제 스와이프 무대에서만 시작한다. document 전체에 걸지 않아
     // 첫 화면의 일반 세로 스크롤과 충돌하지 않는다.
     viewport.addEventListener('touchstart', e => {
       if(e.touches.length !== 1 || blocked(e.target)) return;
+      stopSnap();
+      clearTimeout(wheelEndTimer);
+      wheelTracking = false;
       const t = e.touches[0];
       startX = lastX = t.clientX;
       startY = t.clientY;
@@ -8671,9 +8689,14 @@ function renderRpgQuests(){
     viewport.addEventListener('touchcancel', () => finishTouch(true), {passive:true});
 
     // ---------- MacBook 트랙패드 ----------
-    // 트랙패드는 wheel 이벤트가 여러 번의 작은 deltaX + 관성 delta로 들어오므로,
-    // "한 번의 큰 delta"를 기다리지 않고 실제 드래그처럼 누적/추적한다.
+    // wheel delta를 실제 드래그 거리로 취급하고, 마지막 속도를 같은 spring 엔진에 전달한다.
     let wheelGestureId = 0;
+
+    function normalizeWheelDelta(e){
+      if(e.deltaMode === 1) return e.deltaX * 16;
+      if(e.deltaMode === 2) return e.deltaX * Math.max(1, viewport.clientWidth);
+      return e.deltaX;
+    }
 
     function finishWheel(id){
       if(id !== wheelGestureId || !wheelTracking) return;
@@ -8682,25 +8705,31 @@ function renderRpgQuests(){
       viewport.classList.remove('is-dragging');
 
       const width = Math.max(1, viewport.clientWidth);
-      // 마지막 관성까지 조금 투영해 Safari/Chrome 트랙패드의 자연스러운 감속을 살린다.
-      const projected = wheelOffset + Math.max(-2.8, Math.min(2.8, wheelVelocity)) * 150;
+      const projected = wheelOffset + Math.max(-1.8, Math.min(1.8, wheelVelocity)) * 115;
       let next = activeIndex();
-      const threshold = Math.max(42, width * 0.10);
-      if(Math.abs(projected) > threshold) next += projected < 0 ? 1 : -1;
-      finishTo(next);
+      if(Math.abs(projected) > Math.max(34, width * 0.08)) next += projected < 0 ? 1 : -1;
+
+      // wheelVelocity는 px/ms로 환산해 공통 물리 엔진으로 넘긴다.
+      finishTo(next, wheelVelocity);
       wheelOffset = 0;
       wheelVelocity = 0;
       wheelLastTime = 0;
     }
 
     function handleWheel(e){
-      if(!inSwipeSurface(e.target) || blocked(e.target)) return;
-      const absX = Math.abs(e.deltaX);
-      const absY = Math.abs(e.deltaY);
-      if(absX < 0.5 || absX <= absY * 1.08) return;
+      const onNav = !!(e.currentTarget && e.currentTarget.classList && e.currentTarget.classList.contains('game-tabs__nav'));
+      if(!inSwipeSurface(e.target)) return;
+      // 탭바에서는 버튼 자체가 target이어도 가로 트랙패드 제스처를 허용한다.
+      // 실제 조작 컨트롤은 패널 내부에서만 차단한다.
+      if(!onNav && blocked(e.target)) return;
 
-      // 트랙패드 momentum은 같은 제스처 안에서 계속 들어온다. 새 제스처는
-      // 이전 종료 타이머를 취소하고 즉시 이어서 추적한다.
+      const rawX = normalizeWheelDelta(e);
+      const absX = Math.abs(rawX);
+      const absY = Math.abs(e.deltaY);
+      // 세로 스크롤을 가로 스와이프로 오인하지 않는다.
+      if(absX < 0.75 || absX <= absY * 1.08) return;
+
+      stopSnap();
       const now = performance.now();
       if(!wheelTracking){
         wheelTracking = true;
@@ -8714,11 +8743,11 @@ function renderRpgQuests(){
       e.preventDefault();
       clearTimeout(wheelEndTimer);
 
-      const dt = Math.max(1, now - wheelLastTime);
-      const instant = e.deltaX / dt;
-      wheelVelocity = wheelVelocity * 0.74 + instant * 0.26;
+      const dt = Math.max(8, now - wheelLastTime);
+      const instant = rawX / dt;
+      wheelVelocity = wheelVelocity * 0.72 + instant * 0.28;
       wheelLastTime = now;
-      wheelOffset += e.deltaX;
+      wheelOffset += rawX;
 
       const idx = activeIndex();
       const width = Math.max(1, viewport.clientWidth);
@@ -8733,8 +8762,7 @@ function renderRpgQuests(){
       requestDragRender(-idx * width + drag);
 
       const id = wheelGestureId;
-      // 너무 짧게 끝내지 않아 trackpad의 관성 프레임을 충분히 받는다.
-      wheelEndTimer = setTimeout(() => finishWheel(id), 180);
+      wheelEndTimer = setTimeout(() => finishWheel(id), 140);
     }
     viewport.addEventListener('wheel', handleWheel, {passive:false});
     // 네비게이션 바에서도 트랙패드 가로 제스처가 자연스럽게 탭 전환되도록 한다.
