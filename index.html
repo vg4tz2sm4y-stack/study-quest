@@ -663,7 +663,7 @@
      Safari 읽기목록처럼 손가락을 따라 화면이 직접 움직이고, 손을 떼면
      자연스럽게 다음/이전 화면으로 스냅된다. 세로 스크롤은 그대로 브라우저에 맡긴다. */
   .tab-swipe-viewport{width:100%;overflow:hidden;position:relative;transition:none;overflow-anchor:none;}
-  .tab-swipe-viewport.is-height-settling{transition:height .20s cubic-bezier(.22,.61,.36,1);}
+  .tab-swipe-viewport.is-height-settling{transition:none;}
   .tab-swipe-viewport.is-height-animating{overflow-anchor:none;}
   .tab-swipe-track{contain:layout style;}
   .tab-swipe-track{display:flex;align-items:flex-start;width:400%;will-change:transform;transform:translate3d(0,0,0);transition:none;}
@@ -8553,9 +8553,13 @@ function renderRpgQuests(){
     function requestDragRender(x){ pendingTransformX=x; if(!rafId) rafId=requestAnimationFrame(renderDrag); }
     function cancelDragRender(){ if(rafId){cancelAnimationFrame(rafId);rafId=0;} }
     function currentBaseX(){ return -activeIndex()*width(); }
-    function rubber(value){
-      const sign=value<0?-1:1, amount=Math.min(Math.abs(value),160);
-      return sign*(amount*.30+Math.sqrt(amount)*1.8);
+
+    // 과한 고무줄/반발감을 없애고, 끝에서는 아주 짧게만 저항을 준다.
+    // 목표는 '잡아당겼다가 튕기는' 느낌이 아니라 손가락/트랙패드를 따라
+    // 슥 이동한 뒤 조용히 제자리에 착지하는 것이다.
+    function edgeResistance(value){
+      const sign=value<0?-1:1, amount=Math.min(Math.abs(value),72);
+      return sign * Math.min(amount * 0.16, 11.5);
     }
     function neighborForDelta(delta){
       const idx=activeIndex(), direction=delta<0?1:-1, next=idx+direction;
@@ -8564,9 +8568,9 @@ function renderRpgQuests(){
     function prepareNeighbor(delta){
       const idx=neighborForDelta(delta);
       if(idx<0) return -1;
-      // 중요: 여기서는 scrollHeight를 읽지 않는다. 높이는 미리 캐시되어 있다.
+      // 여기서는 절대 scrollHeight를 읽지 않는다. 높이는 유휴 시점에 캐시된다.
       showNeighbor(TAB_ORDER[idx]);
-      const h=Math.max(heightCache[TAB_ORDER[activeIndex()]]||1,heightCache[TAB_ORDER[idx]]||1);
+      const h=Math.max(heightCache[TAB_ORDER[activeTab()]]||1,heightCache[TAB_ORDER[idx]]||1);
       viewport.style.height=`${h}px`;
       return idx;
     }
@@ -8580,6 +8584,10 @@ function renderRpgQuests(){
       return currentBaseX();
     }
 
+    // 공통 정착 애니메이션.
+    // 이전의 spring force를 직접 누적하는 방식 대신, 과도한 반발이 없는
+    // critically-damped에 가까운 ease-out 곡선을 사용한다. 입력 속도는
+    // 방향 결정에만 쓰고 애니메이션 자체를 폭발적으로 증폭시키지 않는다.
     function finishTo(index, initialVelocity=0){
       index=Math.max(0,Math.min(TAB_ORDER.length-1,index));
       const tab=TAB_ORDER[index];
@@ -8587,25 +8595,37 @@ function renderRpgQuests(){
       stopSnap();
       viewport.classList.add('is-physics-running','is-dragging');
 
-      const w=width(), targetX=-index*w;
-      let x=currentTrackX();
-      let v=Math.max(-34,Math.min(34,initialVelocity*16.667));
-      let last=performance.now();
-      const springK=.030, dampingPerFrame=.84;
+      const targetX=-index*width();
+      const fromX=currentTrackX();
+      const distance=targetX-fromX;
+      if(Math.abs(distance)<0.5){
+        track.style.transform=`translate3d(${targetX}px,0,0)`;
+        track.dataset.activeTab=tab; track.dataset.activeIndex=String(index);
+        switchGameTab(tab,{physics:true,dragging:true});
+        TAB_ORDER.forEach(t=>{if(t!==tab) hideNeighbor(t);});
+        viewport.classList.remove('is-dragging','is-physics-running');
+        syncViewportHeight(tab,false);
+        queueHeightCache();
+        if(typeof updateAmbientAudioForContext==='function') updateAmbientAudioForContext();
+        return;
+      }
+
+      // 거리와 아주 약한 입력 속도에 따라 190~310ms. velocity를 직접 증폭하지 않는다.
+      const speedBias=Math.min(1,Math.abs(initialVelocity)*0.9);
+      const duration=Math.max(190,Math.min(310,270-speedBias*55));
+      const started=performance.now();
+      const ease=t=>1-Math.pow(1-t,3);
 
       function step(now){
-        const dt=Math.min(24,Math.max(8,now-last)); last=now;
-        const scale=dt/16.667;
-        const force=(targetX-x)*springK;
-        v+=force*scale; v*=Math.pow(dampingPerFrame,scale); x+=v*scale;
+        const t=Math.min(1,(now-started)/duration);
+        const e=ease(t);
+        const x=fromX+distance*e;
         track.style.transform=`translate3d(${x}px,0,0)`;
-
-        if(Math.abs(targetX-x)<.45 && Math.abs(v)<.35){
+        if(t>=1){
           track.style.transform=`translate3d(${targetX}px,0,0)`;
           track.dataset.activeTab=tab; track.dataset.activeIndex=String(index);
           switchGameTab(tab,{physics:true,dragging:true});
           TAB_ORDER.forEach(t=>{if(t!==tab) hideNeighbor(t);});
-          // 스프링 중에는 CSS height transition을 켜지 않는다. 정착 직후 캐시 높이로 한 번만 확정한다.
           viewport.classList.remove('is-dragging','is-physics-running');
           syncViewportHeight(tab,false);
           queueHeightCache();
@@ -8621,12 +8641,9 @@ function renderRpgQuests(){
     function animateButtonTo(tabId){
       const idx=TAB_ORDER.indexOf(tabId);
       if(idx<0) return;
-      stopSnap();
-      cancelDragRender();
-      const w=width(), target=-idx*w, x=currentTrackX();
-      const distance=target-x;
-      const baseVelocity=Math.max(-0.9,Math.min(0.9,distance/260));
-      finishTo(idx,baseVelocity);
+      const current=activeIndex();
+      if(idx===current && Math.abs(currentTrackX()-currentBaseX())<0.5) return;
+      finishTo(idx,0);
     }
 
     function finishTouch(cancelled=false){
@@ -8636,10 +8653,13 @@ function renderRpgQuests(){
       if(!horizontal){ horizontal=false; return; }
       horizontal=false;
       const w=width(),dx=lastX-startX;
-      const projected=cancelled?0:dx+Math.max(-2.4,Math.min(2.4,velocityX))*170;
+      // release velocity는 페이지를 '더 세게 튕기는 힘'으로 쓰지 않는다.
+      // 충분히 밀었거나 빠르게 명확히 밀었을 때만 방향 결정에 보조적으로 사용한다.
+      const velocityAssist=cancelled?0:velocityX;
+      const projected=dx + Math.max(-0.55,Math.min(0.55,velocityAssist))*90;
       let next=activeIndex();
-      if(!cancelled&&Math.abs(projected)>Math.max(48,w*.14)) next+=projected<0?1:-1;
-      finishTo(next,cancelled?0:velocityX);
+      if(!cancelled && Math.abs(projected)>Math.max(54,w*.15)) next+=projected<0?1:-1;
+      finishTo(next,cancelled?0:velocityAssist);
     }
 
     viewport.addEventListener('touchstart',e=>{
@@ -8653,18 +8673,18 @@ function renderRpgQuests(){
       if(!tracking||e.touches.length!==1) return;
       const t=e.touches[0],x=t.clientX,y=t.clientY,dx=x-startX,dy=y-startY;
       if(!horizontal){
-        if(Math.abs(dx)<8&&Math.abs(dy)<8) return;
-        if(Math.abs(dy)>Math.abs(dx)*1.15){tracking=false;return;}
+        if(Math.abs(dx)<7&&Math.abs(dy)<7) return;
+        if(Math.abs(dy)>Math.abs(dx)*1.18){tracking=false;return;}
         if(prepareNeighbor(dx)<0){tracking=false;return;}
         horizontal=true; viewport.classList.add('is-dragging','is-physics-running');
       }
       e.preventDefault();
       const now=performance.now(),dt=Math.max(1,now-lastTime),instant=(x-lastX)/dt;
-      velocityX=velocityX*.78+instant*.22; lastX=x; lastTime=now;
+      velocityX=velocityX*.84+instant*.16; lastX=x; lastTime=now;
       const idx=activeIndex(),w=width();
       let drag=dx;
-      if((idx===0&&dx>0)||(idx===TAB_ORDER.length-1&&dx<0)) drag=rubber(dx);
-      drag=Math.max(-w*.96,Math.min(w*.96,drag));
+      if((idx===0&&dx>0)||(idx===TAB_ORDER.length-1&&dx<0)) drag=edgeResistance(dx);
+      drag=Math.max(-w*.98,Math.min(w*.98,drag));
       requestDragRender(-idx*w+drag);
     },{passive:false});
     viewport.addEventListener('touchend',()=>finishTouch(false),{passive:true});
@@ -8679,10 +8699,10 @@ function renderRpgQuests(){
     function finishWheel(id){
       if(id!==wheelGestureId||!wheelTracking) return;
       wheelTracking=false; cancelDragRender();
-      const w=width(),projected=wheelOffset+Math.max(-1.8,Math.min(1.8,wheelVelocity))*115;
+      const w=width(),dx=wheelOffset;
       let next=activeIndex();
-      if(Math.abs(projected)>Math.max(34,w*.08)) next+=projected<0?1:-1;
-      finishTo(next,wheelVelocity);
+      if(Math.abs(dx)>Math.max(42,w*.10)) next+=dx<0?1:-1;
+      finishTo(next,0);
       wheelOffset=0;wheelVelocity=0;wheelLastTime=0;
     }
     function handleWheel(e){
@@ -8690,7 +8710,8 @@ function renderRpgQuests(){
       if(!inSwipeSurface(e.target)) return;
       if(!onNav&&blocked(e.target)) return;
       const rawX=normalizeWheelDelta(e),absX=Math.abs(rawX),absY=Math.abs(e.deltaY);
-      if(absX<.45||absX<=absY*1.05) return;
+      // trackpad의 작은 momentum noise는 무시한다. 세로 스크롤은 절대 가로 전환하지 않는다.
+      if(absX<0.55||absX<=absY*1.12) return;
       stopSnap();
       const now=performance.now();
       if(!wheelTracking){
@@ -8698,18 +8719,18 @@ function renderRpgQuests(){
         viewport.classList.add('is-dragging','is-physics-running');
       }
       e.preventDefault(); clearTimeout(wheelEndTimer);
-      const dt=Math.max(8,now-wheelLastTime),instant=rawX/dt;
-      wheelVelocity=wheelVelocity*.72+instant*.28; wheelLastTime=now; wheelOffset+=rawX;
+      wheelLastTime=now; wheelOffset+=rawX;
       const idx=activeIndex(),w=width();
       let drag=-wheelOffset;
-      if((idx===0&&drag>0)||(idx===TAB_ORDER.length-1&&drag<0)) drag=rubber(drag);
-      drag=Math.max(-w*.985,Math.min(w*.985,drag));
-      if(neighborForDelta(drag)>=0){
-        const n=TAB_ORDER[neighborForDelta(drag)];
+      if((idx===0&&drag>0)||(idx===TAB_ORDER.length-1&&drag<0)) drag=edgeResistance(drag);
+      drag=Math.max(-w*.98,Math.min(w*.98,drag));
+      const nidx=neighborForDelta(drag);
+      if(nidx>=0){
+        const n=TAB_ORDER[nidx];
         if(!slides[n].classList.contains('swipe-neighbor')) prepareNeighbor(drag);
       }
       requestDragRender(-idx*w+drag);
-      const id=wheelGestureId; wheelEndTimer=setTimeout(()=>finishWheel(id),140);
+      const id=wheelGestureId; wheelEndTimer=setTimeout(()=>finishWheel(id),120);
     }
     viewport.addEventListener('wheel',handleWheel,{passive:false});
     const tabNav=document.querySelector('.game-tabs__nav');
