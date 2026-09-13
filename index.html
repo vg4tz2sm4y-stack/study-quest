@@ -2627,7 +2627,7 @@
         <div class="quest-panel__header">
           <span class="quest-panel__header-icon"></span>
           <span class="quest-panel__header-title">상태창</span>
-          <span class="quest-panel__header-sub">클래스 · 성장 상태</span>
+          <span class="quest-panel__header-sub">클래스 · 스탯</span>
         </div>
         <div class="level-strip" id="level-strip"></div>
         <div class="status-board" id="status-board">
@@ -2636,7 +2636,7 @@
       </section>
 
       <section class="quest-panel">
-        <div class="quest-panel__header"><span class="quest-panel__header-icon"></span><span class="quest-panel__header-title">인벤토리</span><span class="quest-panel__header-sub">장비 장착 · 소모품 사용</span></div>
+        <div class="quest-panel__header"><span class="quest-panel__header-icon"></span><span class="quest-panel__header-title">인벤토리</span><span class="quest-panel__header-sub">장비 · 소모품</span></div>
         <div id="inventory-panel"></div>
         <div class="tier2-grid" id="equipment-list" style="margin-top:10px;"></div>
       </section>
@@ -3350,7 +3350,7 @@
     // 몬스터 소재로 만드는 장비 — 골드가 아니라 도감 수집으로 얻는 별도 루트라 여기만 따로 렌더링한다.
     const craftItems=SHOP_EQUIPMENT.filter(item=>item.craftOnly);
     const codexCount=(state.monsterCodex||[]).length, codexTotal=MONSTER_CODEX.length, matCount=totalMaterialCount();
-    const crafting = craftItems.length ? `<div class="shop-subhead">🔨 소재 교환 · 소재 ${matCount}개 보유</div>`+craftItems.map(item=>{
+    const crafting = craftItems.length ? `<div class="shop-subhead">🔨 제작 · 소재 ${matCount}개 보유</div>`+craftItems.map(item=>{
       const owned=ownedEquipment(item.id);
       const ready = item.needCodexComplete ? codexCount>=codexTotal : matCount>=item.needMaterials;
       const ok=ready&&!owned;
@@ -3360,7 +3360,7 @@
     }).join('') : '';
     wrap.innerHTML=consumables+equipment+crafting;
     // 상점은 매번 innerHTML을 다시 그리므로 개별 버튼에 리스너를 붙이는 대신
-    // 컨테이너 하나에서 클릭을 위임한다. 소모품/장비/소재 교환 모두 동일하게 동작한다.
+    // 컨테이너 하나에서 클릭을 위임한다. 소모품/장비/제작 모두 동일하게 동작한다.
     wrap.onclick = (e) => {
       const craftBtn = e.target.closest('[data-craft]');
       if(craftBtn && !craftBtn.disabled){ craftMaterialItem(craftBtn.dataset.craft); return; }
