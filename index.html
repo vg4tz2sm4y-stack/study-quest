@@ -659,6 +659,22 @@
 
   /* ---------- 모험 기록 탭 (상태 / 여정 / 마을 — 앞으로 아이템·상점이 늘어도 여기에 더 얹으면 됨) ---------- */
   .game-tabs{margin:0;}
+  /* ---------- 모바일 탭 스와이프 무대 ----------
+     Safari 읽기목록처럼 손가락을 따라 화면이 직접 움직이고, 손을 떼면
+     자연스럽게 다음/이전 화면으로 스냅된다. 세로 스크롤은 그대로 브라우저에 맡긴다. */
+  .tab-swipe-viewport{width:100%;overflow:hidden;position:relative;transition:height .28s cubic-bezier(.22,.61,.36,1);}
+  .tab-swipe-track{display:flex;align-items:flex-start;width:400%;will-change:transform;transform:translate3d(0,0,0);transition:transform .34s cubic-bezier(.22,.61,.36,1);}
+  .tab-swipe-slide{flex:0 0 25%;min-width:0;display:flex;flex-direction:column;gap:22px;overflow:visible;}
+  .tab-swipe-slide > [data-tab-panel]{width:100%;flex:none;}
+  .tab-swipe-slide.swipe-neighbor > [data-tab-panel]{display:block;}
+  .tab-swipe-viewport.is-dragging{transition:none;}
+  .tab-swipe-viewport.is-dragging .tab-swipe-track{transition:none;}
+  @media(max-width:759px){
+    .tab-swipe-viewport{touch-action:pan-y;overscroll-behavior-x:contain;}
+    .tab-swipe-track{transition-duration:.30s;}
+    .tab-swipe-slide{gap:18px;}
+  }
+
   .game-tabs__nav{
     display:flex;
     gap:6px;
@@ -5210,21 +5226,30 @@ function renderRpgQuests(){
     { need:12, icon:'👑', label:'토마토 제왕!' }
   ];
   // ---------- 타이머 아래 주 탭 전환 ----------
-  function switchGameTab(tabId){
+  function switchGameTab(tabId, options={}){
     document.querySelectorAll('.game-tab-btn').forEach(btn => {
       const active = btn.dataset.tab === tabId;
       btn.classList.toggle('active', active);
       btn.setAttribute('aria-selected', active ? 'true' : 'false');
     });
     document.querySelectorAll('[data-tab-panel]').forEach(panel => {
-      // #exam-finale는 같은 'study' 패널 그룹에 있지만, 실제 시험 당일에만 보여야 하는
-      // 별도 조건부 요소라 탭 전환만으로 무조건 다시 켜면 안 된다. 탭이 맞아도 이 요소는
-      // 건드리지 않고, 아래에서 renderExamFinale()이 그날짜 여부로 다시 판정하게 둔다.
       if(panel.id === 'exam-finale') return;
       panel.hidden = panel.dataset.tabPanel !== tabId;
     });
-    // 탭을 study로 되돌아왔을 때 시험 당일이 아니면 최종 관문 배너가 다시 나타나지 않도록,
-    // 매번 탭을 전환할 때마다 이 조건부 패널의 표시 여부를 다시 계산한다.
+
+    const track = document.querySelector('.tab-swipe-track');
+    const viewport = document.querySelector('.tab-swipe-viewport');
+    if(track){
+      const order = ['study','adventure','growth','record'];
+      const idx = Math.max(0, order.indexOf(tabId));
+      track.style.transform = `translate3d(${-idx * 25}%,0,0)`;
+      track.dataset.activeIndex = String(idx);
+      if(viewport && !options.dragging){
+        const slide = track.querySelector(`.tab-swipe-slide[data-tab-slide="${tabId}"]`);
+        if(slide) viewport.style.height = `${slide.scrollHeight}px`;
+      }
+    }
+
     if(typeof renderExamFinale === 'function') renderExamFinale();
     if(tabId === 'growth' && typeof renderClassStats === 'function') renderClassStats();
   }
@@ -6719,29 +6744,81 @@ function renderRpgQuests(){
       osc.stop(now + offset + 0.28);
     });
   }
+  // ---------- 타이머 시작 음악 ----------
+  // 일반 모드와 아카데미(학교 종) 모드 모두 시작 버튼을 누른 순간 재생한다.
+  // 파일은 index.html과 같은 폴더에 두고, iOS Safari의 자동재생 제한을 피하기 위해
+  // 실제 사용자 탭 이벤트 안에서만 play()가 호출되도록 한다.
+  let timerStartMusicAudio = null;
+  const TIMER_START_MUSIC_SRC = './carriage-in-rainy-forest.mp3';
+  const TIMER_START_MUSIC_VOLUME = 0.16;
+
+  function ensureTimerStartMusic(){
+    if(!timerStartMusicAudio){
+      timerStartMusicAudio = new Audio(TIMER_START_MUSIC_SRC);
+      timerStartMusicAudio.preload = 'auto';
+      timerStartMusicAudio.loop = true;
+      timerStartMusicAudio.volume = TIMER_START_MUSIC_VOLUME * bgmVolumeMultiplier();
+      timerStartMusicAudio.addEventListener('error', () => {
+        showToast('🎵 시작 음악 파일(carriage-in-rainy-forest.mp3)을 찾지 못했어요. HTML과 같은 폴더에 넣어주세요.');
+      }, { once:true });
+    }
+    return timerStartMusicAudio;
+  }
+
+  function playTimerStartMusic(){
+    if(!state.soundOn || !state.bgmOn) return;
+    try{
+      const audio = ensureTimerStartMusic();
+      audio.volume = TIMER_START_MUSIC_VOLUME * bgmVolumeMultiplier();
+      audio.currentTime = 0;
+      const promise = audio.play();
+      if(promise && typeof promise.catch === 'function') promise.catch(() => {});
+    }catch(e){}
+  }
+
+  function stopTimerStartMusic(){
+    if(!timerStartMusicAudio) return;
+    timerStartMusicAudio.pause();
+    try{ timerStartMusicAudio.currentTime = 0; }catch(e){}
+  }
+
   // ---------- 일반 타이머 시작 전용 맑은 종소리 ----------
-  // 사용자가 제공한 clear-bell-chime.mp3를 일반 타이머 시작 버튼에서만 재생한다.
-  let normalTimerStartAudio = null;
-  const NORMAL_TIMER_START_AUDIO_SRC = './clear-bell-chime.mp3';
+  // carriage 음악과 별도의 HTMLAudioElement를 사용한다.
+  // iOS Safari에서 한 오디오의 currentTime/play()가 다른 오디오의 시작을 방해하지 않도록
+  // 두 트랙을 서로 독립적으로 관리한다. 특히 시작 버튼의 동일한 사용자 제스처 안에서
+  // carriage 음악을 먼저 play()하여 첫 재생이 막히는 문제를 피한다.
+  let normalTimerStartChimeAudio = null;
+  const NORMAL_TIMER_START_CHIME_SRC = './clear-bell-chime.mp3';
+  const NORMAL_TIMER_START_CHIME_VOLUME = 0.48;
+
+  function ensureNormalTimerStartChime(){
+    if(!normalTimerStartChimeAudio){
+      normalTimerStartChimeAudio = new Audio(NORMAL_TIMER_START_CHIME_SRC);
+      normalTimerStartChimeAudio.preload = 'auto';
+      normalTimerStartChimeAudio.volume = NORMAL_TIMER_START_CHIME_VOLUME;
+    }
+    return normalTimerStartChimeAudio;
+  }
 
   function playNormalTimerStartChime(){
     if(!state.soundOn) return;
     try{
-      if(!normalTimerStartAudio){
-        normalTimerStartAudio = new Audio(NORMAL_TIMER_START_AUDIO_SRC);
-        normalTimerStartAudio.preload = 'auto';
-        normalTimerStartAudio.volume = 0.48;
-      }
-      normalTimerStartAudio.currentTime = 0;
-      const promise = normalTimerStartAudio.play();
-      if(promise && typeof promise.catch === 'function'){
-        promise.catch(() => {});
-      }
+      const audio = ensureNormalTimerStartChime();
+      audio.volume = NORMAL_TIMER_START_CHIME_VOLUME;
+      audio.currentTime = 0;
+      const promise = audio.play();
+      if(promise && typeof promise.catch === 'function') promise.catch(() => {});
     }catch(e){}
   }
 
+  function stopNormalTimerStartChime(){
+    if(!normalTimerStartChimeAudio) return;
+    normalTimerStartChimeAudio.pause();
+    try{ normalTimerStartChimeAudio.currentTime = 0; }catch(e){}
+  }
+
   // ---------- 일반 타이머 전용 고풍스러운 작은 종 ----------
-  // 일반 타이머의 시작과 집중 시간 종료에만 울린다.
+  // 일반 타이머의 집중 시간 종료에만 울린다.
   function playNormalTimerBell(){
     if(!state.soundOn) return;
     const ctx = ensureAudioCtx();
@@ -6836,7 +6913,7 @@ function renderRpgQuests(){
   function hardStopAmbientAudio(){
     clearBreakMusicTimers();
     clearAmbientFadeOut();
-    [academyBreakAudioEl, adventureBgmEl].forEach(audio => {
+    [academyBreakAudioEl, adventureBgmEl, timerStartMusicAudio].forEach(audio => {
       if(!audio) return;
       audio.pause();
       try{ audio.currentTime = 0; }catch(e){}
@@ -6914,6 +6991,7 @@ function renderRpgQuests(){
     const mult = bgmVolumeMultiplier();
     if(academyBreakAudioEl && !academyBreakAudioEl.paused) academyBreakAudioEl.volume = BREAK_MUSIC_BASE_VOLUME * mult;
     if(adventureBgmEl && !adventureBgmEl.paused) adventureBgmEl.volume = ADVENTURE_BGM_BASE_VOLUME * mult;
+    if(timerStartMusicAudio && !timerStartMusicAudio.paused) timerStartMusicAudio.volume = TIMER_START_MUSIC_VOLUME * mult;
   }
   function updateAmbientAudioForContext(){
     if(!state.soundOn || !state.bgmOn){ stopAmbientAudio(); return; }
@@ -6959,6 +7037,7 @@ function renderRpgQuests(){
   }
   function pomodoroCompleteFocus(){
     stopPomodoroTicking();
+    stopTimerStartMusic();
     const p = state.pomodoro;
     // 25분을 1개 기준으로 삼아, 더 길게 설정했으면 그만큼 비례해서 지급한다 (100분→4개, 200분→8개, 50분 세션→2개)
     const stampCount = Math.max(1, Math.round(pomodoroDurationMs() / 60000 / POMODORO_MIN_MINUTES));
@@ -7822,8 +7901,16 @@ function renderRpgQuests(){
       p.phase = 'focus';
       p.endAt = Date.now() + pomodoroDurationMs();
       p.remainingMs = null;
+
+      // 시작 버튼의 한 번의 사용자 제스처 안에서 두 오디오를 모두 시작한다.
+      // 일반 모드에서는 clear-bell-chime + carriage 음악,
+      // 학교 종 모드에서는 기존 학교 종 + carriage 음악이다.
+      // carriage를 먼저 호출해 첫 재생이 clear-bell에 가려지거나 play() 정책에 의해
+      // 뒤의 음악이 누락되는 현상을 피한다.
+      playTimerStartMusic();
       if(isBell) playSchoolBellSound();
       else playNormalTimerStartChime();
+
       startPomodoroTicking();
       maybeTriggerTravelEvent();
     }else if(id === 'pomodoro-pause-btn'){
@@ -7847,6 +7934,8 @@ function renderRpgQuests(){
       p.remainingMs = null;
       p.pausedFrom = null;
       if(isBell) p.bellCycleIndex = 0;
+      stopTimerStartMusic();
+      stopNormalTimerStartChime();
       stopAmbientAudio();
     }else if(id === 'pomodoro-break-start-btn'){
       p.phase = 'break';
@@ -8318,59 +8407,172 @@ function renderRpgQuests(){
   });
 
   // ---------- 탭 좌우 스와이프 전환 ----------
-  // 탭 버튼을 직접 누르지 않아도, 화면을 좌우로 스와이프해서 공부/모험/성장/기록 탭을
-  // 넘길 수 있게 한다. 세로 스크롤이나, 자체적으로 가로 스크롤을 쓰는 영역
-  // (단계 트랙 .phase-steps, 모험 지도 .journey-map)과는 충돌하지 않도록 조건을 둔다.
+  // 단순히 touchend에서 탭만 바꾸는 방식이 아니라, 손가락 이동량을 매 프레임 화면에
+  // 반영한다. 끝까지 끌지 못하면 살짝 되돌아오는 rubber-band 효과를 주고,
+  // 충분히 끌면 관성감 있게 다음 탭으로 스냅한다.
   (function setupTabSwipe(){
     const TAB_ORDER = ['study', 'adventure', 'growth', 'record'];
-    const SWIPE_MIN_DISTANCE = 60;   // 이 정도는 움직여야 '스와이프'로 인정
-    const SWIPE_MAX_OFF_AXIS = 70;   // 세로로 이만큼 이상 움직였으면 스크롤로 간주하고 무시
-    let startX = 0, startY = 0, tracking = false;
+    const gameTabs = document.getElementById('game-tabs');
+    const page = document.querySelector('.page');
+    if(!gameTabs || !page) return;
 
-    function isSwipeBlocked(target){
+    // 기존 HTML은 탭 패널이 여러 위치에 흩어져 있다. 실행 시 네 개의 슬라이드로
+    // 재배치해도 각 렌더 함수의 id/querySelector는 그대로 유지된다.
+    const viewport = document.createElement('div');
+    viewport.className = 'tab-swipe-viewport';
+    const track = document.createElement('div');
+    track.className = 'tab-swipe-track';
+    viewport.appendChild(track);
+
+    const slides = {};
+    TAB_ORDER.forEach(tab => {
+      const slide = document.createElement('div');
+      slide.className = 'tab-swipe-slide';
+      slide.dataset.tabSlide = tab;
+      slides[tab] = slide;
+      track.appendChild(slide);
+    });
+
+    const nodes = [];
+    let node = gameTabs.nextElementSibling;
+    while(node){
+      const next = node.nextElementSibling;
+      nodes.push(node);
+      node = next;
+    }
+
+    nodes.forEach(node => {
+      if(node.matches && node.matches('[data-tab-panel]')){
+        const tab = node.dataset.tabPanel;
+        if(slides[tab]) slides[tab].appendChild(node);
+        return;
+      }
+      if(node.classList && node.classList.contains('game-tab-panels')){
+        Array.from(node.children).forEach(panel => {
+          const tab = panel.dataset && panel.dataset.tabPanel;
+          if(tab && slides[tab]) slides[tab].appendChild(panel);
+        });
+        node.remove();
+      }
+    });
+
+    page.insertBefore(viewport, gameTabs.nextSibling);
+
+    function slideFor(tab){ return slides[tab]; }
+    function syncViewportHeight(tab){
+      const slide = slideFor(tab);
+      if(slide) viewport.style.height = `${slide.scrollHeight}px`;
+    }
+    function showNeighbor(tab){
+      const slide = slideFor(tab);
+      if(!slide) return;
+      slide.classList.add('swipe-neighbor');
+      slide.querySelectorAll('[data-tab-panel]').forEach(panel => {
+        if(panel.id !== 'exam-finale') panel.hidden = false;
+      });
+    }
+    function hideNeighbor(tab){
+      const slide = slideFor(tab);
+      if(!slide) return;
+      slide.classList.remove('swipe-neighbor');
+      if(tab === document.querySelector('.game-tab-btn.active')?.dataset.tab) return;
+      slide.querySelectorAll('[data-tab-panel]').forEach(panel => {
+        if(panel.id !== 'exam-finale') panel.hidden = true;
+      });
+    }
+
+    let activeIndex = 0;
+    let startX = 0, startY = 0, lastX = 0, lastTime = 0, velocityX = 0;
+    let tracking = false, horizontal = false;
+
+    function blocked(target){
       if(!(target instanceof Element)) return false;
-      // 가로 스크롤 영역 안에서는 스와이프를 그 영역의 스크롤에 맡긴다.
-      if(target.closest('.phase-steps, .journey-map')) return true;
-      // 모달이 떠 있을 때는 뒤쪽 탭이 바뀌면 안 된다.
-      const modal1 = document.getElementById('modal-backdrop');
-      const modal2 = document.getElementById('phase-modal-backdrop');
-      if(modal1 && !modal1.classList.contains('hidden')) return true;
-      if(modal2 && !modal2.classList.contains('hidden')) return true;
+      if(target.closest('.phase-steps, .journey-map, input, select, textarea, button, summary, .modal-backdrop')) return true;
       return false;
     }
 
-    document.addEventListener('touchstart', (e) => {
-      if(e.touches.length !== 1){ tracking = false; return; }
-      if(isSwipeBlocked(e.target)){ tracking = false; return; }
-      startX = e.touches[0].clientX;
+    document.addEventListener('touchstart', e => {
+      if(e.touches.length !== 1 || blocked(e.target)) { tracking=false; return; }
+      activeIndex = Number(track.dataset.activeIndex || 0);
+      startX = lastX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
+      lastTime = performance.now();
+      velocityX = 0;
+      horizontal = false;
       tracking = true;
     }, {passive:true});
 
-    document.addEventListener('touchend', (e) => {
+    document.addEventListener('touchmove', e => {
+      if(!tracking || e.touches.length !== 1) return;
+      const x = e.touches[0].clientX;
+      const y = e.touches[0].clientY;
+      const dx = x - startX;
+      const dy = y - startY;
+
+      if(!horizontal){
+        if(Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        if(Math.abs(dy) > Math.abs(dx) * 1.15){ tracking=false; return; }
+        horizontal=true;
+        viewport.classList.add('is-dragging');
+        const direction = dx < 0 ? 1 : -1;
+        const neighborIndex = activeIndex + direction;
+        if(neighborIndex >= 0 && neighborIndex < TAB_ORDER.length) showNeighbor(TAB_ORDER[neighborIndex]);
+      }
+
+      if(horizontal){
+        e.preventDefault();
+        const now = performance.now();
+        const dt = Math.max(1, now-lastTime);
+        velocityX = (x-lastX)/dt;
+        lastX=x; lastTime=now;
+
+        let drag = dx;
+        const atStart = activeIndex === 0 && dx > 0;
+        const atEnd = activeIndex === TAB_ORDER.length-1 && dx < 0;
+        if(atStart || atEnd) drag *= 0.28;
+
+        // 다음 슬라이드가 등장하는 순간부터는 현재 슬라이드의 폭만큼만큼 움직인다.
+        const base = -activeIndex * viewport.clientWidth;
+        track.style.transform = `translate3d(${base + drag}px,0,0)`;
+        const neighborIndex = activeIndex + (dx < 0 ? 1 : -1);
+        if(neighborIndex >= 0 && neighborIndex < TAB_ORDER.length){
+          const currentSlide = slideFor(TAB_ORDER[activeIndex]);
+          const neighborSlide = slideFor(TAB_ORDER[neighborIndex]);
+          viewport.style.height = `${Math.max(currentSlide.scrollHeight, neighborSlide.scrollHeight)}px`;
+        }
+      }
+    }, {passive:false});
+
+    document.addEventListener('touchend', () => {
       if(!tracking) return;
-      tracking = false;
-      const touch = e.changedTouches[0];
-      if(!touch) return;
-      const dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-      if(Math.abs(dx) < SWIPE_MIN_DISTANCE) return;      // 너무 짧으면 무시
-      if(Math.abs(dy) > SWIPE_MAX_OFF_AXIS) return;       // 대각선/세로 스크롤이면 무시
-      if(Math.abs(dx) < Math.abs(dy)) return;             // 세로 움직임이 더 크면 무시
+      tracking=false;
+      if(!horizontal) return;
+      horizontal=false;
+      viewport.classList.remove('is-dragging');
 
-      const activeBtn = document.querySelector('.game-tab-btn.active');
-      if(!activeBtn) return;
-      const currentIdx = TAB_ORDER.indexOf(activeBtn.dataset.tab);
-      if(currentIdx === -1) return;
-      // 왼쪽으로 스와이프(dx<0) → 다음 탭, 오른쪽으로 스와이프(dx>0) → 이전 탭
-      const nextIdx = dx < 0 ? currentIdx + 1 : currentIdx - 1;
-      if(nextIdx < 0 || nextIdx >= TAB_ORDER.length) return; // 양 끝에서는 반응하지 않음
+      const dx = lastX - startX;
+      const projected = dx + velocityX * 180;
+      let nextIndex = activeIndex;
+      if(Math.abs(projected) > Math.max(52, viewport.clientWidth * 0.16)){
+        nextIndex = activeIndex + (projected < 0 ? 1 : -1);
+        nextIndex = Math.max(0, Math.min(TAB_ORDER.length-1, nextIndex));
+      }
 
-      const nextTab = TAB_ORDER[nextIdx];
-      // switchGameTab이 버튼의 active/aria-selected 갱신까지 전부 처리해준다.
+      const nextTab = TAB_ORDER[nextIndex];
       switchGameTab(nextTab);
+      TAB_ORDER.forEach(tab => { if(tab !== nextTab) hideNeighbor(tab); });
+      track.dataset.activeIndex = String(nextIndex);
       if(typeof updateAmbientAudioForContext === 'function') updateAmbientAudioForContext();
     }, {passive:true});
+
+    window.addEventListener('resize', () => {
+      const tab = TAB_ORDER[Number(track.dataset.activeIndex || 0)];
+      track.style.transform = `translate3d(${-(Number(track.dataset.activeIndex || 0)) * 25}%,0,0)`;
+      syncViewportHeight(tab);
+    }, {passive:true});
+
+    track.dataset.activeIndex = '0';
+    syncViewportHeight('study');
   })();
 
   function init(){
