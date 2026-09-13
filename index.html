@@ -662,7 +662,8 @@
   /* ---------- 모바일 탭 스와이프 무대 ----------
      Safari 읽기목록처럼 손가락을 따라 화면이 직접 움직이고, 손을 떼면
      자연스럽게 다음/이전 화면으로 스냅된다. 세로 스크롤은 그대로 브라우저에 맡긴다. */
-  .tab-swipe-viewport{width:100%;overflow:hidden;position:relative;transition:height .20s cubic-bezier(.22,.61,.36,1);overflow-anchor:none;}
+  .tab-swipe-viewport{width:100%;overflow:hidden;position:relative;transition:none;overflow-anchor:none;}
+  .tab-swipe-viewport.is-height-settling{transition:height .20s cubic-bezier(.22,.61,.36,1);}
   .tab-swipe-viewport.is-height-animating{overflow-anchor:none;}
   .tab-swipe-track{contain:layout style;}
   .tab-swipe-track{display:flex;align-items:flex-start;width:400%;will-change:transform;transform:translate3d(0,0,0);transition:none;}
@@ -673,6 +674,7 @@
   .tab-swipe-slide > [data-tab-panel]{width:100%;flex:none;}
   .tab-swipe-slide.swipe-neighbor > [data-tab-panel]{display:block;}
   .tab-swipe-viewport.is-dragging{transition:none;}
+  .tab-swipe-viewport.is-physics-running{transition:none;}
   .tab-swipe-viewport.is-dragging .tab-swipe-track{transition:none;}
   @media(max-width:759px){
     .tab-swipe-viewport{touch-action:pan-y;overscroll-behavior-x:contain;}
@@ -5245,17 +5247,21 @@ function renderRpgQuests(){
     if(track){
       const order = ['study','adventure','growth','record'];
       const idx = Math.max(0, order.indexOf(tabId));
-      track.style.transform = `translate3d(${-idx * Math.max(1, viewport.clientWidth)}px,0,0)`;
+      const width = viewport ? Math.max(1, viewport.clientWidth) : 1;
+      track.style.transform = `translate3d(${-idx * width}px,0,0)`;
       track.dataset.activeIndex = String(idx);
-      if(viewport && !options.dragging){
-        const slide = track.querySelector(`.tab-swipe-slide[data-tab-slide="${tabId}"]`);
-        if(slide) viewport.style.height = `${slide.scrollHeight}px`;
+      track.dataset.activeTab = tabId;
+      // 스와이프 엔진이 있으면 높이는 엔진이 정착 시점에 확정한다.
+      // 초기 호출 등 엔진이 아직 없는 경우에만 직접 맞춘다.
+      if(viewport && !options.physics && !options.dragging && typeof window.__tabSwipeSyncHeight === 'function'){
+        window.__tabSwipeSyncHeight(tabId, !!options.animateHeight);
       }
     }
 
     if(typeof renderExamFinale === 'function') renderExamFinale();
     if(tabId === 'growth' && typeof renderClassStats === 'function') renderClassStats();
   }
+
   // 모험 탭에 지금 가서 할 만한 게 있다는 걸 살짝 알려주는 점.
   function renderTabBadges(){
     const adventureDot = document.getElementById('adventure-tab-dot');
@@ -8402,13 +8408,6 @@ function renderRpgQuests(){
     const btn = e.target.closest('.exercise-opt');
     if(btn) addExerciseStamp(btn.dataset.emoji, btn);
   });
-  document.querySelectorAll('.game-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      switchGameTab(btn.dataset.tab);
-      updateAmbientAudioForContext();
-    });
-  });
-
   // ---------- 탭 좌우 스와이프 전환 ----------
   // 모바일 touch + 데스크톱 trackpad wheel을 하나의 스와이프 엔진으로 처리한다.
   // 중요한 원칙: 페이지 전체의 세로 스크롤은 건드리지 않고, 이 탭 영역에서만
@@ -8436,360 +8435,316 @@ function renderRpgQuests(){
 
     const nodes = [];
     let node = gameTabs.nextElementSibling;
-    while(node){
-      const next = node.nextElementSibling;
-      nodes.push(node);
-      node = next;
-    }
+    while(node){ const next=node.nextElementSibling; nodes.push(node); node=next; }
     nodes.forEach(node => {
       if(node.matches && node.matches('[data-tab-panel]')){
-        const tab = node.dataset.tabPanel;
+        const tab=node.dataset.tabPanel;
         if(slides[tab]) slides[tab].appendChild(node);
         return;
       }
-      if(node.classList && node.classList.contains('game-tab-panels')){
-        Array.from(node.children).forEach(panel => {
-          const tab = panel.dataset && panel.dataset.tabPanel;
+      if(node.classList && node.classList.contains('game-tabs__panel')){
+        const tab=node.dataset.tabPanel;
+        if(tab && slides[tab]) slides[tab].appendChild(node);
+        return;
+      }
+      if(node.classList && node.classList.contains('game-tabs__panels')){
+        Array.from(node.children).forEach(panel=>{
+          const tab=panel.dataset && panel.dataset.tabPanel;
           if(tab && slides[tab]) slides[tab].appendChild(panel);
         });
         node.remove();
       }
     });
 
+    // 이미 다른 래퍼가 있을 가능성까지 고려해, 실제 탭 패널을 모두 하나의 slide에 모은다.
     page.insertBefore(viewport, gameTabs.nextSibling);
 
     function slideFor(tab){ return slides[tab]; }
     function activeIndex(){
-      const raw = Number(track.dataset.activeIndex);
-      if(Number.isInteger(raw) && raw >= 0 && raw < TAB_ORDER.length) return raw;
-      const idx = TAB_ORDER.indexOf(track.dataset.activeTab || 'study');
-      return idx < 0 ? 0 : idx;
+      const raw=Number(track.dataset.activeIndex);
+      if(Number.isInteger(raw) && raw>=0 && raw<TAB_ORDER.length) return raw;
+      const idx=TAB_ORDER.indexOf(track.dataset.activeTab || 'study');
+      return idx<0 ? 0 : idx;
     }
     function activeTab(){ return TAB_ORDER[activeIndex()] || 'study'; }
-    function setTrackX(px, animate=false){
-      track.style.transition = animate ? '' : 'none';
-      track.style.transform = `translate3d(${px}px,0,0)`;
-      if(!animate) requestAnimationFrame(() => { track.style.transition = ''; });
+    function width(){ return Math.max(1, viewport.clientWidth); }
+
+    // 높이는 제스처 중 읽지 않는다. 유휴 시점에만 측정해 캐시한다.
+    const heightCache = Object.create(null);
+    let heightMeasureQueued = false;
+    let heightMeasureTimer = 0;
+    let heightSettleTimer = 0;
+
+    function readSlideHeight(tab){
+      const slide=slideFor(tab);
+      if(!slide) return 1;
+      return Math.max(1, slide.scrollHeight);
     }
-    function syncViewportHeight(tab=activeTab(), animate=true){
-      const slide = slideFor(tab);
-      if(!slide) return;
-      const nextHeight = Math.max(1, slide.scrollHeight);
-      if(animate) viewport.classList.add('is-height-animating');
-      viewport.style.height = `${nextHeight}px`;
-      if(animate){
-        clearTimeout(syncViewportHeight._timer);
-        syncViewportHeight._timer = setTimeout(() => viewport.classList.remove('is-height-animating'), 220);
+    function cacheAllHeights(){
+      heightMeasureQueued=false;
+      const active=activeTab();
+      const restore=[];
+      TAB_ORDER.forEach(tab=>{
+        const slide=slideFor(tab);
+        if(!slide) return;
+        const wasHidden=Array.from(slide.querySelectorAll('[data-tab-panel]')).map(p=>[p,p.hidden]);
+        if(tab!==active){
+          wasHidden.forEach(([p])=>{p.hidden=false;});
+          restore.push(...wasHidden);
+        }
+        heightCache[tab]=readSlideHeight(tab);
+        if(tab!==active) wasHidden.forEach(([p,h])=>{p.hidden=h;});
+      });
+      const h=heightCache[active] || readSlideHeight(active);
+      viewport.style.height=`${h}px`;
+    }
+    function queueHeightCache(){
+      if(heightMeasureQueued) return;
+      heightMeasureQueued=true;
+      const run=()=>cacheAllHeights();
+      if('requestIdleCallback' in window){
+        requestIdleCallback(run,{timeout:300});
+      }else{
+        clearTimeout(heightMeasureTimer);
+        heightMeasureTimer=setTimeout(run,32);
       }
     }
+    function syncViewportHeight(tab=activeTab(), animate=false){
+      const h=heightCache[tab] || readSlideHeight(tab);
+      clearTimeout(heightSettleTimer);
+      viewport.classList.toggle('is-height-settling', !!animate);
+      viewport.style.height=`${Math.max(1,h)}px`;
+      if(animate){
+        heightSettleTimer=setTimeout(()=>viewport.classList.remove('is-height-settling'),220);
+      }
+    }
+    window.__tabSwipeSyncHeight = syncViewportHeight;
+
     function showNeighbor(tab){
-      const slide = slideFor(tab);
+      const slide=slideFor(tab);
       if(!slide) return;
       slide.classList.add('swipe-neighbor');
-      slide.querySelectorAll('[data-tab-panel]').forEach(panel => {
-        if(panel.id !== 'exam-finale') panel.hidden = false;
+      slide.querySelectorAll('[data-tab-panel]').forEach(panel=>{
+        if(panel.id !== 'exam-finale') panel.hidden=false;
       });
     }
     function hideNeighbor(tab){
-      const slide = slideFor(tab);
-      if(!slide) return;
+      const slide=slideFor(tab);
+      if(!slide || tab===activeTab()) return;
       slide.classList.remove('swipe-neighbor');
-      if(tab === activeTab()) return;
-      slide.querySelectorAll('[data-tab-panel]').forEach(panel => {
-        if(panel.id !== 'exam-finale') panel.hidden = true;
+      slide.querySelectorAll('[data-tab-panel]').forEach(panel=>{
+        if(panel.id!=='exam-finale') panel.hidden=true;
       });
     }
 
-    let startX = 0, startY = 0, lastX = 0, lastTime = 0;
-    let velocityX = 0;
-    let tracking = false;
-    let horizontal = false;
-    let rafId = 0;
-    let snapRafId = 0;
-    let pendingTransformX = 0;
-    let touchStartScrollY = 0;
-    let wheelTracking = false;
-    let wheelOffset = 0;
-    let wheelVelocity = 0;
-    let wheelLastTime = 0;
-    let wheelEndTimer = null;
+    let startX=0,startY=0,lastX=0,lastTime=0;
+    let velocityX=0,tracking=false,horizontal=false;
+    let rafId=0,snapRafId=0,pendingTransformX=0;
+    let wheelTracking=false,wheelOffset=0,wheelVelocity=0,wheelLastTime=0,wheelEndTimer=null;
 
     function blocked(target){
       if(!(target instanceof Element)) return false;
-      return !!target.closest('input, select, textarea, button, summary, .modal-backdrop, .phase-steps, .journey-map, [data-no-tab-swipe]');
+      return !!target.closest('input, select, textarea, summary, .modal-backdrop, .phase-steps, .journey-map, [data-no-tab-swipe]');
     }
     function inSwipeSurface(target){
       return target instanceof Element && !!target.closest('.tab-swipe-viewport, .game-tabs__nav');
     }
-    function renderDrag(){
-      rafId = 0;
-      track.style.transform = `translate3d(${pendingTransformX}px,0,0)`;
-    }
-    function requestDragRender(x){
-      pendingTransformX = x;
-      if(!rafId) rafId = requestAnimationFrame(renderDrag);
-    }
-    function cancelDragRender(){
-      if(rafId){ cancelAnimationFrame(rafId); rafId = 0; }
-    }
-    function currentBaseX(){ return -activeIndex() * Math.max(1, viewport.clientWidth); }
+    function renderDrag(){ rafId=0; track.style.transform=`translate3d(${pendingTransformX}px,0,0)`; }
+    function requestDragRender(x){ pendingTransformX=x; if(!rafId) rafId=requestAnimationFrame(renderDrag); }
+    function cancelDragRender(){ if(rafId){cancelAnimationFrame(rafId);rafId=0;} }
+    function currentBaseX(){ return -activeIndex()*width(); }
     function rubber(value){
-      const sign = value < 0 ? -1 : 1;
-      const amount = Math.min(Math.abs(value), 160);
-      return sign * (amount * 0.30 + Math.sqrt(amount) * 1.8);
+      const sign=value<0?-1:1, amount=Math.min(Math.abs(value),160);
+      return sign*(amount*.30+Math.sqrt(amount)*1.8);
     }
     function neighborForDelta(delta){
-      const idx = activeIndex();
-      const direction = delta < 0 ? 1 : -1;
-      const next = idx + direction;
-      return (next >= 0 && next < TAB_ORDER.length) ? next : -1;
+      const idx=activeIndex(), direction=delta<0?1:-1, next=idx+direction;
+      return next>=0&&next<TAB_ORDER.length?next:-1;
     }
     function prepareNeighbor(delta){
-      const idx = neighborForDelta(delta);
-      if(idx < 0) return -1;
-      const currentSlide = slideFor(TAB_ORDER[activeIndex()]);
-      const neighborSlide = slideFor(TAB_ORDER[idx]);
+      const idx=neighborForDelta(delta);
+      if(idx<0) return -1;
+      // 중요: 여기서는 scrollHeight를 읽지 않는다. 높이는 미리 캐시되어 있다.
       showNeighbor(TAB_ORDER[idx]);
-      viewport.style.height = `${Math.max(currentSlide.scrollHeight, neighborSlide.scrollHeight)}px`;
+      const h=Math.max(heightCache[TAB_ORDER[activeIndex()]]||1,heightCache[TAB_ORDER[idx]]||1);
+      viewport.style.height=`${h}px`;
       return idx;
     }
-    function stopSnap(){
-      if(snapRafId){
-        cancelAnimationFrame(snapRafId);
-        snapRafId = 0;
+    function stopSnap(){ if(snapRafId){cancelAnimationFrame(snapRafId);snapRafId=0;} }
+
+    function currentTrackX(){
+      const matrix=getComputedStyle(track).transform;
+      if(matrix&&matrix!=='none'){
+        try{const m=new DOMMatrixReadOnly(matrix);if(Number.isFinite(m.m41)) return m.m41;}catch(_){}
       }
+      return currentBaseX();
     }
 
     function finishTo(index, initialVelocity=0){
-      index = Math.max(0, Math.min(TAB_ORDER.length - 1, index));
-      const tab = TAB_ORDER[index];
+      index=Math.max(0,Math.min(TAB_ORDER.length-1,index));
+      const tab=TAB_ORDER[index];
       cancelDragRender();
-      viewport.classList.remove('is-dragging');
       stopSnap();
+      viewport.classList.add('is-physics-running','is-dragging');
 
-      const width = Math.max(1, viewport.clientWidth);
-      const targetX = -index * width;
-      const matrix = getComputedStyle(track).transform;
-      let x = -activeIndex() * width;
-      if(matrix && matrix !== 'none'){
-        try{
-          const m = new DOMMatrixReadOnly(matrix);
-          if(Number.isFinite(m.m41)) x = m.m41;
-        }catch(_){ /* older WebKit fallback: keep the calculated base position */ }
-      }
-
-      // 입력 장치와 무관하게 같은 물리 모델을 사용한다.
-      // initialVelocity는 px/ms이며, 과도한 초기 속도는 제한한다.
-      let v = Math.max(-34, Math.min(34, initialVelocity * 16.667));
-      let last = performance.now();
-      const springK = 0.030;
-      const dampingPerFrame = 0.84;
+      const w=width(), targetX=-index*w;
+      let x=currentTrackX();
+      let v=Math.max(-34,Math.min(34,initialVelocity*16.667));
+      let last=performance.now();
+      const springK=.030, dampingPerFrame=.84;
 
       function step(now){
-        const dt = Math.min(24, Math.max(8, now - last));
-        last = now;
-        const scale = dt / 16.667;
-        const force = (targetX - x) * springK;
-        v += force * scale;
-        v *= Math.pow(dampingPerFrame, scale);
-        x += v * scale;
-        track.style.transform = `translate3d(${x}px,0,0)`;
+        const dt=Math.min(24,Math.max(8,now-last)); last=now;
+        const scale=dt/16.667;
+        const force=(targetX-x)*springK;
+        v+=force*scale; v*=Math.pow(dampingPerFrame,scale); x+=v*scale;
+        track.style.transform=`translate3d(${x}px,0,0)`;
 
-        if(Math.abs(targetX - x) < 0.45 && Math.abs(v) < 0.35){
-          track.style.transform = `translate3d(${targetX}px,0,0)`;
-          snapRafId = 0;
-          track.dataset.activeTab = tab;
-          track.dataset.activeIndex = String(index);
-          switchGameTab(tab, {dragging:false});
-          TAB_ORDER.forEach(t => { if(t !== tab) hideNeighbor(t); });
-          syncViewportHeight(tab, true);
-          if(typeof updateAmbientAudioForContext === 'function') updateAmbientAudioForContext();
+        if(Math.abs(targetX-x)<.45 && Math.abs(v)<.35){
+          track.style.transform=`translate3d(${targetX}px,0,0)`;
+          track.dataset.activeTab=tab; track.dataset.activeIndex=String(index);
+          switchGameTab(tab,{physics:true,dragging:true});
+          TAB_ORDER.forEach(t=>{if(t!==tab) hideNeighbor(t);});
+          // 스프링 중에는 CSS height transition을 켜지 않는다. 정착 직후 캐시 높이로 한 번만 확정한다.
+          viewport.classList.remove('is-dragging','is-physics-running');
+          syncViewportHeight(tab,false);
+          queueHeightCache();
+          if(typeof updateAmbientAudioForContext==='function') updateAmbientAudioForContext();
+          snapRafId=0;
           return;
         }
-        snapRafId = requestAnimationFrame(step);
+        snapRafId=requestAnimationFrame(step);
       }
-      snapRafId = requestAnimationFrame(step);
+      snapRafId=requestAnimationFrame(step);
+    }
+
+    function animateButtonTo(tabId){
+      const idx=TAB_ORDER.indexOf(tabId);
+      if(idx<0) return;
+      stopSnap();
+      cancelDragRender();
+      const w=width(), target=-idx*w, x=currentTrackX();
+      const distance=target-x;
+      const baseVelocity=Math.max(-0.9,Math.min(0.9,distance/260));
+      finishTo(idx,baseVelocity);
     }
 
     function finishTouch(cancelled=false){
       if(!tracking) return;
-      tracking = false;
+      tracking=false;
       cancelDragRender();
       if(!horizontal){ horizontal=false; return; }
-      horizontal = false;
-      viewport.classList.remove('is-dragging');
-
-      const width = Math.max(1, viewport.clientWidth);
-      const dx = lastX - startX;
-      const projected = cancelled ? 0 : dx + Math.max(-2.4, Math.min(2.4, velocityX)) * 170;
-      let next = activeIndex();
-      if(!cancelled && Math.abs(projected) > Math.max(48, width * 0.14)){
-        next += projected < 0 ? 1 : -1;
-      }
-      finishTo(next, cancelled ? 0 : velocityX);
+      horizontal=false;
+      const w=width(),dx=lastX-startX;
+      const projected=cancelled?0:dx+Math.max(-2.4,Math.min(2.4,velocityX))*170;
+      let next=activeIndex();
+      if(!cancelled&&Math.abs(projected)>Math.max(48,w*.14)) next+=projected<0?1:-1;
+      finishTo(next,cancelled?0:velocityX);
     }
 
-    // touch는 실제 스와이프 무대에서만 시작한다. document 전체에 걸지 않아
-    // 첫 화면의 일반 세로 스크롤과 충돌하지 않는다.
-    viewport.addEventListener('touchstart', e => {
-      if(e.touches.length !== 1 || blocked(e.target)) return;
-      stopSnap();
-      clearTimeout(wheelEndTimer);
-      wheelTracking = false;
-      const t = e.touches[0];
-      startX = lastX = t.clientX;
-      startY = t.clientY;
-      touchStartScrollY = window.scrollY;
-      lastTime = performance.now();
-      velocityX = 0;
-      horizontal = false;
-      tracking = true;
-    }, {passive:true});
+    viewport.addEventListener('touchstart',e=>{
+      if(e.touches.length!==1||blocked(e.target)) return;
+      stopSnap(); clearTimeout(wheelEndTimer); wheelTracking=false;
+      const t=e.touches[0]; startX=lastX=t.clientX; startY=t.clientY; lastTime=performance.now();
+      velocityX=0; horizontal=false; tracking=true;
+    },{passive:true});
 
-    viewport.addEventListener('touchmove', e => {
-      if(!tracking || e.touches.length !== 1) return;
-      const t = e.touches[0];
-      const x = t.clientX;
-      const y = t.clientY;
-      const dx = x - startX;
-      const dy = y - startY;
-
+    viewport.addEventListener('touchmove',e=>{
+      if(!tracking||e.touches.length!==1) return;
+      const t=e.touches[0],x=t.clientX,y=t.clientY,dx=x-startX,dy=y-startY;
       if(!horizontal){
-        if(Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
-        if(Math.abs(dy) > Math.abs(dx) * 1.15){
-          tracking = false;
-          return;
-        }
-        const neighbor = prepareNeighbor(dx);
-        if(neighbor < 0){
-          tracking = false;
-          return;
-        }
-        horizontal = true;
-        viewport.classList.add('is-dragging');
+        if(Math.abs(dx)<8&&Math.abs(dy)<8) return;
+        if(Math.abs(dy)>Math.abs(dx)*1.15){tracking=false;return;}
+        if(prepareNeighbor(dx)<0){tracking=false;return;}
+        horizontal=true; viewport.classList.add('is-dragging','is-physics-running');
       }
-
       e.preventDefault();
-      const now = performance.now();
-      const dt = Math.max(1, now - lastTime);
-      const instant = (x - lastX) / dt;
-      velocityX = velocityX * 0.78 + instant * 0.22;
-      lastX = x;
-      lastTime = now;
+      const now=performance.now(),dt=Math.max(1,now-lastTime),instant=(x-lastX)/dt;
+      velocityX=velocityX*.78+instant*.22; lastX=x; lastTime=now;
+      const idx=activeIndex(),w=width();
+      let drag=dx;
+      if((idx===0&&dx>0)||(idx===TAB_ORDER.length-1&&dx<0)) drag=rubber(dx);
+      drag=Math.max(-w*.96,Math.min(w*.96,drag));
+      requestDragRender(-idx*w+drag);
+    },{passive:false});
+    viewport.addEventListener('touchend',()=>finishTouch(false),{passive:true});
+    viewport.addEventListener('touchcancel',()=>finishTouch(true),{passive:true});
 
-      const idx = activeIndex();
-      const width = Math.max(1, viewport.clientWidth);
-      let drag = dx;
-      if((idx === 0 && dx > 0) || (idx === TAB_ORDER.length - 1 && dx < 0)) drag = rubber(dx);
-      drag = Math.max(-width * 0.96, Math.min(width * 0.96, drag));
-      requestDragRender(-idx * width + drag);
-    }, {passive:false});
-
-    viewport.addEventListener('touchend', () => finishTouch(false), {passive:true});
-    viewport.addEventListener('touchcancel', () => finishTouch(true), {passive:true});
-
-    // ---------- MacBook 트랙패드 ----------
-    // wheel delta를 실제 드래그 거리로 취급하고, 마지막 속도를 같은 spring 엔진에 전달한다.
-    let wheelGestureId = 0;
-
+    let wheelGestureId=0;
     function normalizeWheelDelta(e){
-      if(e.deltaMode === 1) return e.deltaX * 16;
-      if(e.deltaMode === 2) return e.deltaX * Math.max(1, viewport.clientWidth);
+      if(e.deltaMode===1) return e.deltaX*16;
+      if(e.deltaMode===2) return e.deltaX*Math.max(1,viewport.clientWidth);
       return e.deltaX;
     }
-
     function finishWheel(id){
-      if(id !== wheelGestureId || !wheelTracking) return;
-      wheelTracking = false;
-      cancelDragRender();
-      viewport.classList.remove('is-dragging');
-
-      const width = Math.max(1, viewport.clientWidth);
-      const projected = wheelOffset + Math.max(-1.8, Math.min(1.8, wheelVelocity)) * 115;
-      let next = activeIndex();
-      if(Math.abs(projected) > Math.max(34, width * 0.08)) next += projected < 0 ? 1 : -1;
-
-      // wheelVelocity는 px/ms로 환산해 공통 물리 엔진으로 넘긴다.
-      finishTo(next, wheelVelocity);
-      wheelOffset = 0;
-      wheelVelocity = 0;
-      wheelLastTime = 0;
+      if(id!==wheelGestureId||!wheelTracking) return;
+      wheelTracking=false; cancelDragRender();
+      const w=width(),projected=wheelOffset+Math.max(-1.8,Math.min(1.8,wheelVelocity))*115;
+      let next=activeIndex();
+      if(Math.abs(projected)>Math.max(34,w*.08)) next+=projected<0?1:-1;
+      finishTo(next,wheelVelocity);
+      wheelOffset=0;wheelVelocity=0;wheelLastTime=0;
     }
-
     function handleWheel(e){
-      const onNav = !!(e.currentTarget && e.currentTarget.classList && e.currentTarget.classList.contains('game-tabs__nav'));
+      const onNav=!!(e.currentTarget&&e.currentTarget.classList&&e.currentTarget.classList.contains('game-tabs__nav'));
       if(!inSwipeSurface(e.target)) return;
-      // 탭바에서는 버튼 자체가 target이어도 가로 트랙패드 제스처를 허용한다.
-      // 실제 조작 컨트롤은 패널 내부에서만 차단한다.
-      if(!onNav && blocked(e.target)) return;
-
-      const rawX = normalizeWheelDelta(e);
-      const absX = Math.abs(rawX);
-      const absY = Math.abs(e.deltaY);
-      // 세로 스크롤을 가로 스와이프로 오인하지 않는다.
-      if(absX < 0.75 || absX <= absY * 1.08) return;
-
+      if(!onNav&&blocked(e.target)) return;
+      const rawX=normalizeWheelDelta(e),absX=Math.abs(rawX),absY=Math.abs(e.deltaY);
+      if(absX<.45||absX<=absY*1.05) return;
       stopSnap();
-      const now = performance.now();
+      const now=performance.now();
       if(!wheelTracking){
-        wheelTracking = true;
-        wheelGestureId++;
-        wheelOffset = 0;
-        wheelVelocity = 0;
-        wheelLastTime = now;
-        viewport.classList.add('is-dragging');
+        wheelTracking=true;wheelGestureId++;wheelOffset=0;wheelVelocity=0;wheelLastTime=now;
+        viewport.classList.add('is-dragging','is-physics-running');
       }
-
-      e.preventDefault();
-      clearTimeout(wheelEndTimer);
-
-      const dt = Math.max(8, now - wheelLastTime);
-      const instant = rawX / dt;
-      wheelVelocity = wheelVelocity * 0.72 + instant * 0.28;
-      wheelLastTime = now;
-      wheelOffset += rawX;
-
-      const idx = activeIndex();
-      const width = Math.max(1, viewport.clientWidth);
-      let drag = -wheelOffset;
-      if((idx === 0 && drag > 0) || (idx === TAB_ORDER.length - 1 && drag < 0)) drag = rubber(drag);
-      drag = Math.max(-width * 0.985, Math.min(width * 0.985, drag));
-
-      const neighbor = neighborForDelta(drag);
-      if(neighbor >= 0 && !slides[TAB_ORDER[neighbor]].classList.contains('swipe-neighbor')){
-        prepareNeighbor(drag);
+      e.preventDefault(); clearTimeout(wheelEndTimer);
+      const dt=Math.max(8,now-wheelLastTime),instant=rawX/dt;
+      wheelVelocity=wheelVelocity*.72+instant*.28; wheelLastTime=now; wheelOffset+=rawX;
+      const idx=activeIndex(),w=width();
+      let drag=-wheelOffset;
+      if((idx===0&&drag>0)||(idx===TAB_ORDER.length-1&&drag<0)) drag=rubber(drag);
+      drag=Math.max(-w*.985,Math.min(w*.985,drag));
+      if(neighborForDelta(drag)>=0){
+        const n=TAB_ORDER[neighborForDelta(drag)];
+        if(!slides[n].classList.contains('swipe-neighbor')) prepareNeighbor(drag);
       }
-      requestDragRender(-idx * width + drag);
-
-      const id = wheelGestureId;
-      wheelEndTimer = setTimeout(() => finishWheel(id), 140);
+      requestDragRender(-idx*w+drag);
+      const id=wheelGestureId; wheelEndTimer=setTimeout(()=>finishWheel(id),140);
     }
-    viewport.addEventListener('wheel', handleWheel, {passive:false});
-    // 네비게이션 바에서도 트랙패드 가로 제스처가 자연스럽게 탭 전환되도록 한다.
-    const tabNav = document.querySelector('.game-tabs__nav');
-    if(tabNav) tabNav.addEventListener('wheel', handleWheel, {passive:false});
+    viewport.addEventListener('wheel',handleWheel,{passive:false});
+    const tabNav=document.querySelector('.game-tabs__nav');
+    if(tabNav) tabNav.addEventListener('wheel',handleWheel,{passive:false});
 
-    // 패널 내부에서 렌더링으로 높이가 바뀌어도 viewport가 stale height를 갖지 않게 한다.
     if('ResizeObserver' in window){
-      const ro = new ResizeObserver(() => {
-        if(!viewport.classList.contains('is-dragging')) syncViewportHeight(activeTab(), false);
+      const ro=new ResizeObserver(()=>{
+        // 관성/드래그 중에는 레이아웃을 만지지 않는다. 유휴 시 캐시만 갱신한다.
+        if(!viewport.classList.contains('is-dragging')&&!viewport.classList.contains('is-physics-running')) queueHeightCache();
       });
-      TAB_ORDER.forEach(tab => ro.observe(slides[tab]));
+      TAB_ORDER.forEach(tab=>ro.observe(slides[tab]));
     }
 
-    window.addEventListener('resize', () => {
-      cancelDragRender();
-      const idx = activeIndex();
-      track.style.transform = `translate3d(${-idx * Math.max(1, viewport.clientWidth)}px,0,0)`;
-      syncViewportHeight(TAB_ORDER[idx], false);
-    }, {passive:true});
+    window.addEventListener('resize',()=>{
+      cancelDragRender(); stopSnap();
+      const idx=activeIndex(),w=width();
+      track.style.transform=`translate3d(${-idx*w}px,0,0)`;
+      queueHeightCache();
+    },{passive:true});
 
-    track.dataset.activeTab = 'study';
-    // init() 뒤에 동적으로 채워지는 콘텐츠까지 포함해 높이를 다시 맞춘다.
-    syncViewportHeight('study', false);
-    requestAnimationFrame(() => syncViewportHeight('study', false));
-    setTimeout(() => syncViewportHeight('study', false), 0);
+    // 버튼 클릭도 즉시 이동하지 않고 같은 spring 엔진을 사용한다.
+    document.querySelectorAll('.game-tab-btn').forEach(btn=>{
+      btn.addEventListener('click',e=>{
+        e.preventDefault();
+        animateButtonTo(btn.dataset.tab);
+        if(typeof updateAmbientAudioForContext==='function') updateAmbientAudioForContext();
+      });
+    });
+
+    track.dataset.activeTab='study'; track.dataset.activeIndex='0';
+    queueHeightCache();
+    requestAnimationFrame(queueHeightCache);
+    setTimeout(queueHeightCache,80);
   })();
+
 
   function init(){
     loadState();
