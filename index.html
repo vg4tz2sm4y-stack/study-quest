@@ -2343,13 +2343,6 @@
   .slump-nudge__dialogue{font-size:.72rem;line-height:1.45;color:var(--muted);}
   .slump-nudge__mission{font-size:.68rem;line-height:1.4;color:var(--gold);font-weight:700;margin-top:2px;}
 
-  /* ---------- 플레이버용 피로도 · 패널티 없음 ---------- */
-  .fatigue-panel{margin:7px 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#f8f4ea;}
-  .fatigue-panel__head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-  .fatigue-panel__label{font-size:.68rem;font-weight:700;color:var(--ink-soft);}
-  .fatigue-panel__state{font-size:.66rem;color:var(--gold);font-weight:700;}
-  .fatigue-panel__message{margin:3px 0 0;font-size:.62rem;line-height:1.4;color:var(--muted);}
-
   /* ---------- 시험 당일 최종 화면 ---------- */
   .exam-finale{background:#f8f4ea;border:1px solid var(--gold);border-radius:16px;padding:16px;box-shadow:0 3px 14px rgba(163,130,63,.12);}
   .exam-finale__head{text-align:center;margin-bottom:13px;}
@@ -2399,8 +2392,8 @@
 }
 
   .npc-dialogue__portrait img {
-  width: 120px;
-  height: 120px;
+  width: 150px;
+  height: 150px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -2811,10 +2804,6 @@
           <span class="quest-panel__header-icon"></span>
           <span class="quest-panel__header-title">여관</span>
           <span class="quest-panel__header-sub" id="inn-tomato-balance">🍅 0개 보유</span>
-        </div>
-        <div class="fatigue-panel" id="fatigue-panel">
-          <div class="fatigue-panel__head"><span class="fatigue-panel__label">💤 오늘의 피로도</span><span class="fatigue-panel__state" id="fatigue-state">가벼움</span></div>
-          <p class="fatigue-panel__message" id="fatigue-message">아직 몸이 가벼워요. 여유 있게 이어가세요.</p>
         </div>
         <div class="npc-dialogue">
           <div class="npc-dialogue__portrait">
@@ -4899,16 +4888,65 @@ function getRpgNpcView(npcId){
   return Object.assign({id},rpg||{},base||{});
 }
 const RPG_DIALOGUES={
-  innkeeper:[{speaker:'마르타',text:'어서 와. 이곳까지 무사히 와서 다행이야.'},{speaker:'마르타',text:'요즘 마을 밖의 세상이 조금 이상하게 움직이고 있다던데.'},{speaker:'마르타',text:'무엇을 찾게 될지는 모르겠지만, 네가 가는 길에 작은 도움이 되었으면 좋겠어.'}],
-  knight:[{speaker:'레온',text:'멈춰라. 이곳을 지나려면 네가 누구인지 알아야 한다.'},{speaker:'레온',text:'하지만 네가 이 길을 걷겠다면, 그 발걸음에 책임을 져야 할 것이다.'},{speaker:'레온',text:'좋다. 길을 잃지 마라. 네가 찾는 답은 네가 직접 확인해야 한다.'}],
-  archivist:[{speaker:'세라',text:'이 기록을 본 적이 있나요?'},{speaker:'세라',text:'이상한 점은 날짜도, 사건도 모두 기록되어 있는데 그런 사건은 실제로 존재하지 않는다는 겁니다.'},{speaker:'세라',text:'기록이 진실을 보존하는 것인지, 아니면 진실을 만들어내는 것인지… 나도 모르겠군요.'}],
-  sage:[{speaker:'에드윈',text:'공부는 지식을 쌓는 일만이 아니라, 흩어진 기록을 하나의 판단으로 연결하는 일이오.'},{speaker:'에드윈',text:'작은 성취도 빠짐없이 남겨두시오. 언젠가 그 기록이 당신의 길을 밝혀줄 것이오.'}],
-  guardian:[{speaker:'성채의 수호자',text:'여기까지 왔군. 네가 쌓아온 기록은 이제 하나의 답을 요구한다.'},{speaker:'성채의 수호자',text:'기록되지 않은 권리는 존재하는가?'},{speaker:'성채의 수호자',text:'이번에는 누구의 답도 대신 빌려주지 않겠다. 네가 직접 판단하라.'}],
+  innkeeper:[
+    {speaker:'마르타',text:'어서 와! 오늘은 좀 늦었네— 어, 잠깐, 오늘 무슨 요일이더라? …아무튼 왔으니까 앉아!'},
+    {speaker:'마르타',text:'장부 정리하다 왔어. 숫자는 하나도 안 틀리는데 방 열쇠는 매번 어디 뒀는지 까먹어. 웃기지?'},
+    {speaker:'마르타',text:'이 여관, 내가 스무 살도 되기 전에 물려받았어. 다들 반년도 못 버틸 거라고 했는데— 지금 몇 년째지? 세는 것도 까먹었네.'},
+    {speaker:'마르타',text:'손님들 얼굴 보면 대충 알아. 오늘 잘 풀린 날인지, 억지로 버틴 날인지. 근데 정작 내 기분은 나도 잘 모르겠더라.'},
+    {speaker:'마르타',text:'다들 나더러 인기가 많다고 놀리는데, 정작 누가 나를 좋아하는지도 잘 몰라. 장사엔 진심인데 그런 쪽은 영 둔해.'},
+    {speaker:'마르타',text:'저번에 접시 세 개를 한 번에 나르다 넘어질 뻔했잖아? 근데 값 계산은 한 번도 틀린 적 없어. 이상하지, 나도.'},
+    {speaker:'마르타',text:'가끔 그런 생각을 해. 물려받은 게 아니라 내가 선택했다면 어땠을까. …아니다, 이미 좋아하게 됐는데 뭘.'},
+    {speaker:'마르타',text:'오늘도 네가 왔네. 매번 반가운 게 신기해. 손님을 셀 수 없이 봤는데, 왜 어떤 얼굴은 계속 기억에 남을까.'}
+  ],
+  knight:[
+    {speaker:'레온',text:'왔군.'},
+    {speaker:'레온',text:'나는 오랫동안 명령이 곧 나였다. 명령이 없으면 내가 없는 것 같았지.'},
+    {speaker:'레온',text:'누구의 명령인지는 중요하지 않았다. 그저 따르는 것 자체가 나를 증명하는 방법이라 믿었다.'},
+    {speaker:'레온',text:'어떤 계기로… 아니, 말하지 않겠다. 다만 그날 이후로 나는 처음 스스로에게 물었다. "나는 무엇을 원하는가."'},
+    {speaker:'레온',text:'아직 답은 없다. 하지만 질문을 던질 수 있게 된 것만으로도 예전과는 다르다.'},
+    {speaker:'레온',text:'세라는 기록을 믿는다. 나는 오랫동안 명령만 믿었지. 요즘은 조금씩… 내 판단을 믿어보려 한다.'},
+    {speaker:'레온',text:'전에 네가 "오늘은 조금만 하겠다"고 말했지. 결국 평소보다 오래 했더군. 스스로 정한 것을 지키려는 모습이, 나쁘지 않았다.'},
+    {speaker:'레온',text:'예전의 나였다면 이런 대화도 낭비라 여겼을 것이다. 지금은… 이런 시간이 나쁘지 않다는 걸 안다.'}
+  ],
+  archivist:[
+    {speaker:'세라',text:'어서 오세요. 오늘 기록은 확인했습니다.'},
+    {speaker:'세라',text:'저는 원래 이런 곳에 있을 사람이 아니었습니다. …라고 예전엔 자주 생각했죠. 지금은 아닙니다.'},
+    {speaker:'세라',text:'집안에서는 실수가 용납되지 않았습니다. 그래서 저는 실수하지 않는 사람이 되기로 했죠. 오래도록요.'},
+    {speaker:'세라',text:'한때 저는 제가 지키지 못한 것들 때문에, 지킬 수 있는 것만 지키기로 했습니다. 기록이 그중 하나였고요.'},
+    {speaker:'세라',text:'완벽한 기록은 안심이 됩니다. 하지만 요즘은… 완벽하지 않은 하루도 기록할 가치가 있다는 걸 배우고 있어요.'},
+    {speaker:'세라',text:'전에 말씀하셨던 그 문장, 기억하고 있습니다. "완벽하지 않아도 다시 하면 된다." …아직 완전히 믿지는 못하지만, 자주 떠올립니다.'},
+    {speaker:'세라',text:'레온 씨는 말이 적지만 관찰력이 좋습니다. 저와 비슷한 데가 있어요. 둘 다 다른 방식으로 자신을 가두고 있었으니까요.'},
+    {speaker:'세라',text:'이상하죠. 처음엔 기록만 정확하면 충분하다고 생각했는데, 요즘은 기록되지 않는 마음까지 궁금해집니다. 당신 덕분인 것 같아요.'}
+  ],
+  sage:[
+    {speaker:'에드윈',text:'흠, 오늘도 얼굴을 보니 반갑구려. 나는 같은 말을 자주 하는 편이지만, 반가운 건 매번 진짜라오.'},
+    {speaker:'에드윈',text:'다들 나를 현자라 부르지만, 사실 나는 아직도 못 찾은 답이 하나 있소. 오래전부터 말이오.'},
+    {speaker:'에드윈',text:'젊을 때는 답을 많이 아는 사람이 현명한 줄 알았소. 지금은 모르는 것을 인정하는 사람이 더 현명할 때도 있다는 걸 아오.'},
+    {speaker:'에드윈',text:'마르타 양에게 차를 얻어 마셨소. 차를 내오는 솜씨는 훌륭한데, 본인은 설탕을 얼마나 넣었는지 기억하지 못하더군.'},
+    {speaker:'에드윈',text:'세라 양은 빈칸을 보면 마음이 불편한 모양이오. 사람의 인생에는 빈칸이 좀 있어도 괜찮은데 말이지.'},
+    {speaker:'에드윈',text:'나도 한때는 어느 시험 앞에 섰던 적이 있소. 통과했는지 못했는지는… 오늘은 말하지 않겠소.'},
+    {speaker:'에드윈',text:'전에 자네가 작은 기록도 쌓이면 힘이 되느냐고 물었지. 그렇소. 다만 그 힘은 쌓이는 동안에는 잘 보이지 않는 법이라오.'},
+    {speaker:'에드윈',text:'오늘의 답을 찾지 못했더라도 괜찮소. 내일 다시 질문할 수 있다면, 여정은 이어지고 있는 것이오.'}
+  ],
   merchant:[
-  {speaker:'마르코',text:'어서 오게. 필요한 물건이라면 웬만한 건 다 구해주지.'},
-  {speaker:'마르코',text:'상법의 항구에서는 돈도 실력이지. 하지만 좋은 거래는 서로에게 이익이어야 하는 법이야.'},
-  {speaker:'마르코',text:'자네가 더 깊이 들어올수록, 내가 보여줄 수 있는 물건도 달라질 거야.'}
-],
+    {speaker:'마르코',text:'어서 오게. 오늘은 물건보다 이야기가 더 싸게 먹힐 수도 있지.'},
+    {speaker:'마르코',text:'나 돈 밝히는 거 다들 알지? 부정 안 해. 근데 말이야, 다 이유가 있어서 그런 거야.'},
+    {speaker:'마르코',text:'예전에 아무것도 없이 이 길에 나섰을 때, 돈이 없어서 못 지킨 게 있었어. 그다음부턴… 안 그러려고 억척스럽게 벌었지.'},
+    {speaker:'마르코',text:'그렇다고 내가 쩨쩨한 건 아니야. 벌 땐 화끈하게 벌고, 쓸 땐 화끈하게 써. 그게 마르코식이지.'},
+    {speaker:'마르코',text:'세라가 지난번에 장부의 숫자 하나를 잡아냈어. 내가 속인 것도 아닌데 어찌나 꼼꼼한지. …그래도 그런 꼼꼼함, 나쁘지 않더군.'},
+    {speaker:'마르코',text:'레온은 칼보다 지갑을 더 단단히 닫고 다니더군. 기사도 돈 앞에서는 신중한 모양이야.'},
+    {speaker:'마르코',text:'가끔 스스로 묻는다네. 이렇게 벌어서 뭘 하려던 거였지? …답은 있는데, 아직 아무한테도 말 안 했어.'},
+    {speaker:'마르코',text:'자네가 처음 왔을 때보다 물건을 고르는 눈이 좋아졌어. 사람도 장비도, 오래 보면 보는 법이 생기는 거지.'}
+  ],
+  guardian:[
+    {speaker:'성채의 수호자',text:'또 왔군. 이번에는 발걸음이 조금 다르다.'},
+    {speaker:'성채의 수호자',text:'마르코는 거래가 사람을 드러낸다고 하더군. 나는 선택이 사람을 드러낸다고 생각한다.'},
+    {speaker:'성채의 수호자',text:'세라가 기록한 문장을 보았다. 빈칸 하나를 오래 바라보고 있더군.'},
+    {speaker:'성채의 수호자',text:'레온은 한때 이 성채를 지나갈 때조차 목적지만 보았다. 지금은 주변을 살피더군.'},
+    {speaker:'성채의 수호자',text:'에드윈은 오래전부터 같은 질문을 던졌다. 답보다 질문을 오래 남기는 자도 있는 법이지.'},
+    {speaker:'성채의 수호자',text:'마르타가 너를 걱정하더군. 뜻밖이지 않은가? 강한 사람도 누군가의 걱정을 받으며 걷는 법이다.'},
+    {speaker:'성채의 수호자',text:'네가 처음 이곳에 왔을 때는 정답을 찾으려 했다. 지금은 스스로 판단하려 하는군.'}
+  ]
 };
 
 
@@ -5337,6 +5375,30 @@ function renderRpgQuests(){
   if(streak >= 7) return pick([
     `${marta}"연속 ${streak}일째 오다니. 대단하네 — 오늘도 잘 챙겨 먹어!"`,
     `${marta}"${streak}일 연속이라니, 이 정도면 단골을 넘어 사랑이야."`
+  ]);
+
+  // 피로도(플레이버, 패널티 없음)는 스트릭 축하 다음, 잔고/시간대 인사보다는 먼저 — 오늘의 상태가 더 급한 정보라서.
+  const fatigue = fatigueTier();
+  if(fatigue === 3) return pick([
+    `${marta}"오늘은 진짜 너무 오래 붙어 있었어. 억지로 더 하지 마, 부탁이야."`,
+    `${marta}"그만! 오늘은 여기까지. 이러다 내일 아예 못 일어나."`,
+    `${marta}"장하다, 오늘. 근데 장한 것도 몸 성해야 계속할 수 있는 거야. 쉬어."`,
+    `${marta}"이렇게까지 몰아붙이는 거 보면, 나도 모르게 걱정돼… 쉬는 것도 공부의 일부야."`,
+    `${marta}"오늘 하루로 뭘 증명하려 하지 마. 내일도 있잖아. 일단 자."`
+  ]);
+  if(fatigue === 2) return pick([
+    `${marta}"오늘 진짜 오래 달렸네. 여기 앉아서 잠깐이라도 눈 붙여."`,
+    `${marta}"그만하면 충분히 열심히 했어. 오늘은 좀 쉬어가도 돼."`,
+    `${marta}"표정 보니 딱 알겠다. 오늘은 무리한 날이네. 밥부터 먹자."`,
+    `${marta}"이 정도 했으면 나머지는 내일 걱정해도 돼. 오늘은 여기까지 해."`,
+    `${marta}"몸이 힘들다고 소리치는 게 여기까지 들리는데? 잠깐 쉬어가."`
+  ]);
+  if(fatigue === 1) return pick([
+    `${marta}"슬슬 눈이 무거워 보이는데? 물 한 잔 마시고 가."`,
+    `${marta}"오늘 꽤 오래 붙어 있었네. 잠깐 기지개라도 켜고 앉아."`,
+    `${marta}"어깨 좀 축 처졌는데, 자세 한번 바꿔봐… 나도 종일 서 있으면 그래."`,
+    `${marta}"오늘 벌써 이만큼 했어? 무리하지 말고 잠깐 쉬었다 가."`,
+    `${marta}"몸이 조금 무거워 보이네. 차 한 잔 내줄까?"`
   ]);
 
   if(balance === 0) return pick([
@@ -6221,7 +6283,7 @@ function renderRpgQuests(){
     { id:'merchant', icon:'⚓', name:'마르코', role:'항구의 상인 · 잡화상', image:'study-quest-npc-merchant.png', trustMax:5,
       trust:()=>merchantTrust(),
       dialogue:t=>tierLine('merchant',t,[5,4,3,0]),
-      unlock:t=> t>=5 ? '고대 제작소 해금' : t>=4 ? '비밀 시장 해금' : t>=3 ? '희귀 재료 해금' : '일반 거래' },
+      unlock:t=> t>=5 ? '고대 제작소 해금' : t>=4 ? '비밀 시장 해금' : t>=3 ? '희귀 재료 해금' : '누적 골드 1000개 사용시 희귀 재료 해금' },
   ];
   // ---------- NPC 신뢰도 ----------
   // 예전엔 NPC별로 기준이 제각각이라(마르타 식사 5회, 레온 스탬프 200개 등) 어떤 NPC는
@@ -6231,7 +6293,7 @@ function renderRpgQuests(){
     innkeeper: [0, 30, 60, 90, 150, 200],       // 여관에서 먹은 끼니 수
     sage:      [0, 3, 5, 7, 10, 12],         // 달성한 업적 수 (전체 14개 중)
     archivist: [0, 30, 50, 70, 90, 100],      // 누적 활동일수
-    knight:    [0, 100, 200, 400, 700, 1000], // 누적 스탬프 수
+    knight:    [0, 100, 200, 400, 750, 1000], // 누적 스탬프 수
     merchant:  [0, 250, 500, 1000, 1500, 3000]  // 잡화상에서 쓴 누적 골드
   };
   function trustLevelFor(value, thresholds){
@@ -6258,30 +6320,66 @@ function renderRpgQuests(){
   }
   const NPC_LINES = {
     innkeeper: {
-      5:['“이제 네가 오면 방부터 비워둘게! 마을의 영웅이잖아.”','“오늘은 뭘 좀 더 챙겨줄까? 편하게 말해.”','“여기 오면 이제 집처럼 편해야지, 안 그래?”'],
-      3:['“단골이 됐네! 오늘도 무리하지 말고 쉬어갔으면 해”','“요즘 얼굴이 한결 편해 보이네.”','“오늘 몫은 넉넉히 챙겨줄게.”'],
-      0:['“한 끼 먹고 가! 오래 가려면 잘 쉬어야지.”','“배 곯으면서 공부하면 안 돼. 뭐라도 먹고 가.”','“여기 앉아서 잠깐 숨 좀 돌려.”']
+      5:[
+        '“왔어? 네가 올 것 같아서 창가 자리 비워뒀는데.”','“이제 네가 들어오면 얼굴부터 찾게 된다니까. 참 이상하지?”','“오늘은 내가 서비스야. 대신 다음엔 네가 나한테 간식 사줘.”',
+        '“요즘 네 얘기를 듣다 보면 나도 괜히 뿌듯해. 내가 뭐 한 것도 없는데.”','“잘하고 있어. 진짜로. 그러니까 오늘은 조금 편하게 있어도 돼.”','“전에 여기 앉아서 오래 고민하던 거 기억나. 그때보다 표정이 좋아졌네.”',
+        '“세라가 네 기록을 보여줬는데… 나도 모르게 웃었잖아. 열심히 살고 있더라, 너.”','“레온 씨가 너를 믿는다고 하더라. 그 사람 입에서 그런 말 나오기 쉽지 않은데?”'
+      ],
+      3:[
+        '“단골이네! 오늘은 내가 먼저 알아봤다?”','“요즘 자주 보니까 괜히 반갑네.”','“오늘도 왔어? 좋아, 그럼 일단 뭐라도 먹어.”','“공부한 날에는 표정이 달라. 뿌듯한 얼굴이랑 죽겠다는 얼굴이 번갈아 나오거든.”',
+        '“전에 쉬어도 된다고 했잖아. 기억하지? 오늘은 그 말 써도 되는 날이야.”','“너 은근히 오래 가는 타입이네. 이런 사람이 나중에 제일 무섭더라.”','“세라가 요즘 네 기록을 자주 본다더라. 관심 없는 척하면서 말이야.”'
+      ],
+      0:[
+        '“한 끼 먹고 가! 배고프면 공부도 삐뚤어져.”','“어서 와. 앉아, 앉아. 서서 쉬는 사람은 처음 봤어.”','“오늘은 어땠어? 좋았으면 좋았다고 하고, 망했으면 망했다고 해. 여기선 다 괜찮아.”','“공부했으면 잘한 거고, 못 했으면… 음, 내일 하면 되지!”',
+        '“아, 그리고 빵은 오늘 안 탔어. …왜 웃어?”','“전에 창가 자리에 앉았지? 오늘도 앉을래? 자리가 좀 익숙할 거야.”','“오랜만이네. 무슨 일 있었어? 말하기 싫으면 안 해도 돼. 그냥 밥이나 먹자.”'
+      ]
     },
     sage: {
-      5:['“기록은 쌓였고, 이제 그 기록이 당신의 실력이 되었소.”','“당신의 여정을 보면 나도 배우는 게 있소.”'],
-      3:['“작은 성취도 빠짐없이 쌓이는 법이오.”','“꾸준함이 결국 재능을 이기는 법이오.”'],
-      0:['“먼저 한 걸음을 남기시오. 나머지는 기록이 말해줄 것이오.”','“무엇을 하든, 기록해두면 언젠가 도움이 되오.”']
+      5:[
+        '“자네가 처음 왔을 때보다 질문이 좋아졌구려. 답을 많이 얻었다는 뜻은 아니오. 더 좋은 질문을 하게 되었다는 뜻이지.”','“이제는 내가 자네의 기록을 보며 배우는군. 사람의 성장은 참 재미있소.”','“마르타 양이 자네를 칭찬하더군. 본인은 아무렇지 않은 척했지만 꽤 자랑스러워했소.”','“세라 양이 빈칸을 그대로 두는 연습을 하고 있소. 자네가 좋은 영향을 준 모양이오.”'
+      ],
+      3:[
+        '“작은 성취도 빠짐없이 쌓이는 법이오.”','“꾸준함이란 대단한 재능이오. 특히 아무도 보지 않을 때 이어가는 꾸준함은 더 그렇지.”','“오늘은 많이 했군. 그렇다면 오늘의 지혜는 하나요. 멈출 때도 스스로 정하는 법을 배우시오.”','“전에 자네가 기록이 의미 있느냐고 물었지. 이제는 그 답을 자네가 보여주고 있소.”'
+      ],
+      0:[
+        '“먼저 한 걸음을 남기시오. 나머지는 기록이 말해줄 것이오.”','“무엇을 하든 기록해두면 언젠가 도움이 되오.”','“오늘의 공부가 별것 아닌 것처럼 보여도 괜찮소. 별것 아닌 것들이 역사를 만든다오.”','“쉬는 날에도 배울 것은 있소. 다만 오늘은 쉬는 법을 배우는 날일 수도 있지.”'
+      ]
     },
     archivist: {
-      5:['“당신의 달력은 이제 한 사람의 긴 여정이 되었군요.”','“이 정도 기록이면 저도 자료로 남기고 싶을 정도예요.”'],
-      3:['“빈칸도 기록의 일부예요. 중요한 건 다시 이어지는 것.”','“꾸준히 채워온 흔적이 보이네요.”'],
-      0:['“날짜 하나, 기록 하나. 시간이 지나면 큰 지도가 됩니다.”','“오늘 하루도 잘 기록해두세요.”']
+      5:[
+        '“당신의 달력은 이제 한 사람의 긴 여정이 되었군요. 처음의 빈칸까지도요.”','“이 정도 기록이면 저도 자료로 남기고 싶을 정도예요. …이미 남기고 있지만요.”','“마르타 씨가 당신 자리를 기억하고 있다는 말을 들었습니다. 이상하게 기분이 좋더군요.”','“전에 당신이 ‘완벽하지 않아도 다시 하면 된다’고 했죠. 아직도 그 문장을 기억하고 있습니다.”','“요즘은 기록을 정리하다가 당신이 무엇을 했는지보다, 어떤 날이었는지를 생각하게 됩니다.”'
+      ],
+      3:[
+        '“빈칸도 기록의 일부예요. 중요한 건 다시 이어지는 것.”','“꾸준히 채워온 흔적이 보이네요.”','“오늘 기록은 좋습니다. …제가 이런 말을 먼저 하다니, 조금 의외네요.”','“전에 비슷한 질문을 하셨죠. 기록은 과거를 붙잡는 게 아니라, 다음 날을 시작하게 만드는 것일지도 모르겠습니다.”','“레온 씨가 오늘도 당신을 유심히 보더군요. 본인은 아니라고 하겠지만요.”'
+      ],
+      0:[
+        '“날짜 하나, 기록 하나. 시간이 지나면 큰 지도가 됩니다.”','“오늘 하루도 잘 기록해두세요.”','“기록이 아직 많지 않아도 괜찮습니다. 빈 페이지가 있다고 해서 책이 실패한 것은 아니니까요.”','“마르타 씨가 식사를 권하더군요. …저는 괜찮다고 했습니다. 두 번 정도.”','“오늘은 무엇을 남기고 싶으신가요? 짧아도 괜찮아요.”'
+      ]
     },
     knight: {
-      5:['“이제 관문을 지키는 쪽이 누구인지 헷갈릴 정도군.”','“자네라면 다음 관문도 문제없겠군.”'],
-      3:['“꾸준히 두드리면 관문은 반드시 열린다.”','“이번 주도 흔들림 없군.”'],
-      0:['“이번 주 관문부터 바라보시오. 한 번에 하나면 충분하오.”','“급하게 갈 필요 없다. 착실히만 가라.”']
+      5:[
+        '“이제 관문을 지키는 쪽이 누구인지 헷갈릴 정도군.”','“자네라면 다음 관문도 문제없겠군. 다만 혼자서 다 하려 하지는 마라.”','“마르타가 자네 이야기를 할 때 웃더군. 나도 그 이유를 조금 알 것 같다.”','“세라가 자네의 기록을 자주 확인한다. 그녀도 변하고 있군. 나 역시 마찬가지겠지.”','“예전의 나는 목표를 향해 가는 것만 알았다. 지금은 왜 가는지 묻고 있다.”'
+      ],
+      3:[
+        '“꾸준히 두드리면 관문은 반드시 열린다.”','“이번 주도 흔들림 없군.”','“오늘은 많이 했군. 그러나 쉬는 것도 훈련이다. …마르타에게 배웠다.”','“전에 자네가 포기하지 않는 이유를 물었지. 아직 명확한 답은 없다. 그래도 계속 생각하고 있다.”'
+      ],
+      0:[
+        '“이번 주 관문부터 바라보시오. 한 번에 하나면 충분하오.”','“급하게 갈 필요 없다. 착실히만 가라.”','“오늘의 한 걸음이 작아 보여도, 멈춰 있는 것보다는 낫다.”','“몸이 무거워 보이는군. 오늘은 조금 쉬어도 된다.”','“처음 만났을 때보다 발걸음이 안정되었다. 스스로는 느끼지 못할 수도 있겠지.”'
+      ]
     },
     merchant: {
-      5:['“고대 제작소를 열어주지. 이제부터는 평범한 물건만 찾을 필요 없을 거야.”','“이제 우리 사이에 숨길 게 뭐가 있겠나.”'],
-      4:['“비밀 시장에 관심이 있나? 아직은 조금 이르군.”'],
-      3:['“희귀 재료가 하나 들어왔지. 자네라면 살펴볼 만해.”','“귀한 손님한테만 보여주는 물건이 있는데 말이야.”'],
-      0:['“어서 오게. 필요한 물건이라면 웬만한 건 다 구해주지.”','“오늘도 필요한 거 있으면 말해.”']
+      5:[
+        '“고대 제작소를 열어주지. 이제부터는 평범한 물건만 찾을 필요 없을 거야.”','“이제 우리 사이에 숨길 게 뭐가 있겠나. 그래도 장사는 장사라네.”','“자네가 처음 왔을 때는 물건 하나 고르는 데도 오래 걸렸지. 이젠 제법 눈이 생겼어.”','“마르타가 자네한테 잘해주더군. 그 사람한테 신세 졌으면 언젠가 갚게. 아주 무서운 사람이거든.”','“세라가 내 장부를 다시 확인했어. 틀린 건 없었는데도 긴장되더군.”'
+      ],
+      4:[
+        '“비밀 시장에 관심이 있나? 이제는 보여줘도 되겠군.”','“전에 비싸다고 하던 물건 말이지? 오늘은 할인해주지. 아주 조금.”','“레온이 여기서 뭘 사갔는지 궁금한가? …비밀이라네.”','“세라는 흥정도 정확하더군. 감으로 사는 사람이 아니야.”'
+      ],
+      3:[
+        '“희귀 재료가 하나 들어왔지. 자네라면 살펴볼 만해.”','“귀한 손님한테만 보여주는 물건이 있는데 말이야.”','“요즘 자네가 쓰는 물건을 보면 공부하는 습관도 보이더군. 장사꾼 눈이란 게 그런 거지.”','“마르타가 또 주방에서 뭔가 실험하더군. 나는 물러나 있었어.”'
+      ],
+      0:[
+        '“어서 오게. 필요한 물건이라면 웬만한 건 다 구해주지.”','“오늘도 필요한 거 있으면 말해.”','“처음 보는 얼굴이군. 천천히 둘러봐. 급하게 사는 손님이 제일 많이 후회하거든.”','“공부하는 사람이라면 집중의 물약부터 보게. …광고 아니야. 장사꾼의 조언이지.”','“돈을 아끼는 것도 실력이라네. 다 쓰고 나서 아끼는 건 누구나 하거든.”'
+      ]
     }
   };
   function tierLine(npcId, t, tiers){
@@ -6513,19 +6611,14 @@ function renderRpgQuests(){
   }
   function renderTier2(){ renderNPCs(); renderEquipment(); renderInventory(); renderMonsterCodex(); renderChronicle(); }
 
-  function fatigueInfo(){
+  // 피로도는 플레이버일 뿐 패널티는 없음 — 별도 패널 대신 여관 마르타 대사(innkeeperLine)에 녹여서 보여준다.
+  // 0=가벼움 1=조금 피곤함 2=피곤함 3=많이 피곤함
+  function fatigueTier(){
     const minutes = estimatedFocusMinutesForDate(formatDate(today));
-    if(minutes >= 480) return {label:'많이 피곤함', message:'오늘은 꽤 오래 달렸어요. 여관에서 푹 쉬어가요 — 피로도는 플레이버일 뿐, 패널티는 없어요.'};
-    if(minutes >= 360) return {label:'피곤함', message:'오늘의 여정이 제법 길었어요. 여관에서 한숨 돌리고 다시 이어가요.'};
-    if(minutes >= 180) return {label:'조금 피곤함', message:'슬슬 몸이 무거워질 시간이에요. 잠깐 쉬어가도 여정은 그대로예요.'};
-    return {label:'가벼움', message:'아직 몸이 가벼워요. 여유 있게 이어가세요.'};
-  }
-  function renderFatigue(){
-    const info = fatigueInfo();
-    const stateEl=document.getElementById('fatigue-state');
-    const msgEl=document.getElementById('fatigue-message');
-    if(stateEl) stateEl.textContent=info.label;
-    if(msgEl) msgEl.textContent=info.message;
+    if(minutes >= 480) return 3;
+    if(minutes >= 360) return 2;
+    if(minutes >= 180) return 1;
+    return 0;
   }
   function renderExamFinale(){
     const panel=document.getElementById('exam-finale');
@@ -8382,7 +8475,6 @@ function renderRpgQuests(){
   persistAndRefresh = function(){
     _origPersist();
     renderPhaseTrack();
-    renderFatigue();
     renderExamFinale();
     checkAvoidanceNudge();
   };
@@ -8584,123 +8676,14 @@ function renderRpgQuests(){
 
 // 모바일에서만 여정 지도 영역의 터치가 부모 Swiper로 전파되지 않게 한다.
 // 지도 자체의 가로 스크롤은 유지하고, 지도 밖 터치는 기존 Swiper 동작을 그대로 둔다.
-// 였는데 롱프레스 접근법 시도함
 const journeyMap = document.getElementById('journey-map');
-
-if (journeyMap) {
-  let longPressTimer = null;
-  let longPressActive = false;
-  let lastTouchX = 0;
-
-  // 1보다 크면 손가락 이동보다 지도가 더 빠르게 움직임
-  const DRAG_SPEED = 1.4;
-
-  const clearLongPress = () => {
-    clearTimeout(longPressTimer);
-    longPressTimer = null;
+if(journeyMap){
+  const stopJourneyMapSwipe = event => {
+    if(window.matchMedia('(max-width: 759px)').matches) event.stopPropagation();
   };
-
-  const unlockSwiper = () => {
-    if (window.__gameTabsSwiper) {
-      window.__gameTabsSwiper.allowTouchMove = true;
-    }
-  };
-
-  const resetLongPress = () => {
-    clearLongPress();
-
-    if (longPressActive) {
-      longPressActive = false;
-      unlockSwiper();
-
-      journeyMap
-        .querySelectorAll('.long-press-active')
-        .forEach(node => node.classList.remove('long-press-active'));
-    }
-  };
-
-  // 터치 시작
-  journeyMap.addEventListener('touchstart', event => {
-    if (!window.matchMedia('(max-width: 759px)').matches) return;
-
-    // 지도 터치가 부모 Swiper로 올라가지 않도록 차단
-    event.stopPropagation();
-
-    const touch = event.touches[0];
-    if (!touch) return;
-
-    lastTouchX = touch.clientX;
-
-    // 실제 층/지역 노드를 눌렀을 때만 롱프레스 시작
-    const node = event.target.closest('.journey-map__node');
-
-    if (!node) {
-      clearLongPress();
-      return;
-    }
-
-    clearLongPress();
-    longPressActive = false;
-
-    longPressTimer = setTimeout(() => {
-      longPressActive = true;
-
-      // 롱프레스가 성립하면 부모 Swiper 잠금
-      if (window.__gameTabsSwiper) {
-        window.__gameTabsSwiper.allowTouchMove = false;
-      }
-
-      node.classList.add('long-press-active');
-
-      // 롱프레스 직후의 현재 손가락 위치를 기준점으로 다시 잡음
-      const currentTouch = event.touches[0];
-      if (currentTouch) {
-        lastTouchX = currentTouch.clientX;
-      }
-    }, 2000);
-  }, { passive: true });
-
-
-  // 손가락 이동
-  journeyMap.addEventListener('touchmove', event => {
-  if (!window.matchMedia('(max-width: 759px)').matches) return;
-
-  event.stopPropagation();
-
-  if (!longPressActive) return;
-
-  // 롱프레스 이후에는 기본 브라우저 스크롤을 막고
-  // 우리가 직접 scrollLeft를 조작한다.
-  event.preventDefault();
-
-  const touch = event.touches[0];
-  if (!touch) return;
-
-  const currentX = touch.clientX;
-  const deltaX = currentX - lastTouchX;
-
-  journeyMap.scrollLeft -= deltaX * DRAG_SPEED;
-
-  lastTouchX = currentX;
-}, { passive: false });
-
-
-  // 손가락을 뗌
-  journeyMap.addEventListener('touchend', event => {
-    if (!window.matchMedia('(max-width: 759px)').matches) return;
-
-    event.stopPropagation();
-    resetLongPress();
-  }, { passive: true });
-
-
-  // 터치가 취소된 경우
-  journeyMap.addEventListener('touchcancel', event => {
-    if (!window.matchMedia('(max-width: 759px)').matches) return;
-
-    event.stopPropagation();
-    resetLongPress();
-  }, { passive: true });
+  ['touchstart','touchmove','touchend','touchcancel'].forEach(type => {
+    journeyMap.addEventListener(type, stopJourneyMapSwipe, {passive:true});
+  });
 }
 
     // 탭 버튼은 동일한 Swiper 인스턴스를 사용한다. 별도의 터치 엔진은 없다.
@@ -8749,7 +8732,6 @@ if (journeyMap) {
     renderGateSettings();
     renderAchievements();
     renderInn();
-    renderFatigue();
     renderExamFinale();
     renderExercisePool();
     renderExercisePanel();
