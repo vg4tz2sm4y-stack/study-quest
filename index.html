@@ -852,7 +852,7 @@
   .record-fold > summary::after{content:'▸';margin-left:8px;color:var(--gold);font-size:.9rem;transition:transform .2s ease;}
   .record-fold > summary .quest-panel__header-sub{margin-left:auto;}
   .record-fold[open] > summary::after{transform:rotate(90deg);}
-  .record-fold__body{padding-top:2px;}
+  .record-fold__body{padding-top:6px;}
 
   /* ---------- 업적 ---------- */
   .achievement-list{display:flex;flex-direction:column;gap:8px;}
@@ -2605,7 +2605,7 @@
       <p class="today-times" id="today-times"></p>
 
       <div class="period-breakdown" id="period-breakdown"></div>
-      <p class="chip-limit-note" id="period-range-note">아침녘 05–12시 · 낮뜨락 12–19시 · 달무리 19–05시(익일) 기준으로 자동 분류돼요.</p>
+      <p class="chip-limit-note" id="period-range-note">아침녘 05–12시 · 낮뜨락 12–19시 · 달무리 19–05시(익일) 기준이에요,</p>
 
       <div class="mini-section">
         <p class="mini-section__label">오늘 나는 어떤 사람이었나요?</p>
@@ -2668,19 +2668,19 @@
         <strong id="weekly-avg">0.0개</strong>
       </div>
       <div class="stat-row">
-        <span class="stat-name">🔁 지난주 같은 기간 대비</span>
+        <span class="stat-name">🔁 지난 주 대비</span>
         <strong id="week-compare">-</strong>
       </div>
       <div class="stat-row">
-        <span class="stat-name">✅ 이달 목표 달성일</span>
+        <span class="stat-name">✅ 이번 달 목표 달성일</span>
         <strong id="monthly-success-days">0일</strong>
       </div>
       <div class="stat-row">
-        <span class="stat-name">🏅 이달 최다 스탬프</span>
+        <span class="stat-name">🏅 이번 달 최다 스탬프</span>
         <strong id="most-used-sticker">-</strong>
       </div>
       <div class="mission-stats-row">
-        <span class="stat-name">📚 이달 과목별 미션</span>
+        <span class="stat-name">📚 이번 달 과목별 미션</span>
         <div class="mission-stat-chips" id="mission-stat-chips"></div>
       </div>
         </div>
@@ -2694,7 +2694,7 @@
       <span class="quest-panel__header-title">체력 단련</span>
       <span class="exercise-today-log" id="exercise-today-log">오늘 기록 없음</span>
     </div>
-    <p class="chip-limit-note" style="text-align:center;margin:-6px 0 14px;">공부만큼 몸도 중요하니까 — 가볍게 기록만 남겨도 체력 스탯이 올라요.</p>
+    <p class="chip-limit-note" style="text-align:center;margin:-6px 0 14px;">A sound mind in a sound body — 체력 스탯이 올라요.</p>
     <div class="exercise-pool" id="exercise-pool"></div>
   </section>
 
@@ -2804,6 +2804,15 @@
       <section class="quest-panel">
         <div class="quest-panel__header">
           <span class="quest-panel__header-icon"></span>
+          <span class="quest-panel__header-title">마을 사람들</span>
+          <span class="quest-panel__header-sub"></span>
+        </div>
+        <div class="tier2-grid" id="npc-list"></div>
+      </section>
+      
+      <section class="quest-panel">
+        <div class="quest-panel__header">
+          <span class="quest-panel__header-icon"></span>
           <span class="quest-panel__header-title">여관</span>
           <span class="quest-panel__header-sub" id="inn-tomato-balance">🍅 0개 보유</span>
         </div>
@@ -2824,9 +2833,9 @@
         <div class="quest-panel__header">
           <span class="quest-panel__header-icon"></span>
           <span class="quest-panel__header-title">잡화상</span>
-          <span class="quest-panel__header-sub" id="shop-coin-balance"><img src="study-quest-gold-coin.png" class="coin-icon" alt="금화">0개 보유</span>
+          <span class="quest-panel__header-sub" id="shop-coin-balance"><img src="study-quest-gold-coin.png" class="coin-icon" alt="골드">0개 보유</span>
         </div>
-        <p class="quest-panel__hint">골드로 오늘 하루만 쓸 수 있는 소모품을 사보세요. 효과는 오늘 자정까지 이어져요.</p>
+        <p class="quest-panel__hint">골드로 소모품을 사보세요. 효과는 오늘 자정까지 이어집니다.</p>
         <div class="npc-dialogue">
   <div class="npc-dialogue__portrait">
     <img src="study-quest-npc-merchant.png" alt="마르코">
@@ -2845,18 +2854,9 @@
           <span class="quest-panel__header-title">유물함</span>
           <span class="quest-panel__header-sub" id="seal-collection-count">0/7</span>
         </div>
-        <button type="button" class="gacha-draw-btn" id="gacha-draw-btn">유물함 열기 (<img src="study-quest-gold-coin.png" class="coin-icon coin-icon--button" alt="금화">30)</button>
+        <button type="button" class="gacha-draw-btn" id="gacha-draw-btn">유물함 열기 (<img src="study-quest-gold-coin.png" class="coin-icon coin-icon--button" alt="골드">30)</button>
         <div class="rune-set-banner" id="rune-set-banner">룬을 조합해 세트 효과를 활성화할 수 있어요.</div>
         <div class="seal-collection" id="seal-collection"></div>
-      </section>
-
-      <section class="quest-panel">
-        <div class="quest-panel__header">
-          <span class="quest-panel__header-icon"></span>
-          <span class="quest-panel__header-title">마을 사람들</span>
-          <span class="quest-panel__header-sub"></span>
-        </div>
-        <div class="tier2-grid" id="npc-list"></div>
       </section>
 
     </div>
@@ -3027,9 +3027,9 @@
   };
   const DEFAULT_CLASS_TITLE = { id:'novice', title:'새내기', icon:'🧭', desc:'공부 패턴이 쌓이면 나만의 클래스가 드러나요.' };
   const HIDDEN_CLASSES = [
-    { id:'arbiter', title:'판관', icon:'⚖️', desc:'지식·표현·실전 감각이 함께 자란 히든 클래스',
+    { id:'arbiter', title:'판관', icon:'⚖️', desc:'지식·표현·실전 감각을 함께 벼려낸 자',
       check: p => p.int >= STAT_LEVELS[2] && p.dex >= STAT_LEVELS[2] && p.per >= STAT_LEVELS[2] && p.focusUnits >= 20 },
-    { id:'pioneer', title:'개척자', icon:'🥾', desc:'실전과 인내, 생활의 리듬까지 길러낸 히든 클래스',
+    { id:'pioneer', title:'개척자', icon:'🥾', desc:'실전과 인내, 흔들리지 않는 규율을 지켜낸 자',
       check: p => p.int >= STAT_LEVELS[2] && p.per >= STAT_LEVELS[2] && p.end >= STAT_LEVELS[2] && p.activeDays >= 21 && p.exercise >= 8 }
   ];
   // 스탯과 별개로, 실제로 어떤 방식으로 공부해왔는지를 남기는 행동형 능력.
@@ -3037,34 +3037,34 @@
   const BEHAVIOR_ABILITIES = [
     { key:'sit', icon:'🪑', name:'일단 앉음', desc:'힘든 날에도 다시 책상으로 돌아온 흔적', need:10, unit:'회',
       progress:()=>countMinimalStampsAllTime(),
-      effect:{ type:'stampGold', appliesTo:['🪑'], bonus:1 }, effectDesc:'"일단 앉음" 스탬프마다 금화+1개' },
+      effect:{ type:'stampGold', appliesTo:['🪑'], bonus:1 }, effectDesc:'"일단 앉음" 스탬프마다 골드+1개' },
     { key:'steady', icon:'🐢', name:'꾸준한 발걸음', desc:'공부한 날을 차곡차곡 이어온 흔적', need:30, unit:'일',
       progress:()=>activeDaysAllTime(),
-      effect:{ type:'firstStampGold', bonus:2 }, effectDesc:'오늘 첫 스탬프마다 금화+2개' },
+      effect:{ type:'firstStampGold', bonus:2 }, effectDesc:'오늘 첫 스탬프마다 골드+2개' },
     { key:'focus', icon:'🔥', name:'몰입의 심지', desc:'집중 기록으로 다져진 흔적', need:30, unit:'회',
       progress:()=>studyTimeUnitsAllTime(),
-      effect:{ type:'stampGold', appliesTo:['🍅'], bonus:1 }, effectDesc:'뽀모도로 완료마다 금화+1개' },
+      effect:{ type:'stampGold', appliesTo:['🍅'], bonus:1 }, effectDesc:'뽀모도로 완료마다 골드+1개' },
     { key:'case', icon:'📖', name:'판례의 나침반', desc:'암기와 판례를 반복해 온 흔적', need:50, unit:'점',
       progress:()=>statCountsAllTime().int || 0,
-      effect:{ type:'stampGold', appliesTo:['📖'], bonus:1 }, effectDesc:'암기·판례 스탬프마다 금화+1개' },
+      effect:{ type:'stampGold', appliesTo:['📖'], bonus:1 }, effectDesc:'암기·판례 스탬프마다 골드+1개' },
     { key:'write', icon:'🖋️', name:'답안의 필치', desc:'직접 써보며 벼려낸 흔적', need:50, unit:'점',
       progress:()=>statCountsAllTime().dex || 0,
-      effect:{ type:'stampGold', appliesTo:['✍️'], bonus:1 }, effectDesc:'답안작성 스탬프마다 금화+1개' },
+      effect:{ type:'stampGold', appliesTo:['✍️'], bonus:1 }, effectDesc:'답안작성 스탬프마다 골드+1개' },
     { key:'comeback', icon:'🌱', name:'다시 일어섬', desc:'흐름이 끊겨도 다시 공부를 시작한 흔적', need:5, unit:'회',
       progress:()=>comebackCountAllTime(),
-      effect:{ type:'comebackGold', bonus:5 }, effectDesc:'3일 이상 쉬었다 돌아오면 금화+5개' },
+      effect:{ type:'comebackGold', bonus:5 }, effectDesc:'3일 이상 쉬었다 돌아오면 골드+5개' },
     { key:'iron', icon:'🛡️', name:'쇠 같은 리듬', desc:'공부와 생활의 리듬을 함께 지켜낸 흔적', need:20, unit:'회',
       progress:()=>exerciseCountAllTime(),
-      effect:{ type:'exerciseGold', bonus:2 }, effectDesc:'운동 기록마다 금화+2개' },
+      effect:{ type:'exerciseGold', bonus:2 }, effectDesc:'운동 기록마다 골드+2개' },
     { key:'nightowl', icon:'🌙', name:'야행성', desc:'늦은 시간에도 자기 페이스를 지켜낸 흔적', need:30, unit:'회',
       progress:()=>timeOfDayStampCountAllTime('night'),
-      effect:{ type:'timeStampGold', time:'night', bonus:1 }, effectDesc:'22시 이후 스탬프마다 금화+1개' },
+      effect:{ type:'timeStampGold', time:'night', bonus:1 }, effectDesc:'22시 이후 스탬프마다 골드+1개' },
     { key:'earlybird', icon:'🌅', name:'새벽형', desc:'이른 시간부터 하루의 첫 페이지를 연 흔적', need:30, unit:'회',
       progress:()=>timeOfDayStampCountAllTime('dawn'),
-      effect:{ type:'timeStampGold', time:'dawn', bonus:1 }, effectDesc:'07시 이전 스탬프마다 금화+1개' },
+      effect:{ type:'timeStampGold', time:'dawn', bonus:1 }, effectDesc:'07시 이전 스탬프마다 골드+1개' },
     { key:'reader', icon:'📚', name:'독서가', desc:'암기·판례를 반복해 지식의 바탕을 두껍게 만든 흔적', need:150, unit:'회',
       progress:()=>stampCountAllTime('📖'),
-      effect:{ type:'stampGold', appliesTo:['📖'], bonus:1 }, effectDesc:'암기·판례 스탬프마다 추가 금화+1개' }
+      effect:{ type:'stampGold', appliesTo:['📖'], bonus:1 }, effectDesc:'암기·판례 스탬프마다 추가 골드+1개' }
   ];
 
   function timeOfDayStampCountAllTime(kind){
@@ -3189,12 +3189,12 @@
   const JOURNEY_ICONS = ['🏕️','🌲','🏚️','🏰','🌋','🏟️','👑'];
   const JOURNEY_MAP = [
     { icon:'🏕️', name:'출발의 마을', sub:'여정의 시작' },
-    { icon:'🌲', name:'기초의 숲', sub:'기본기를 다지는 곳' },
-    { icon:'🏚️', name:'판례의 폐허', sub:'흩어진 지식을 찾는 곳' },
-    { icon:'🏰', name:'실전의 성채', sub:'답안과 문제를 넘는 곳' },
-    { icon:'🌋', name:'집중의 화산', sub:'몰입을 벼리는 곳' },
-    { icon:'🏟️', name:'시험의 경기장', sub:'실전 감각을 세우는 곳' },
-    { icon:'👑', name:'시험의 전당', sub:'최종 목적지' }
+    { icon:'🌲', name:'기초의 숲', sub:'기본기를 다지며' },
+    { icon:'🏚️', name:'판례의 폐허', sub:'흩어진 지식을 찾아서' },
+    { icon:'🏰', name:'실전의 성채', sub:'문제와 답안을 넘어' },
+    { icon:'🌋', name:'집중의 화산', sub:'끝없는 반복과 몰입으로' },
+    { icon:'🏟️', name:'지식의 검투장', sub:'실전 감각을 더욱 날카롭게' },
+    { icon:'👑', name:'시험의 전당', sub:'여정의 끝' }
   ];
   const JOURNEY_REGIONS = {
     '헌법':      { icon:'🏛️', name:'헌법의 성채' },
@@ -3240,17 +3240,17 @@
   // 이어지지 않는다(사경제 아이템처럼 "꽝"이 없음).
   const SEAL_POOL = [
     { id:'chosim',    name:'초심의 룬',     icon:'ᚠ', rarity:'common',    weight:26,
-      effectKey:'minimal',      effectBonus:1,    effectDesc:'"일단 앉음" 기록에도 금화+1개' },
+      effectKey:'minimal',      effectBonus:1,    effectDesc:'"일단 앉음" 기록에도 골드+1개' },
     { id:'seongsil',  name:'성실의 룬',     icon:'ᚢ', rarity:'common',    weight:26,
-      effectKey:'stamp',        effectBonus:1,    effectDesc:'공부 스탬프마다 금화+1개' },
+      effectKey:'stamp',        effectBonus:1,    effectDesc:'공부 스탬프마다 골드+1개' },
     { id:'cheongram', name:'청람의 룬',     icon:'ᚦ', rarity:'common',    weight:23,
-      effectKey:'statLevelUp',  effectBonus:5,    effectDesc:'스탯 Lv.업 보상 금화+5개' },
+      effectKey:'statLevelUp',  effectBonus:5,    effectDesc:'스탯 Lv.업 보상 골드+5개' },
     { id:'bulcheol',  name:'불철주야의 룬', icon:'ᚨ', rarity:'rare',      weight:14,
       effectKey:'focusMinutes', effectBonus:5,    effectDesc:'뽀모도로 완료마다 순공 시간 +5분 인정' },
     { id:'jeongjin',  name:'정진의 룬',     icon:'ᚱ', rarity:'rare',      weight:14,
-      effectKey:'gateClear',    effectBonus:10,   effectDesc:'관문지기 격파 보상 금화+10개' },
+      effectKey:'gateClear',    effectBonus:10,   effectDesc:'관문지기 격파 보상 골드+10개' },
     { id:'jangwon',   name:'장원급제의 룬', icon:'ᛏ', rarity:'legendary', weight:4,
-      effectKey:'levelUp',      effectBonus:20,   effectDesc:'레벨업 보상 금화+20개' },
+      effectKey:'levelUp',      effectBonus:20,   effectDesc:'레벨업 보상 골드+20개' },
     { id:'daegi',     name:'대기만성의 룬', icon:'ᛃ', rarity:'legendary', weight:4,
       effectKey:'luckChance',   effectBonus:0.03, effectDesc:'행운 이벤트 발동 확률 소폭 상승' }
   ];
@@ -3315,7 +3315,7 @@
   }
   const RARITY_LABEL = { common:'일반', rare:'희귀', legendary:'전설' };
 
-  // ---------- 기본 금화 보상 ----------
+  // ---------- 기본 골드 보상 ----------
   // 여러 기능(스탬프/운동/레벨업/관문 등)이 공통으로 참조하므로 반드시 전역 데이터 정의를 유지한다.
   const COIN_REWARD = {
     stamp:2, exercise:3, statLevelUp:15, levelUp:40, bestDay:10,
@@ -3361,7 +3361,7 @@
   // 만든 메뉴라, 재료는 전부 토마토 기반. 먹으면 소소한 골드 환산 보상 + "식사 기록"에 한 줄 남는다.
   const FOOD_MENU = [
     { id:'tomato-salad',   name:'토마토 샐러드',   icon:'🥗', image:'study-quest-tomato-salad.png', cost:3,  flavor:'가볍게 속을 채워요.',
-      buff:{ kind:'nextStampGold', value:2 }, grantLabel:'다음 스탬프 금화+2개' },
+      buff:{ kind:'nextStampGold', value:2 }, grantLabel:'다음 스탬프 골드+2개' },
     { id:'tomato-soup',    name:'토마토 스프',     icon:'🍲', image:'study-quest-tomato-soup.png', cost:5,  flavor:'따뜻한 국물이 든든해요.',
       buff:{ kind:'goldPct', value:0.05 }, grantLabel:'오늘 남은 시간 골드 획득 +5%' },
     { id:'basil-bread',    name:'토마토바질 빵',   icon:'🍞', image:'study-quest-tomato-basil-bread.png', cost:9,  flavor:'속을 파내고 토마토와 바질을 채워 구운  빵.',
@@ -3369,7 +3369,7 @@
     { id:'pomodoro-pasta', name:'뽀모도로 파스타', icon:'🍝', image:'study-quest-pomodoro-pasta.png', cost:12,  flavor:'제대로 된 한 끼, 포만감 최고.',
       buff:{ kind:'goldPct', value:0.10 }, grantLabel:'오늘 남은 시간 골드 획득 +10%' },
     { id:'tomato-curry',   name:'토마토 카레',     icon:'🍛', image:'study-quest-tomato-curry.png', cost:15, flavor:'여관 명물 요리 — 오늘의 휴식.',
-      buff:{ kind:'nextStampGold', value:6 }, grantLabel:'다음 스탬프 금화+6개' },
+      buff:{ kind:'nextStampGold', value:6 }, grantLabel:'다음 스탬프 골드+6개' },
     // 마르타 신뢰 Lv.5(여관 식사 100회) 해금 메뉴 — 예전엔 "특별 메뉴 해금" 문구만 있고 실제로는 아무 메뉴도 없던 부분을 실제 구매 가능한 프리미엄 메뉴로 연결한다.
     { id:'hero-feast', name:'영웅의 식탁', icon:'🍖', image: 'hero-feast.png', cost:30, unlockTrust:5, flavor:'마르타가 단골에게만 차려주는 특별한 상차림이에요.',
       buff:{ kind:'goldPct', value:0.15 }, grantLabel:'오늘 남은 시간 골드 획득 +15%' }
@@ -3379,7 +3379,7 @@
   const SHOP_ITEMS = [
     { id:'focus-potion', icon:'☕', name:'집중의 물약', cost:15,
       flavor:'다음 스탬프 하나에 강한 힘을 실어줘요.',
-      buff:{ kind:'nextStampGold', value:10 }, grantLabel:'다음 스탬프 금화+10개' },
+      buff:{ kind:'nextStampGold', value:10 }, grantLabel:'다음 스탬프 골드+10개' },
     { id:'lucky-charm', icon:'🍀', name:'행운의 부적', cost:20,
       flavor:'오늘 하루, 행운이 유난히 자주 따라와요.',
       buff:{ kind:'luckFlat', value:0.20 }, grantLabel:'오늘 행운 확률 대폭 상승' },
@@ -3388,7 +3388,7 @@
       buff:{ kind:'goldPct', value:0.10 }, grantLabel:'오늘 골드 획득 +10%' },
     { id:'memory-scroll', icon:'📖', name:'기억의 두루마리', cost:20,
       flavor:'오늘따라 암기와 판례가 유난히 잘 붙어요.',
-      buff:{ kind:'emojiGoldFlat', value:3, targetEmoji:'📖' }, grantLabel:'오늘 암기·판례 스탬프 금화+3개' },
+      buff:{ kind:'emojiGoldFlat', value:3, targetEmoji:'📖' }, grantLabel:'오늘 암기·판례 스탬프 골드+3개' },
     // 마르코의 신뢰 레벨로 잠금 해제되는 물건 — 예전엔 "희귀 재료 해금" 같은 문구만 있고
     // 실제로는 아무것도 해금되지 않던 부분을 실제 구매 가능한 상품으로 연결한다.
     { id:'rare-material', icon:'💎', name:'희귀 재료', cost:35, unlockTrust:3,
@@ -3396,7 +3396,7 @@
       buff:{ kind:'goldPct', value:0.20 }, grantLabel:'오늘 골드 획득 +20%' },
     { id:'secret-chart', icon:'🗺️', name:'비밀 시장의 지도', cost:75, unlockTrust:4,
       flavor:'항구 너머 비밀 시장으로 가는 지도. 아는 사람만 압니다.',
-      buff:{ kind:'emojiGoldFlat', value:6, targetEmoji:'⚖️' }, grantLabel:'오늘 모의고사 스탬프 금화+6개' }
+      buff:{ kind:'emojiGoldFlat', value:6, targetEmoji:'⚖️' }, grantLabel:'오늘 모의고사 스탬프 골드+6개' }
   ];
   // ---------- 기간제 버프 엔진 (여관 음식·상점 소모품이 공통으로 사용) ----------
   function activeBuffsToday(){
@@ -3681,7 +3681,7 @@ activeBuffs: [], equipment: {weapon:null, armor:null, accessory:null}, inventory
     });
   }
   function coinHTML(amount, extraClass){
-    return `<img src="study-quest-gold-coin.png" class="coin-icon${extraClass ? ` ${extraClass}` : ''}" alt="금화">${amount}개`;
+    return `<img src="study-quest-gold-coin.png" class="coin-icon${extraClass ? ` ${extraClass}` : ''}" alt="골드">${amount}개`;
   }
   function missionCountsAllTime(){
     const counts = {};
@@ -3760,7 +3760,7 @@ activeBuffs: [], equipment: {weapon:null, armor:null, accessory:null}, inventory
       : '아직 순공 기록이 없어요';
     wrap.innerHTML = `
       <div class="study-trend__head">
-        <span class="study-trend__title">📈 공부 시간 추세</span>
+        <span class="study-trend__title">📈 추세</span>
         <span class="study-trend__summary">${summaryText}</span>
       </div>
       <div class="study-trend__bars">${bars}</div>
@@ -4701,7 +4701,7 @@ function resolveRpgQuest(questId) {
   // 먼저 완료해 뒀다면 여기서 알아보고 보너스를 준다 (반대 방향은 claimNarrativeQuest 참고).
   if(questId === 'Q003' && typeof questClaimed === 'function' && questClaimed('forgotten-case')){
     awardCoins(20);
-    showToast('📖 서사 퀘스트 "잊혀진 판례를 찾아서"의 기억이 낯선 기록과 겹칩니다. (금화 +20)');
+    showToast('📖 서사 퀘스트 "잊혀진 판례를 찾아서"의 기억이 낯선 기록과 겹칩니다. (골드 +20)');
   }
 
   (quest.effects || []).forEach(applyRpgEffect);
@@ -5383,7 +5383,7 @@ function renderRpgQuests(){
 
   if(streak >= 7) return pick([
     `${marta}"연속 ${streak}일째 오다니. 대단하네 — 오늘도 잘 챙겨 먹어!"`,
-    `${marta}"${streak}일 연속이라니, 이 정도면 단골을 넘어 사랑이야."`
+    `${marta}"${streak}일 연속이라니, 이 정도면 단골을 넘어 사랑 아니야?"`
   ]);
 
   // 피로도(플레이버, 패널티 없음)는 스트릭 축하 다음, 잔고/시간대 인사보다는 먼저 — 오늘의 상태가 더 급한 정보라서.
@@ -5491,10 +5491,10 @@ function renderRpgQuests(){
   const NARRATIVE_QUESTS = [
     { id:'daily-first-step', tier:'daily', icon:'🟢', typeLabel:'일일', name:'오늘의 첫 발걸음', desc:'오늘 스탬프를 하나 남겨 모험을 시작하세요.',
       progress:()=>Math.min(1, scorableEntries(formatDate(today)).length), target:1, unit:'개',
-      reward:{gold:5}, rewardText:'금화 +5' },
+      reward:{gold:5}, rewardText:'골드 +5' },
     { id:'weekly-steadfast', tier:'weekly', icon:'🔵', typeLabel:'주간', name:'일주일의 발자국', desc:'이번 주 5일 이상 기록을 남겨 여정을 이어가세요.',
       progress:()=>{ let n=0; const ws=sundayOf(today); for(let i=0;i<7;i++){ const d=new Date(ws); d.setDate(ws.getDate()+i); if(scorableEntries(formatDate(d)).length>0)n++; } return n; }, target:5, unit:'일',
-      reward:{gold:20}, rewardText:'금화 +20' },
+      reward:{gold:20}, rewardText:'골드 +20' },
     { id:'long-focus', tier:'long', icon:'🟣', typeLabel:'장기', name:'몰입의 기록',
       tiers:LONG_FOCUS_TIERS, unit:'시간',
       rawProgress:()=>Math.floor(totalFocusMinutesAllTime()/60) },
@@ -5502,22 +5502,22 @@ function renderRpgQuests(){
       // [버그 수정] 예전엔 '문제풀이'/'복습'이라는, 실제로는 어디에도 쌓이지 않는 미션 이름을 세고 있어서
       // 이 퀘스트가 영원히 클리어 불가능했다. 실제로 존재하는 스탬프 종류(✍️답안작성, 🔥집중몰입)로 교체.
       progress:()=>({caseCount:stampCountAllTime('📖'), problemCount:stampCountAllTime('✍️'), reviewCount:stampCountAllTime('🔥')}), target:1, unit:'완료',
-      reward:{gold:100}, rewardText:'금화 +100 · 특별 칭호의 첫 기록' },
+      reward:{gold:100}, rewardText:'골드 +100 · 특별 칭호의 첫 기록' },
     { id:'three-traces-echo', tier:'story', icon:'🔴', typeLabel:'서사 2부', name:'세 흔적의 메아리',
       unlockedIf:()=>!!state.rpgWorld?.flags?.threeTracesFound,
       desc:'"세 개의 흔적"을 발견한 뒤, 판례 공부를 이어가 총 15회를 채우세요.',
       progress:()=>stampCountAllTime('📖'), target:15, unit:'회',
-      reward:{gold:60}, rewardText:'금화 +60', rpgBonusFlag:'rightsSealFound', rpgBonusGold:15 },
+      reward:{gold:60}, rewardText:'골드 +60', rpgBonusFlag:'rightsSealFound', rpgBonusGold:15 },
     { id:'guardian-vigil', tier:'story', icon:'🔴', typeLabel:'서사 3부', name:'성벽 앞의 다짐',
       unlockedIf:()=>!!state.rpgWorld?.flags?.rightsRecordsProtected,
       desc:'무너진 성벽을 지키기로 한 다짐 — 판례 공부 30회 + 운동 기록 5회를 채우세요.',
       progress:()=>({caseCount:stampCountAllTime('📖'), exerciseCount:exerciseCountAllTime()}), target:1, unit:'완료',
-      reward:{gold:90}, rewardText:'금화 +90', rpgBonusFlag:'erasedNameDiscovered', rpgBonusGold:20 },
+      reward:{gold:90}, rewardText:'골드 +90', rpgBonusFlag:'erasedNameDiscovered', rpgBonusGold:20 },
     { id:'guardians-echo', tier:'story', icon:'🔴', typeLabel:'서사 4부(완결)', name:'수호자의 메아리',
       unlockedIf:()=>!!state.rpgWorld?.flags?.constitutionGuardianCleared,
       desc:'수호자를 넘어선 뒤, 어느 한 능력치라도 Lv.3까지 성장시켜 그 메아리에 응답하세요.',
       progress:()=>Math.max(0, ...CLASS_STATS.map(s=>statLevelIndexFor(statCountsAllTime()[s.key]||0))), target:3, unit:'레벨',
-      reward:{gold:150, items:[{id:'헌정의_파편', amount:1}]}, rewardText:'금화 +150 · 헌정의 파편 +1' }
+      reward:{gold:150, items:[{id:'헌정의_파편', amount:1}]}, rewardText:'골드 +150 · 헌정의 파편 +1' }
   ];
   function stampCountAllTime(emoji){
     return Object.keys(state.entries||{}).reduce((sum,ds)=>sum+entriesFor(ds).filter(e=>e===emoji).length,0);
@@ -5567,7 +5567,7 @@ function renderRpgQuests(){
       const pr=narrativeQuestProgress(q);
       const claimed=q.tier==='long' ? false : questClaimed(q.id, period);
       const done=pr.done;
-      const rewardText = q.tier==='long' ? `금화 +${40+pr.tierIdx*20}` : q.rewardText;
+      const rewardText = q.tier==='long' ? `골드 +${40+pr.tierIdx*20}` : q.rewardText;
       const cls='narrative-quest'+((done||pr.maxed)?' done':'');
       const button=done&&!claimed?`<button type="button" class="narrative-quest__claim" data-quest-id="${q.id}">보상 받기 · ${rewardText}</button>`:'';
       const status=pr.maxed?'✓ 전 단계 달성':(claimed?'✓ 완료':(done?'✓ 조건 달성':'진행 중'));
@@ -5587,7 +5587,7 @@ function renderRpgQuests(){
     if(q.tier==='long'){
       const gold=40+pr.tierIdx*20;
       awardCoins(gold);
-      rewardText=`금화 +${gold}`;
+      rewardText=`골드 +${gold}`;
     }else{
       if(q.reward && q.reward.gold) awardCoins(q.reward.gold);
       if(q.reward && Array.isArray(q.reward.items)) applyRpgReward({items:q.reward.items});
@@ -5602,7 +5602,7 @@ function renderRpgQuests(){
     state.questLog=state.questLog.slice(-80);
     persistAndRefresh();
     showToast(linkedBonus
-      ? `📜 ${q.name} 완료! ${rewardText} · 메인 스토리와 이어져 금화 +${linkGold} 추가!`
+      ? `📜 ${q.name} 완료! ${rewardText} · 메인 스토리와 이어져 골드 +${linkGold} 추가!`
       : `📜 ${q.name} 완료! ${rewardText}`);
   }
 
@@ -6106,7 +6106,7 @@ function renderRpgQuests(){
           <span class="class-stats__class-title">${title}</span>
           <span class="class-stats__class-caption">${caption}</span>
         </div>
-        <div class="class-stats__coins" title="금화 — 여관과 유물함에 쓸 수 있어요">${coinHTML(state.coins || 0)}</div>
+        <div class="class-stats__coins" title="골드 — 여관과 유물함에 쓸 수 있어요">${coinHTML(state.coins || 0)}</div>
       </div>
       <div class="class-stats__grid">${rows}</div>
       <div class="hidden-stat-row" title="체력은 운동 기록마다, 행운은 스탬프를 찍을 때 무작위로 쌓여요. 체력은 히든 클래스 해금 조건에, 행운은 다음 행운 이벤트 확률에 영향을 줘요.">💪 체력 ${exerciseCountAllTime()} · 🍀 행운 ${state.luckPoints||0}</div>
@@ -6292,7 +6292,7 @@ function renderRpgQuests(){
     { id:'merchant', icon:'⚓', name:'마르코', role:'항구의 상인 · 잡화상', image:'study-quest-npc-merchant.png', trustMax:5,
       trust:()=>merchantTrust(),
       dialogue:t=>tierLine('merchant',t,[5,4,3,0]),
-      unlock:t=> t>=5 ? '고대 제작소 해금' : t>=4 ? '비밀 시장 해금' : t>=3 ? '희귀 재료 해금' : '일반 거래' },
+      unlock:t=> t>=5 ? '고대 제작소 해금' : t>=4 ? '비밀 시장 해금' : t>=3 ? '희귀 재료 해금' : '누적 1500골드 사용 시 비밀 해금' },
   ];
   // ---------- NPC 신뢰도 ----------
   // 예전엔 NPC별로 기준이 제각각이라(마르타 식사 5회, 레온 스탬프 200개 등) 어떤 NPC는
@@ -6352,7 +6352,7 @@ function renderRpgQuests(){
         '“처음 뵙죠? 아, 아니다 저번에도 왔었나? …아무튼 반가워요!”','“메뉴 고민되면 그냥 아무거나 시켜. 나 눈치 하나는 빠르거든.”',
         '“여긴 늦게 와도 눈치 안 줘요. 대신 일찍 오면 좋은 자리 줄게.”','“공부하다 왔어요? 그럼 물부터. 이건 서비스예요.”',
         '“여기 처음이면 창가 자리 추천이에요. 내가 아끼는 자리거든요.”','“장사 하루 이틀 하는 거 아니니까, 손님 얼굴 보면 대충 알아요.”',
-        '“뭐 필요한 거 있으면 말해요. 없으면 없는 대로 만들어볼게요.”'
+        '“뭐 필요한 거 있으면 말해요. 없으면 없는 대로 만들어테니.”'
       ]
     },
     sage: {
@@ -6762,7 +6762,7 @@ function renderRpgQuests(){
     if(logEl){
       const eaten = state.mealsEaten || [];
       logEl.textContent = eaten.length
-        ? `지금까지 여관에서 ${eaten.length}끼를 먹었어요.`
+        ? `지금까지 여관에서 ${eaten.length}끼를 먹었어요. 샐러드는 끼니가 아닌 건 아시죠?`
         : '아직 여관에서 아무것도 안 먹었어요 — 토마토를 모아 첫 끼를 먹어보세요.';
     }
   }
@@ -6883,7 +6883,7 @@ function renderRpgQuests(){
     '목표를 다 못 채워도 절반은 절반만큼의 성취예요. 0과 같지 않습니다.',
     '완벽하게 못 할 것 같은 날엔, "일단 앉음" 스탬프만 찍어도 충분해요.',
     '어제 못 했다고 오늘까지 포기할 필요는 없어요. 여관에서 하루 묵은 셈 치면 되니까요.',
-    '지금 이 순간, 위에 적어둔 이유를 다시 한번 읽어보세요.',
+    '지금 이 순간, 적어둔 이유를 다시 한 번 읽어보세요.',
     '작게 시작한 오늘이, 큰 내일을 만듭니다.',
     '실수한 나를 다그치기보다, 다시 시작한 나를 칭찬해주세요.'
   ];
@@ -7352,7 +7352,7 @@ function renderRpgQuests(){
     document.getElementById('bell-break-input').disabled = locked;
     document.getElementById('bell-cycles-input').disabled = locked;
     modeNote.textContent = isBell
-      ? `아카데미 세션처럼 ${p.bellBlockMin}분 집중 + ${p.bellBreakMin}분 휴식을 ${p.bellTotalCycles}세트 자동으로 이어갑니다.`
+      ? `${p.bellBlockMin}분 집중 + ${p.bellBreakMin}분 휴식을 ${p.bellTotalCycles}세트 자동으로 이어갑니다.`
       : '최소 25분 원칙이에요. 그 이상은 자유롭게 늘려도 좋아요.';
 
     const remaining = pomodoroRemainingMs();
@@ -7494,7 +7494,7 @@ function renderRpgQuests(){
 
     const noteEl = document.getElementById('streak-note');
     if(freezesUsedThisWeek === 0){
-      noteEl.textContent = '이번 주 여관 숙박권 아직 안 썼어요 — 하루 쉬어가도 여정은 안 끊겨요.';
+      noteEl.textContent = '이번 주 숙박권은 사용하지 않았어요. — 여정이 계속됩니다.';
     }else if(freezesUsedThisWeek < FREEZE_LIMIT_PER_WEEK){
       noteEl.textContent = `이번 주 여관에 ${freezesUsedThisWeek}번 묵었어요 · ${FREEZE_LIMIT_PER_WEEK - freezesUsedThisWeek}번 더 묵을 수 있어요.`;
     }else{
