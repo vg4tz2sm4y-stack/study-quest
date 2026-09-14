@@ -1720,12 +1720,8 @@
     font-size:0.62rem;
     color:var(--muted);
     font-weight:500;
-  }
-  .stamp-opt span.stamp-stat-hint{
-    font-size:0.56rem;
-    color:var(--gold);
-    font-weight:600;
-    letter-spacing:0.01em;
+    text-align:center;
+    word-break:keep-all;
   }
   .stamp-opt:hover{transform:translateY(-2px);}
   .stamp-opt.selected{
@@ -1735,12 +1731,17 @@
     transform:scale(1.01);
   }
   .stamp-opt.selected span.stamp-caption{color:var(--seal);}
-  .stamp-opt.selected span.stamp-stat-hint{color:var(--seal-soft);}
   .stamp-opt.minimal{border-style:dashed;}
-  .stamp-opt.minimal span.stamp-stat-hint{color:var(--muted);font-weight:500;}
   .stamp-opt.minimal.selected{border-color:var(--sage);background:var(--sage-soft);}
   .stamp-opt.minimal.selected span.stamp-caption{color:var(--sage);}
-  .stamp-opt.minimal.selected span.stamp-stat-hint{color:var(--sage);}
+
+  /* 모바일: 6개를 한 줄에 욱여넣지 않고 3열×2줄로, 글자도 살짝 줄여서 줄바꿈 자체를 방지 */
+  @media(max-width:759px){
+    .stamp-pool{flex-wrap:wrap;}
+    .stamp-opt{flex:1 1 30%;min-width:0;}
+    .stamp-opt.selected{flex-grow:0;}
+    .stamp-opt span.stamp-caption{font-size:0.58rem;}
+  }
 
   .stamp-press{
     width:100%;
@@ -1882,19 +1883,20 @@
   .mission-dots{display:flex;gap:3px;margin:2px 0;}
   .mission-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex:none;}
 
-  /* ---------- 목표 달성 배지 ---------- */
-  .goal-badge{
-    position:absolute;
-    top:4px;
-    right:4px;
+  /* ---------- 목표 달성 표시 · 날짜 숫자 바로 밑에 가운데 정렬 ---------- */
+  .day-check{
+    text-align:center;
+    font-size:0.62rem;
+    font-weight:700;
+    color:#fff;
+  }
+  .day-check:not(:empty){
     width:16px;
     height:16px;
+    line-height:16px;
     border-radius:50%;
     background:var(--sage);
-    color:#fff;
-    font-size:0.62rem;
-    line-height:16px;
-    text-align:center;
+    margin:2px auto 0;
     box-shadow:0 1px 3px rgba(0,0,0,0.2);
   }
 
@@ -2040,7 +2042,7 @@
   .heatmap-summary{margin-top:12px;font-size:.66rem;color:var(--muted);line-height:1.45;}
   .heatmap-legend{display:flex;align-items:center;gap:5px;margin-top:9px;font-size:.62rem;color:var(--muted);}
   .heatmap-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
-  .day-num{font-size:0.75rem;font-weight:700;color:var(--ink-soft);}
+  .day-num{font-size:0.75rem;font-weight:700;color:var(--ink-soft);white-space:nowrap;}
   .weekday-cell .day-num{font-size:0.7rem;color:var(--muted);font-weight:600;}
   .cell-stickers{
     display:flex;
@@ -2332,7 +2334,7 @@
     background:var(--sage-soft);
     border-radius:10px;
     padding:8px 12px;
-    margin:8px 0 0;
+    margin:8px 0 14px;
     display:none;
   }
   .permission-note.show{display:block;}
@@ -5186,8 +5188,7 @@ function renderRpgQuests(){
     STAMPS.forEach(s => {
       const btn = document.createElement('div');
       btn.className = 'stamp-opt' + (s.emoji === selectedStamp ? ' selected' : '') + (s.minimal ? ' minimal' : '');
-      const hint = STAMP_STAT_HINT[s.emoji] || '';
-      btn.innerHTML = `<span>${s.emoji}</span><span class="stamp-caption">${s.label}</span>${hint ? `<span class="stamp-stat-hint">${hint}</span>` : ''}`;
+      btn.innerHTML = `<span>${s.emoji}</span><span class="stamp-caption">${s.label}</span>`;
       btn.addEventListener('click', () => {
         selectedStamp = s.emoji;
         renderStampPool();
@@ -5209,7 +5210,9 @@ function renderRpgQuests(){
     document.getElementById('today-title').textContent = `🖋️ 오늘의 기록 · ${weekday}`;
 
     const permissionEl = document.getElementById('permission-note');
-    permissionEl.classList.toggle('show', count === 0);
+    const yesterdayStr = formatDate(addDays(today, -1));
+    const yesterdayGoalMissed = scorableEntries(yesterdayStr).length < goalForDate(yesterdayStr);
+    permissionEl.classList.toggle('show', count === 0 && yesterdayGoalMissed);
     permissionEl.textContent = '오늘은 아무것도 안 눌러도 괜찮아요. 이 화면을 열어본 것만으로 충분해요.';
 
     const rec = state.entries[dateStr];
@@ -7604,12 +7607,12 @@ function renderRpgQuests(){
     const missionDots = missionsForDay.length
       ? `<div class="mission-dots">${missionsForDay.map(m => `<span class="mission-dot" style="background:${missionColor(m)}" title="${m}"></span>`).join('')}</div>`
       : '';
-    const goalBadge = goalMet ? '<span class="goal-badge">✓</span>' : '';
+    const goalCheck = `<div class="day-check">${goalMet ? '✓' : ''}</div>`;
 
     if(!dense){
       cell.innerHTML = `
-        ${goalBadge}
         <div class="day-num">${opts.label !== undefined ? opts.label : d.getDate()}</div>
+        ${goalCheck}
         ${missionDots}
       `;
       cell.addEventListener('click', () => openModal(d));
@@ -7632,8 +7635,8 @@ function renderRpgQuests(){
     const timeLabel = (!compact && rec && rec.startTime) ? `${rec.startTime}${rec.endTime ? '–'+rec.endTime : ''}` : '';
 
     cell.innerHTML = `
-      ${goalBadge}
       <div class="day-num">${opts.label !== undefined ? opts.label : d.getDate()}</div>
+      ${goalCheck}
       ${timeLabel ? `<div class="cell-time">${timeLabel}</div>` : ''}
       ${missionDots}
       <div class="cell-stickers">${shown}</div>
