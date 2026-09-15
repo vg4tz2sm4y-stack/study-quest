@@ -1638,6 +1638,24 @@
   .seal-item.owned.rarity-legendary .seal-item__name{color:var(--seal);font-weight:700;}
   .seal-item.owned.rarity-rare .seal-item__icon{background:linear-gradient(145deg,#dce9fb,#8eb1d9);border-color:#6f93bd;color:#243f63;}
   .seal-item.owned.rarity-legendary .seal-item__icon{background:linear-gradient(145deg,#fff0b7,#d39a35);border-color:var(--gold);color:#6f4811;box-shadow:0 0 0 2px rgba(163,130,63,0.14);}
+  .seal-item__level{font-size:0.58rem;font-weight:700;color:var(--seal);margin-top:1px;}
+  .seal-enhance-btn{
+    margin-top:5px;
+    font-size:0.6rem;
+    font-weight:600;
+    padding:4px 8px;
+    border-radius:8px;
+    border:1px solid var(--gold);
+    background:#fff;
+    color:var(--gold);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:2px;
+  }
+  .seal-enhance-btn:hover{background:var(--sage-soft);}
+  .seal-enhance-btn:active{transform:scale(0.96);}
+  .seal-item__maxed{font-size:0.6rem;font-weight:700;color:var(--seal);margin-top:5px;}
 
   /* ---------- 축하 컨페티 ---------- */
   .confetti-particle{
@@ -3253,13 +3271,56 @@
     { id:'daegi',     name:'대기만성의 룬', icon:'ᛃ', rarity:'legendary', weight:4,
       effectKey:'luckChance',   effectBonus:0.03, effectDesc:'행운 이벤트 발동 확률 소폭 상승' }
   ];
+
+  // ---------- 룬 강화 ----------
+  // 유물함을 다 채운 뒤에도 골드를 쓸 곳이 남아있도록, 이미 보유한 룬 하나하나를
+  // 골드로 강화해서 효과 자체를 키울 수 있게 한다. 최대 5강까지.
+  // 희귀도가 높을수록 강화 비용도 비싸게(등급별 기준가 × 다음 레벨).
+  const SEAL_MAX_LEVEL = 5;
+  // [주의] 처음엔 "레벨당 +20%"로 짰었는데, 예를 들어 기본값이 1인 룬은 1×1.2=1.2가
+  // 반올림되면 그대로 1이라 1~2강을 눌러도 숫자가 안 바뀌는(강화했는데 효과 그대로인)
+  // 문제가 있었다. 그래서 비율이 아니라 등급별 "레벨당 고정 증가량"으로 바꿨다 —
+  // 기본값이 몇이든 레벨을 올릴 때마다 반드시 눈에 보이게 오른다.
+  const SEAL_ENHANCE_INCREMENT = { common:1, rare:2, legendary:4 };
+  const SEAL_ENHANCE_INCREMENT_SMALL = 0.01; // 확률형(기본값 1 미만)인 룬 전용
+  const SEAL_ENHANCE_BASE_COST = { common:15, rare:30, legendary:60 };
+  function sealLevel(sealId){
+    return (state.sealLevels && state.sealLevels[sealId]) || 0;
+  }
+  function sealEffectiveBonus(seal){
+    const level = sealLevel(seal.id);
+    if(seal.effectBonus < 1){
+      return Math.round((seal.effectBonus + level * SEAL_ENHANCE_INCREMENT_SMALL) * 1000) / 1000;
+    }
+    return seal.effectBonus + level * (SEAL_ENHANCE_INCREMENT[seal.rarity] || 1);
+  }
+  function sealEnhanceCost(seal){
+    const level = sealLevel(seal.id);
+    if(level >= SEAL_MAX_LEVEL) return null;
+    return (SEAL_ENHANCE_BASE_COST[seal.rarity] || 15) * (level + 1);
+  }
+  function enhanceSeal(sealId){
+    const seal = SEAL_POOL.find(s => s.id === sealId);
+    if(!seal || !(state.seals||[]).includes(sealId)) return;
+    const cost = sealEnhanceCost(seal);
+    if(cost === null){ showToast('이미 최대 강화 단계예요.'); return; }
+    if((state.coins||0) < cost){ showToast('골드가 부족해요. 조금 더 모아볼까요?'); return; }
+    state.coins -= cost;
+    if(!state.sealLevels) state.sealLevels = {};
+    state.sealLevels[sealId] = sealLevel(sealId) + 1;
+    saveState();
+    renderGachaSection();
+    renderClassStats();
+    renderTabBadges();
+    showToast(`${seal.icon} ${seal.name} 강화 완료! Lv.${state.sealLevels[sealId]} · 효과 ${seal.effectBonus} → ${sealEffectiveBonus(seal)}`);
+  }
   // 보유한 유물들의 특정 효과를 전부 더해서 돌려준다. 여러 개를 가질 수 없는 유물들이라
   // (중복은 골드 환급으로 흡수) 사실상 0 또는 1개분 보너스지만, 나중에 효과가 겹치는 유물이
   // 추가돼도 자연히 합산되도록 reduce로 짜둔다.
   function relicBonus(effectKey){
     return (state.seals||[]).reduce((sum, id) => {
       const item = SEAL_POOL.find(s => s.id === id);
-      return (item && item.effectKey === effectKey) ? sum + item.effectBonus : sum;
+      return (item && item.effectKey === effectKey) ? sum + sealEffectiveBonus(item) : sum;
     }, 0);
   }
   // ---------- 룬 조합 세트 효과 ----------
@@ -3501,7 +3562,7 @@
   // "기본값 위에 병합"하는 안전망으로 쓴다 — 나중에 상태 필드가 늘어나도 그 두 곳에
   // 개별 복원 코드를 추가하는 걸 깜빡하면 조용히 사라지던 문제를 구조적으로 막기 위함.
   function createDefaultState(){
-    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [],
+    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [],
     rpgQuests: {},
     rpgWorld: { flags: {}, history: [], investigations: {}, items: {}, dialogue: { activeNpc:null, step:0 } },
     rpgNpcTrust: {},
@@ -4079,6 +4140,7 @@
           state.seals = Array.isArray(parsed.seals) ? parsed.seals : [];
           state.gachaPity = (typeof parsed.gachaPity === 'number' && parsed.gachaPity >= 0) ? parsed.gachaPity : 0;
           state.sealCollectionComplete = !!parsed.sealCollectionComplete;
+          state.sealLevels = (parsed.sealLevels && typeof parsed.sealLevels === 'object') ? parsed.sealLevels : {};
           state.focusLog = Array.isArray(parsed.focusLog) ? parsed.focusLog : [];
           state.weeklyGateClearedWeekKey = (typeof parsed.weeklyGateClearedWeekKey === 'string') ? parsed.weeklyGateClearedWeekKey : null;
           state.gateClearedKey = (typeof parsed.gateClearedKey === 'string') ? parsed.gateClearedKey : null;
@@ -6847,12 +6909,18 @@ function renderRpgQuests(){
     wrap.innerHTML = SEAL_POOL.map(s => {
       const has = owned.includes(s.id);
       const pct = Math.round(s.weight/totalW*1000)/10;
+      const level = has ? sealLevel(s.id) : 0;
+      const enhanceCost = has ? sealEnhanceCost(s) : null;
       return `
         <div class="seal-item${has?' owned':' locked'} rarity-${s.rarity}">
           <span class="seal-item__icon">${has ? s.icon : '❔'}</span>
           <span class="seal-item__name">${has ? s.name : '???'}</span>
           <span class="seal-item__rarity">${RARITY_LABEL[s.rarity]} ${pct}%</span>
-          <span class="seal-item__effect">${has ? '✓ 적용 중 · ' : '해금 시 · '}${s.effectDesc}</span>
+          ${has ? `<span class="seal-item__level">Lv.${level}/${SEAL_MAX_LEVEL}</span>` : ''}
+          <span class="seal-item__effect">${has ? '✓ 적용 중 · ' : '해금 시 · '}${s.effectDesc}${has && level > 0 ? ` (${s.effectBonus}→${sealEffectiveBonus(s)})` : ''}</span>
+          ${has ? (enhanceCost !== null
+            ? `<button type="button" class="seal-enhance-btn" data-seal-id="${s.id}">강화하기 (${coinHTML(enhanceCost, 'coin-icon--button')})</button>`
+            : `<span class="seal-item__maxed">✨ 최대 강화</span>`) : ''}
         </div>
       `;
     }).join('');
@@ -8526,6 +8594,7 @@ function renderRpgQuests(){
         state.seals = Array.isArray(parsed.seals) ? parsed.seals : [];
         state.gachaPity = (typeof parsed.gachaPity === 'number' && parsed.gachaPity >= 0) ? parsed.gachaPity : 0;
         state.sealCollectionComplete = !!parsed.sealCollectionComplete;
+        state.sealLevels = (parsed.sealLevels && typeof parsed.sealLevels === 'object') ? parsed.sealLevels : {};
         state.focusLog = Array.isArray(parsed.focusLog) ? parsed.focusLog : [];
         state.weeklyGateClearedWeekKey = (typeof parsed.weeklyGateClearedWeekKey === 'string') ? parsed.weeklyGateClearedWeekKey : null;
         state.gateClearedKey = (typeof parsed.gateClearedKey === 'string') ? parsed.gateClearedKey : null;
@@ -8682,6 +8751,12 @@ function renderRpgQuests(){
     document.getElementById('avoidance-nudge').classList.add('hidden');
   });
   document.getElementById('gacha-draw-btn').addEventListener('click', drawSeal);
+  // 유물 카드는 매번 innerHTML로 통째로 다시 그려지므로, 강화 버튼도 개별 리스너 대신
+  // 컨테이너 하나에 위임해서 어떤 카드가 그려져 있든 항상 정확히 반응하게 한다.
+  document.getElementById('seal-collection').addEventListener('click', (e) => {
+    const btn = e.target.closest('.seal-enhance-btn');
+    if(btn) enhanceSeal(btn.dataset.sealId);
+  });
   document.getElementById('encounter-panel').addEventListener('click', (e) => {
     const btn = e.target.closest('.encounter-choice');
     if(btn) resolveChoiceEncounter(Number(btn.dataset.choiceIndex));
