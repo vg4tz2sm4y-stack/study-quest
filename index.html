@@ -2276,6 +2276,7 @@
     transition:opacity 0.25s ease, transform 0.25s ease;
   }
   .toast.show{opacity:1;transform:translateY(0) scale(1);}
+  .toast-npc-icon{width:18px;height:18px;border-radius:50%;object-fit:cover;vertical-align:-4px;margin-right:2px;}
   .toast-container.has-action{pointer-events:auto;}
   .session-record-toast{
     width:min(420px,calc(100vw - 28px));
@@ -2487,7 +2488,7 @@
     <div class="game-tabs__nav" role="tablist">
       <button type="button" class="game-tab-btn active" data-tab="study" role="tab" aria-selected="true">🍅 공부</button>
       <button type="button" class="game-tab-btn" data-tab="adventure" role="tab" aria-selected="false">🗺️ 모험<span class="game-tab-btn__dot" id="adventure-tab-dot" hidden></span></button>
-      <button type="button" class="game-tab-btn" data-tab="growth" role="tab" aria-selected="false">🦋 성장</button>
+      <button type="button" class="game-tab-btn" data-tab="growth" role="tab" aria-selected="false">🦋 성장<span class="game-tab-btn__dot" id="growth-tab-dot" hidden></span></button>
       <button type="button" class="game-tab-btn" data-tab="record" role="tab" aria-selected="false">📜 기록</button>
     </div>
   </div>
@@ -2745,6 +2746,17 @@
       </section>
 
       <section class="quest-panel">
+        <div class="quest-panel__header">
+          <span class="quest-panel__header-icon"></span>
+          <span class="quest-panel__header-title">유물함</span>
+          <span class="quest-panel__header-sub" id="seal-collection-count">0/7</span>
+        </div>
+        <button type="button" class="gacha-draw-btn" id="gacha-draw-btn">유물함 열기 (<img src="study-quest-gold-coin.png" class="coin-icon coin-icon--button" alt="골드">30)</button>
+        <div class="rune-set-banner" id="rune-set-banner">룬을 조합해 세트 효과를 활성화할 수 있어요.</div>
+        <div class="seal-collection" id="seal-collection"></div>
+      </section>
+
+      <section class="quest-panel">
         <details class="fold-panel">
           <summary class="quest-panel__header">
             <span class="quest-panel__header-icon">🏅</span>
@@ -2840,23 +2852,10 @@
   <div class="npc-dialogue__portrait">
     <img src="study-quest-npc-merchant.png" alt="마르코">
   </div>
-  <div class="npc-dialogue__text">
-    "어서 오게! 필요한 물건이라면 웬만한 건 다 구해주지."
-  </div>
+  <div class="npc-dialogue__text" id="shop-line"></div>
 </div>
 
         <div class="food-menu" id="shop-menu"></div>
-      </section>
-
-      <section class="quest-panel">
-        <div class="quest-panel__header">
-          <span class="quest-panel__header-icon"></span>
-          <span class="quest-panel__header-title">유물함</span>
-          <span class="quest-panel__header-sub" id="seal-collection-count">0/7</span>
-        </div>
-        <button type="button" class="gacha-draw-btn" id="gacha-draw-btn">유물함 열기 (<img src="study-quest-gold-coin.png" class="coin-icon coin-icon--button" alt="골드">30)</button>
-        <div class="rune-set-banner" id="rune-set-banner">룬을 조합해 세트 효과를 활성화할 수 있어요.</div>
-        <div class="seal-collection" id="seal-collection"></div>
       </section>
 
     </div>
@@ -5355,15 +5354,22 @@ function renderRpgQuests(){
 
     if(typeof renderExamFinale === 'function') renderExamFinale();
     if(activeTabId === 'growth' && typeof renderClassStats === 'function') renderClassStats();
+    // 모험 탭에 들를 때마다 여관·잡화상·마을 사람들 대사를 전부 새로 뽑는다 — 마르코만 그러던 걸 확장.
+    if(activeTabId === 'adventure'){
+      if(typeof renderInn === 'function') renderInn();
+      if(typeof marcoShopLine === 'function') marcoShopLine();
+      if(typeof renderNPCs === 'function') renderNPCs();
+    }
   }
 
   // 모험 탭에 지금 가서 할 만한 게 있다는 걸 살짝 알려주는 점.
   function renderTabBadges(){
     const adventureDot = document.getElementById('adventure-tab-dot');
-    if(!adventureDot) return;
+    const growthDot = document.getElementById('growth-tab-dot');
     const canEat = FOOD_MENU.some(f => tomatoBalance() >= f.cost);
     const canDraw = (state.coins||0) >= GACHA_COST;
-    adventureDot.hidden = !(canEat || canDraw || choiceEncounterForPending());
+    if(adventureDot) adventureDot.hidden = !(canEat || choiceEncounterForPending());
+    if(growthDot) growthDot.hidden = !canDraw;
   }
 
   // ---------- 여관 주인 (NPC) — 상황에 맞는 대사 한 줄 + 오늘의 작은 부탁(퀘스트) ----------
@@ -5371,8 +5377,10 @@ function renderRpgQuests(){
   const hour = new Date().getHours();
   const balance = tomatoBalance();
   const streak = computeStreak().streak;
-  const seed = dayOfYear(today);
-  const pick = arr => arr[seed % arr.length];
+  // 예전엔 dayOfYear로 하루 동안 같은 대사만 나왔는데, 탭을 옮길 때마다 새로 고르도록
+  // 랜덤으로 바꿨다 — 어떤 조건(스트릭/피로도/시간대)이 적용되는지는 그대로 실시간으로 계산되고,
+  // 그 조건 안에서 어떤 문장이 나올지만 매번 새로 뽑힌다.
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
   const marta = ''; // 초상화는 이제 HTML에 고정 배치되어 있어 대사 문자열에는 텍스트만 남김
 
@@ -5436,6 +5444,26 @@ function renderRpgQuests(){
     `${marta}"오늘 하루도 무사히 여기까지 왔네. 고생했어."`
   ]);
 }
+
+  // 잡화상 마르코 — 여관과 달리 상황 조건 없이, 모험 탭에 들를 때마다(switchGameTab에서 호출) 그냥 랜덤으로 한 줄 바뀐다.
+  const MARCO_SHOP_LINES = [
+    '"어서 오게! 필요한 물건이라면 웬만한 건 다 구해주지."',
+    '"오늘은 뭘 보러 왔나? 천천히 구경해."',
+    '"방금 괜찮은 물건이 하나 들어왔는데, 한번 볼 텐가?"',
+    '"장사꾼 눈으로 보면 딱 알지 — 자네한테 필요한 게 뭔지."',
+    '"싸게 줄 순 없어도, 후회 없게는 팔지."',
+    '"오늘 장사가 잘 풀리면 다 자네 덕이라 해두지."',
+    '"뭘 살지 모르겠으면 일단 둘러보게. 급할 거 없어."',
+    '"이 항구에서 나만큼 물건 보는 눈 있는 사람, 흔치 않아."',
+    '"자, 뭐가 필요한가? 없는 거 빼고 다 있다네."',
+    '"오늘도 왔군. 장사꾼이 손님 얼굴은 잘 안 잊어."'
+  ];
+  function marcoShopLine(){
+    const el = document.getElementById('shop-line');
+    if(!el) return;
+    el.textContent = MARCO_SHOP_LINES[Math.floor(Math.random() * MARCO_SHOP_LINES.length)];
+  }
+
   // 오늘 뽀모도로 2회를 채우면 여관 주인이 몰래 챙겨주는 보너스 — 하루 한 번, 자동 지급
   const INNKEEPER_QUEST_NEED = 2;
   const INNKEEPER_QUEST_REWARD = 15;
@@ -5454,7 +5482,7 @@ function renderRpgQuests(){
     return false;
   }
   function celebrateInnkeeperQuest(){
-    showToast(`🧑‍🍳 "오늘 정말 열심히 했네! 이건 내 마음이야." (${coinHTML(INNKEEPER_QUEST_REWARD)})`);
+    showToast(`<img src="study-quest-npc-innkeeper.png" class="toast-npc-icon" alt="마르타"> "오늘 정말 열심히 했네! 이건 내 마음이야." (${coinHTML(INNKEEPER_QUEST_REWARD)})`);
   }
 
   // ---------- 돌발 이벤트 — 뽀모도로를 "시작"하는 순간에만, 작은 확률로 ----------
@@ -6320,12 +6348,11 @@ function renderRpgQuests(){
   function merchantTrust(){ return trustLevelFor(state.merchantSpent||0, NPC_TRUST_THRESHOLDS.merchant); }
   // 신뢰 구간별 대사를 여러 개 두고 날짜를 시드로 골라, 하루 동안은 같은 대사를 유지하되
   // 매일 자연스럽게 바뀌게 한다 — 예전엔 구간마다 대사가 고정 한 줄뿐이라 다시 봐도 늘 같았다.
+  // 원래는 날짜로 해시를 만들어 하루 동안 같은 대사만 나왔는데, 탭을 옮길 때마다(마을 사람들
+  // 카드도 renderNPCs가 다시 불리면서) 새로 뽑히도록 랜덤으로 바꿨다. 이름은 그대로 둔다.
   function dailyPick(seedKey, arr){
     if(!arr || !arr.length) return '';
-    const str = seedKey + formatDate(today);
-    let hash = 0;
-    for(let i=0;i<str.length;i++){ hash = (hash*31 + str.charCodeAt(i)) >>> 0; }
-    return arr[hash % arr.length];
+    return arr[Math.floor(Math.random() * arr.length)];
   }
   const NPC_LINES = {
     innkeeper: {
@@ -7169,12 +7196,18 @@ function renderRpgQuests(){
   }
   // 종소리가 끝난 직후 곧바로 겹쳐 나오지 않도록 1초 텀을 두고, 시작할 때도 아주 작은 소리로
   // 스며들듯 시작해서 목표 볼륨까지 서서히 커지게 한다 (은은한 크레센도).
+  // 탭을 옮길 때마다 이 함수가 다시 불려도(성장/공부/기록 탭 전환 등) 이미 재생 중이면
+  // 처음부터 다시 시작하지 않는다 — 예전엔 매번 pause+되감기+페이드인을 반복해 끊겨 들렸다.
   function playBreakMusic(){
     if(!state.soundOn || !state.bgmOn) return;
+    const audio = ensureAcademyBreakAudio();
+    if(!audio.paused && !breakMusicStartTimer){
+      if(adventureBgmEl) adventureBgmEl.pause();
+      return;
+    }
     clearBreakMusicTimers();
     clearAmbientFadeOut();
     if(adventureBgmEl) adventureBgmEl.pause();
-    const audio = ensureAcademyBreakAudio();
     const targetVolume = BREAK_MUSIC_BASE_VOLUME * bgmVolumeMultiplier();
     audio.pause();
     try{ audio.currentTime = 0; }catch(e){}
@@ -8502,10 +8535,23 @@ function renderRpgQuests(){
         document.getElementById('reason-input').value = state.reason;
         autoResizeReason();
         updateSoundToggleLabel();
+        updateDensityToggleLabel();
+        // 예전엔 여기서 persistAndRefresh() 등 일부만 다시 그려서, 불러온 백업이 이전 버전에서
+        // 만들어졌을 경우 새로 추가된 퀘스트가 초기화되지 않거나(initializeRpgSystem 누락),
+        // 유물함·잡화상·시험 결산·관문 설정 같은 화면이 탭을 옮기기 전까지 예전 값 그대로
+        // 남아있는 문제가 있었다. init()과 동일한 수준으로 전체를 다시 그리도록 보강.
+        if(typeof initializeRpgSystem === 'function') initializeRpgSystem();
         persistAndRefresh();
         renderPhaseTrack();
+        renderGateSettings();
+        renderExamFinale();
+        renderExercisePool();
+        renderGachaSection();
+        renderShop();
+        renderStampPool();
         renderPomodoro();
         resumePomodoroTickingIfNeeded();
+        checkBackupNudge();
         alert('백업을 불러왔어요.');
       }catch(err){
         alert('올바른 백업 파일이 아니에요.');
