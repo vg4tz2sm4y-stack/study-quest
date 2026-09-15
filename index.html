@@ -3497,11 +3497,17 @@
     { id:'focus', label:'집중 훈련', icon:'🔥', multiplier:1.15, difficulty:'도전' }
   ];
 
-  let state = { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [],
-rpgQuests: {},
-rpgWorld: { flags: {}, history: [], investigations: {}, items: {}, dialogue: { activeNpc:null, step:0 } },
-rpgNpcTrust: {},
-activeBuffs: [], equipment: {weapon:null, armor:null, accessory:null}, inventory: {equipment:[], consumables:[]}, monsterCodex: [], monsterMaterialClaims: [], chronicleLog: [], pomodoro: { durationMin: 25, phase: 'idle', endAt: null, remainingMs: null, lastStampCount: 1, mode: 'normal', bellBlockMin: 50, bellBreakMin: 10, bellTotalCycles: 3, bellCycleIndex: 0, pausedFrom: null } };
+  // 새 게임 시작 시의 기본 상태. loadState()/백업 불러오기에서도 이 함수를 다시 호출해
+  // "기본값 위에 병합"하는 안전망으로 쓴다 — 나중에 상태 필드가 늘어나도 그 두 곳에
+  // 개별 복원 코드를 추가하는 걸 깜빡하면 조용히 사라지던 문제를 구조적으로 막기 위함.
+  function createDefaultState(){
+    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [],
+    rpgQuests: {},
+    rpgWorld: { flags: {}, history: [], investigations: {}, items: {}, dialogue: { activeNpc:null, step:0 } },
+    rpgNpcTrust: {},
+    activeBuffs: [], equipment: {weapon:null, armor:null, accessory:null}, inventory: {equipment:[], consumables:[]}, monsterCodex: [], monsterMaterialClaims: [], chronicleLog: [], pomodoro: { durationMin: 25, phase: 'idle', endAt: null, remainingMs: null, lastStampCount: 1, mode: 'normal', bellBlockMin: 50, bellBreakMin: 10, bellTotalCycles: 3, bellCycleIndex: 0, pausedFrom: null } };
+  }
+  let state = createDefaultState();
   let selectedStamp = STAMPS[1].emoji;
   let currentView = 'week';
   let weekCursor = new Date(today);
@@ -4045,6 +4051,10 @@ activeBuffs: [], equipment: {weapon:null, armor:null, accessory:null}, inventory
       if(raw){
         const parsed = JSON.parse(raw);
         if(parsed && typeof parsed === 'object'){
+          // 안전망: 기본값 위에 통째로 먼저 병합해서, 아래 개별 라인이 다루지 않는 필드가
+          // 있어도(예: 나중에 추가된 필드를 여기 추가하는 걸 깜빡한 경우) 최소한 그대로
+          // 복원은 되게 한다. 아래 개별 라인들은 그 위에 타입 검증·마이그레이션을 덧씌운다.
+          state = Object.assign(createDefaultState(), parsed);
           state.dailyGoal = parsed.dailyGoal || 6;
           state.entries = parsed.entries || {};
           state.phases = (parsed.phases && parsed.phases.length) ? parsed.phases : DEFAULT_PHASES.slice();
@@ -8467,6 +8477,9 @@ function renderRpgQuests(){
         if(!parsed || typeof parsed !== 'object') throw new Error('invalid');
         if(!confirm('불러온 백업으로 현재 기록을 덮어쓸까요?')) return;
         stopPomodoroTicking();
+        // 안전망: loadState()와 마찬가지로 기본값 위에 먼저 통째로 병합. 아래 개별 라인이
+        // 어떤 필드를 깜빡 빠뜨려도 최소한 그대로 복원은 되도록 하는 이중 장치.
+        state = Object.assign(createDefaultState(), parsed);
         state.dailyGoal = parsed.dailyGoal || 6;
         state.dailyGoalHistory = (parsed.dailyGoalHistory && typeof parsed.dailyGoalHistory === 'object') ? parsed.dailyGoalHistory : {};
         state.calendarDense = (typeof parsed.calendarDense === 'boolean') ? parsed.calendarDense : true;
