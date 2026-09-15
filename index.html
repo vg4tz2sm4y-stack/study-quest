@@ -7292,7 +7292,13 @@ function renderRpgQuests(){
   });
 
   document.addEventListener('visibilitychange', () => {
-    if(document.visibilityState === 'visible' && hasUserInteracted) primeAudioContext();
+    if(document.visibilityState === 'visible'){
+      if(hasUserInteracted) primeAudioContext();
+      // [버그 수정] 탭이 백그라운드에 오래 있으면 브라우저가 setInterval을 늦추거나 멈춰서,
+      // 휴식이 끝나 있어도 탭으로 돌아오기 전까진 다음 세션으로 안 넘어간 것처럼 보였다.
+      // 돌아오는 즉시 한 번 더 확인해서 이미 끝난 시간이면 바로 이어지게 한다.
+      if(state.pomodoro.phase === 'focus' || state.pomodoro.phase === 'break') pomodoroTick();
+    }
   });
 
   function pomodoroTick(){
@@ -7347,6 +7353,10 @@ function renderRpgQuests(){
         p.phase = 'focus';
         p.endAt = Date.now() + pomodoroDurationMs();
         saveState();
+        // [버그 수정] 종만 울리고 카리지 브금은 다시 안 켜지던 문제 — 시작 버튼을 누를 때만
+        // 이 음악을 틀고 있었는데, 휴식 끝나고 다음 세션으로 자동으로 넘어갈 때는
+        // 이 호출이 빠져 있었다. 수동 시작과 동일하게 여기서도 다시 틀어준다.
+        playTimerStartMusic();
         startPomodoroTicking();
         showToast(`🔔 ${p.bellCycleIndex+1}세션 시작!`);
       }else{
@@ -8212,6 +8222,8 @@ function renderRpgQuests(){
       stopAmbientAudio();
       p.phase = 'focus';
       p.endAt = Date.now() + pomodoroDurationMs();
+      // [버그 수정] 여기도 같은 이유로 카리지 브금이 안 켜지고 있었다 — 새 세션이니 다시 틀어준다.
+      playTimerStartMusic();
       startPomodoroTicking();
     }else if(id === 'pomodoro-skip-break-btn'){
       // 아카데미 세션에서는 '건너뛰기'가 다음 세션으로 이어지는 것 — 완료 처리와 같은 진행 로직을 탄다
@@ -8229,6 +8241,8 @@ function renderRpgQuests(){
         p.phase = 'focus';
         p.endAt = Date.now() + pomodoroDurationMs();
       }
+      // [버그 수정] 건너뛰기로 새 세션을 시작할 때도 카리지 브금이 안 켜지고 있었다.
+      if(p.phase === 'focus') playTimerStartMusic();
       updateAmbientAudioForContext();
       startPomodoroTicking();
     }else{
