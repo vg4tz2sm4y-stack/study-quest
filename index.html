@@ -5,6 +5,56 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>STUDY QUEST · 제16회 변호사시험</title>
+<script>
+/* 테마 부트스트랩 — 첫 페인트 전에 실행되어야 화면이 번쩍이지 않는다.
+   iOS 사파리/크롬에서 홈 화면 앱으로 띄웠을 때도 동일하게 동작하도록
+   state(localStorage 백업 데이터)와 분리된 별도 키에 저장한다.
+   기록 저장이 실패하는 상황에서도 테마 설정만은 살아남게 하려는 의도. */
+(function(){
+  var KEY = 'study-quest-theme';   // 'system' | 'light' | 'dark'
+  var pref = 'system';
+  try{
+    var saved = localStorage.getItem(KEY);
+    if(saved === 'light' || saved === 'dark' || saved === 'system') pref = saved;
+  }catch(e){}
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function resolve(p){
+    if(p === 'dark') return 'dark';
+    if(p === 'light') return 'light';
+    return (mq && mq.matches) ? 'dark' : 'light';
+  }
+  function apply(p){
+    pref = p;
+    var mode = resolve(p);
+    var root = document.documentElement;
+    root.setAttribute('data-theme', mode);
+    root.setAttribute('data-theme-pref', p);
+    // 이 스크립트는 <meta name="theme-color">보다 먼저 실행되므로 없으면 직접 만든다
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if(!meta && document.head){
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'theme-color');
+      document.head.appendChild(meta);
+    }
+    if(meta) meta.setAttribute('content', mode === 'dark' ? '#14161b' : '#6b4f32');
+    try{ localStorage.setItem(KEY, p); }catch(e){}
+    if(typeof window.__onThemeChange === 'function') window.__onThemeChange(p, mode);
+  }
+  // 시스템 설정을 따르는 중이라면 iOS의 자동 다크(시간대별)에도 즉시 반응한다
+  if(mq){
+    var onSys = function(){ if(pref === 'system') apply('system'); };
+    if(mq.addEventListener) mq.addEventListener('change', onSys);
+    else if(mq.addListener) mq.addListener(onSys);
+  }
+  window.StudyQuestTheme = {
+    get: function(){ return pref; },
+    resolved: function(){ return resolve(pref); },
+    set: apply,
+    cycle: function(){ apply(pref === 'system' ? 'light' : (pref === 'light' ? 'dark' : 'system')); }
+  };
+  apply(pref);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700;900&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -27,7 +77,7 @@
     margin:0;
     padding:28px 18px 60px;
     background:
-      radial-gradient(1200px 500px at 10% -10%, #ece2c9 0%, transparent 60%),
+      radial-gradient(1200px 500px at 10% -10%, var(--c-ece2c9) 0%, transparent 60%),
       var(--paper);
     color:var(--ink);
     font-family:'Noto Sans KR', sans-serif;
@@ -63,7 +113,7 @@
   .doc-header__eyebrow{
     font-size:0.72rem;
     letter-spacing:0.28em;
-    color:#c9b98a;
+    color:var(--t-c9b98a);
     font-weight:600;
     margin:0 0 10px;
   }
@@ -74,7 +124,7 @@
   }
   .doc-header__exam{
     font-size:0.88rem;
-    color:#cfd3e0;
+    color:var(--t-cfd3e0);
     margin:0;
   }
   .doc-header__exam-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
@@ -93,7 +143,7 @@
   .exam-edit-input:focus{outline:none;border-bottom-color:var(--gold);}
   .exam-type-edit{flex:1 1 140px;min-width:100px;max-width:230px;}
   .exam-date-edit{flex:none;}
-  .exam-edit-sep, .exam-edit-suffix{color:#cfd3e0;font-size:0.85rem;white-space:nowrap;}
+  .exam-edit-sep, .exam-edit-suffix{color:var(--t-cfd3e0);font-size:0.85rem;white-space:nowrap;}
   .doc-header__main{flex:1;min-width:0;}
   .reason-row{
     display:flex;
@@ -112,13 +162,13 @@
     content:"✒";
     flex:none;
     font-size:0.85rem;
-    color:#d8c797;
+    color:var(--t-d8c797);
     opacity:0.85;
   }
   .reason-label{
     flex:none;
     font-size:0.7rem;
-    color:#c9b98a;
+    color:var(--t-c9b98a);
     letter-spacing:0.08em;
     white-space:nowrap;
   }
@@ -184,7 +234,7 @@
     padding:4px 2px;
     border:1px solid var(--line);
     border-radius:6px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink);
   }
   .pomodoro-duration-row input:disabled{opacity:0.5;cursor:not-allowed;}
@@ -208,7 +258,7 @@
     padding:4px 2px;
     border:1px solid var(--line);
     border-radius:6px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink);
     margin:0 2px;
   }
@@ -219,13 +269,13 @@
     width:172px;
     height:172px;
     border-radius:50%;
-    background:conic-gradient(var(--gold) calc(var(--pct)*1%), #e9e2cf 0);
+    background:conic-gradient(var(--gold) calc(var(--pct)*1%), var(--c-e9e2cf) 0);
     display:flex;
     align-items:center;
     justify-content:center;
     transition:background 0.4s linear;
   }
-  .pomodoro-ring.break{background:conic-gradient(var(--sage) calc(var(--pct)*1%), #e9e2cf 0);}
+  .pomodoro-ring.break{background:conic-gradient(var(--sage) calc(var(--pct)*1%), var(--c-e9e2cf) 0);}
   .pomodoro-ring.running{animation:pomodoroPulse 3s ease-in-out infinite;}
   @keyframes pomodoroPulse{
     0%,100%{box-shadow:0 0 0 0 rgba(163,130,63,0.25);}
@@ -259,7 +309,7 @@
     padding:12px 16px;
     border-radius:12px;
     border:1.5px solid var(--line);
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink-soft);
     font-weight:600;
     font-size:0.88rem;
@@ -279,7 +329,7 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    color:#e7a89f;
+    color:var(--t-e7a89f);
     background:radial-gradient(circle at 35% 30%, rgba(220,140,120,0.16), transparent 60%), rgba(169,59,50,0.12);
     transform:rotate(-7deg);
     font-family:'Noto Serif KR', serif;
@@ -291,26 +341,26 @@
     position:absolute;
     bottom:6px;
     font-size:0.6rem;
-    color:#d8b6b0;
+    color:var(--t-d8b6b0);
     opacity:0.6;
   }
   .seal__label{font-size:0.6rem;letter-spacing:0.24em;font-weight:700;margin-bottom:2px;}
-  .seal__value{font-size:1.55rem;font-weight:900;line-height:1;color:#f4d9d3;}
-  .seal__sub{font-size:0.58rem;color:#d8b6b0;margin-top:3px;}
+  .seal__value{font-size:1.55rem;font-weight:900;line-height:1;color:var(--t-f4d9d3);}
+  .seal__sub{font-size:0.58rem;color:var(--t-d8b6b0);margin-top:3px;}
 
   /* D-100 이내 / D-30 이내로 갈수록 인장이 점점 진해지는 연출 (시간 경과 기반, 확률 아님) */
   .seal.seal--near{
     background:rgba(169,59,50,0.22);
-    border-color:#d98c81;
+    border-color:var(--c-d98c81);
   }
-  .seal.seal--near .seal__sub{color:#f0c6bd;}
+  .seal.seal--near .seal__sub{color:var(--t-f0c6bd);}
   .seal.seal--final{
     background:rgba(169,59,50,0.32);
-    border-color:#f0a99c;
+    border-color:var(--c-f0a99c);
     animation:sealGlow 2.6s ease-in-out infinite;
   }
-  .seal.seal--final .seal__value{color:#fff2ee;}
-  .seal.seal--final .seal__sub{color:#ffd9d0;font-weight:700;}
+  .seal.seal--final .seal__value{color:var(--t-fff2ee);}
+  .seal.seal--final .seal__sub{color:var(--t-ffd9d0);font-weight:700;}
   @keyframes sealGlow{
     0%,100%{box-shadow:0 0 0 0 rgba(240,169,156,0.35);}
     50%{box-shadow:0 0 0 10px rgba(240,169,156,0);}
@@ -342,7 +392,7 @@
     font-size:0.72rem;
     font-weight:600;
     color:var(--muted);
-    background:#f3ede0;
+    background:var(--c-f3ede0);
     padding:3px 10px;
     border-radius:20px;
   }
@@ -361,7 +411,7 @@
   .prep-progress-bg{
     flex:1;
     height:6px;
-    background:#ece4cf;
+    background:var(--c-ece4cf);
     border-radius:6px;
     overflow:hidden;
   }
@@ -385,7 +435,7 @@
     gap:7px;
     border-radius:10px;
     padding:8px 10px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     border:1px solid var(--line);
     font-size:0.78rem;
     color:var(--muted);
@@ -402,7 +452,7 @@
     padding:0;
     border-radius:50%;
     border:1.5px solid var(--line);
-    background:#fff;
+    background:var(--c-ffffff);
     color:transparent;
     font-size:0.66rem;
     font-weight:900;
@@ -419,22 +469,22 @@
     border-color:var(--ink);
   }
   .phase-step.current .phase-name{color:var(--paper);}
-  .phase-step.current .phase-date{color:#c9b98a;}
+  .phase-step.current .phase-date{color:var(--t-c9b98a);}
   .phase-step.current .phase-check{border-color:rgba(255,255,255,0.55);}
   .phase-step.done{
     background:var(--sage-soft);
-    border-color:#bcd4bf;
+    border-color:var(--c-bcd4bf);
   }
   .phase-step.done .phase-name{color:var(--ink);}
   .phase-step.done .phase-check{
     background:var(--sage);
     border-color:var(--sage);
-    color:#fff;
+    color:var(--t-ffffff);
   }
   .phase-step.done-flash{animation:tomatoPop 0.6s ease;}
   .phase-floor{margin-right:4px;}
   .phase-step--boss{
-    background:linear-gradient(135deg, #fdf1e0, #f3e2c8);
+    background:linear-gradient(135deg, var(--c-fdf1e0), var(--c-f3e2c8));
     border-color:var(--gold);
   }
   .phase-step--boss .phase-name{color:var(--seal);}
@@ -459,7 +509,7 @@
     flex:none;
     width:34px;
     border:1px solid var(--line);
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     border-radius:10px;
     cursor:pointer;
     font-size:1rem;
@@ -487,7 +537,7 @@
     border-radius:8px;
     font-family:inherit;
     font-size:0.85rem;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink);
   }
   .phase-edit-row input[type="date"]{
@@ -497,7 +547,7 @@
     border-radius:8px;
     font-family:inherit;
     font-size:0.8rem;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink);
   }
   .phase-edit-row button{
@@ -559,7 +609,7 @@
     margin-top:6px;
     margin-bottom:18px;
     border-radius:14px;
-    background:linear-gradient(135deg, #fdf1e0, #f8ece2);
+    background:linear-gradient(135deg, var(--c-fdf1e0), var(--c-f8ece2));
     border:1.5px solid var(--gold);
     box-shadow:0 0 0 3px rgba(163,130,63,0.12), 0 6px 16px -10px rgba(163,130,63,0.4);
     position:relative;
@@ -620,14 +670,14 @@
     padding:4px 2px;
     border-radius:8px;
     border:1px solid var(--line);
-    background:#f3ede0;
+    background:var(--c-f3ede0);
     color:var(--muted);
     opacity:0.5;
   }
   .tomato-roadmap__tier small{font-size:0.6rem;font-weight:700;}
   .tomato-roadmap__tier.achieved{
     opacity:1;
-    background:linear-gradient(135deg,#fdf1e0,#f8ece2);
+    background:linear-gradient(135deg,var(--c-fdf1e0),var(--c-f8ece2));
     border-color:var(--gold);
     color:var(--ink-soft);
   }
@@ -647,15 +697,15 @@
     padding:2px 4px;
     margin:0 1px 1px 0;
     border-radius:6px;
-    background:#fdece0;
-    border:1px solid #f0d2b8;
+    background:var(--c-fdece0);
+    border:1px solid var(--c-f0d2b8);
     font-weight:700;
     color:var(--ink-soft);
   }
   .cell-tomato-badge b{font-size:0.6rem;font-weight:800;}
-  .cell-tomato-badge.tier-4{background:linear-gradient(135deg,#fdeec4,#f6dca3);border-color:#e0bb6c;color:#7a5a12;}
-  .cell-tomato-badge.tier-8{background:linear-gradient(135deg,#dce9fb,#cfe0f5);border-color:#a9c6e8;color:#2c4e73;}
-  .cell-tomato-badge.tier-12{background:linear-gradient(135deg,#f3ddff,#fde2ae);border-color:#d9b6f0;color:#5b3a7a;box-shadow:0 0 0 2px rgba(163,130,63,0.18);}
+  .cell-tomato-badge.tier-4{background:linear-gradient(135deg,var(--c-fdeec4),var(--c-f6dca3));border-color:var(--c-e0bb6c);color:var(--t-7a5a12);}
+  .cell-tomato-badge.tier-8{background:linear-gradient(135deg,var(--c-dce9fb),var(--c-cfe0f5));border-color:var(--c-a9c6e8);color:var(--t-2c4e73);}
+  .cell-tomato-badge.tier-12{background:linear-gradient(135deg,var(--c-f3ddff),var(--c-fde2ae));border-color:var(--c-d9b6f0);color:var(--t-5b3a7a);box-shadow:0 0 0 2px rgba(163,130,63,0.18);}
 
   /* ---------- 모험 기록 탭 (상태 / 여정 / 마을 — 앞으로 아이템·상점이 늘어도 여기에 더 얹으면 됨) ---------- */
   .game-tabs{margin:0;}
@@ -768,7 +818,7 @@
     width:42px;
     height:42px;
     border-radius:50%;
-    background:linear-gradient(135deg,#fdf1e0,#f3ede0);
+    background:linear-gradient(135deg,var(--c-fdf1e0),var(--c-f3ede0));
     border:1px solid var(--gold);
     display:flex;
     align-items:center;
@@ -786,13 +836,13 @@
   }
   .level-strip__title{font-family:'Noto Serif KR', serif;font-weight:700;font-size:0.92rem;color:var(--ink);}
   .level-strip__caption{font-size:0.72rem;color:var(--muted);white-space:nowrap;}
-  .level-strip__bar-bg{background:#e9e2cf;border-radius:8px;height:8px;overflow:hidden;}
-  .level-strip__bar-fill{background:linear-gradient(90deg,var(--gold),#c9a45c);height:100%;transition:width 0.5s ease;}
+  .level-strip__bar-bg{background:var(--c-e9e2cf);border-radius:8px;height:8px;overflow:hidden;}
+  .level-strip__bar-fill{background:linear-gradient(90deg,var(--gold),var(--c-c9a45c));height:100%;transition:width 0.5s ease;}
   .level-strip.level-up{animation: tomatoPop 0.6s ease; }
 
   /* ---------- 이번 주 관문지기 (몬스터 HP 바) ---------- */
   .weekly-gate{
-    background:linear-gradient(155deg,#2c2419,#1c2333);
+    background:linear-gradient(155deg,var(--c-2c2419),var(--c-1c2333));
     border-radius:16px;
     padding:14px 18px;
     margin-bottom:16px;
@@ -807,16 +857,16 @@
     flex-wrap:wrap;
   }
   .weekly-gate__name{font-family:'Noto Serif KR', serif;font-weight:700;font-size:0.9rem;color:var(--paper);}
-  .weekly-gate__hp-text{font-size:0.72rem;color:#d8b872;white-space:nowrap;}
+  .weekly-gate__hp-text{font-size:0.72rem;color:var(--t-d8b872);white-space:nowrap;}
   .weekly-gate__bar-bg{background:rgba(255,255,255,0.14);border-radius:8px;height:10px;overflow:hidden;}
-  .weekly-gate__bar-fill{background:linear-gradient(90deg,#c25a4f,#e08a3e);height:100%;transition:width 0.5s ease;}
-  .weekly-gate__note{margin:8px 0 0;font-size:0.68rem;color:#c7bfa8;line-height:1.5;}
-  .weekly-gate.gate-cleared{background:linear-gradient(155deg,#3a4f3d,#1c2333);}
-  .weekly-gate.gate-cleared .weekly-gate__bar-fill{background:linear-gradient(90deg,var(--sage),#7fae86);}
-  .weekly-gate.gate-cleared .weekly-gate__hp-text{color:#a9d6ae;}
+  .weekly-gate__bar-fill{background:linear-gradient(90deg,var(--c-c25a4f),var(--c-e08a3e));height:100%;transition:width 0.5s ease;}
+  .weekly-gate__note{margin:8px 0 0;font-size:0.68rem;color:var(--t-c7bfa8);line-height:1.5;}
+  .weekly-gate.gate-cleared{background:linear-gradient(155deg,var(--c-3a4f3d),var(--c-1c2333));}
+  .weekly-gate.gate-cleared .weekly-gate__bar-fill{background:linear-gradient(90deg,var(--sage),var(--c-7fae86));}
+  .weekly-gate.gate-cleared .weekly-gate__hp-text{color:var(--t-a9d6ae);}
   .gate-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:-6px 0 16px;}
   .gate-settings label{display:flex;flex-direction:column;gap:4px;font-size:0.68rem;color:var(--muted);}
-  .gate-settings select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:#fbf8f1;color:var(--ink);font:inherit;}
+  .gate-settings select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;}
 
 
   .shop-subhead{margin:10px 0 6px;padding-top:7px;border-top:1px dashed var(--line);font-size:.68rem;font-weight:700;color:var(--ink-soft);}
@@ -825,10 +875,10 @@
   .inventory-group__title{display:flex;justify-content:space-between;font-size:.68rem;font-weight:700;color:var(--ink-soft);margin-bottom:6px;}
   .inventory-group__title span{font-weight:600;color:var(--muted);}
   .inventory-chips{display:flex;flex-wrap:wrap;gap:6px;}
-  .inventory-chip{border:1px solid var(--line);border-radius:9px;background:#fffaf0;padding:6px 8px;color:var(--ink);font:inherit;font-size:.62rem;font-weight:700;cursor:pointer;}
-  .inventory-chip.active{border-color:var(--gold);background:#fdf6e6;}
-  .inventory-group--material .inventory-group__title{color:#6b5940;}
-  .inventory-group--quest .inventory-group__title{color:#76564f;}
+  .inventory-chip{border:1px solid var(--line);border-radius:9px;background:var(--c-fffaf0);padding:6px 8px;color:var(--ink);font:inherit;font-size:.62rem;font-weight:700;cursor:pointer;}
+  .inventory-chip.active{border-color:var(--gold);background:var(--c-fdf6e6);}
+  .inventory-group--material .inventory-group__title{color:var(--t-6b5940);}
+  .inventory-group--quest .inventory-group__title{color:var(--t-76564f);}
   .inventory-group--other .inventory-group__title{color:var(--muted);}
 
   /* ---------- 상태창 · 성장 ---------- */
@@ -866,7 +916,7 @@
     background:var(--paper-card);
     opacity:0.55;
   }
-  .achievement-row.done{opacity:1;border-color:var(--gold);background:#fdf6e6;}
+  .achievement-row.done{opacity:1;border-color:var(--gold);background:var(--c-fdf6e6);}
   .achievement-row__icon{font-size:1.15rem;flex:none;}
   .achievement-row__body{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
   .achievement-row__name{font-size:0.8rem;font-weight:700;color:var(--ink);}
@@ -892,7 +942,7 @@
     width:38px;
     height:38px;
     border-radius:50%;
-    background:linear-gradient(135deg,#fdf1e0,#f3ede0);
+    background:linear-gradient(135deg,var(--c-fdf1e0),var(--c-f3ede0));
     border:1px solid var(--gold);
     display:flex;
     align-items:center;
@@ -909,7 +959,7 @@
   .buff-strip[hidden]{display:none;}
   .buff-chip{
     display:inline-flex;align-items:center;gap:4px;
-    background:linear-gradient(135deg,#fdf1e0,#f3ede0);
+    background:linear-gradient(135deg,var(--c-fdf1e0),var(--c-f3ede0));
     border:1px solid var(--gold);
     color:var(--ink-soft);
     font-size:0.74rem;
@@ -920,7 +970,7 @@
   .stat-line__icon{flex:none;width:20px;text-align:center;font-size:0.95rem;}
   .stat-line__label{flex:none;width:70px;color:var(--ink-soft);font-weight:600;}
   .stat-line__lv{flex:none;width:40px;color:var(--muted);font-size:0.7rem;}
-  .stat-line__bar-bg{flex:1;height:6px;background:#e9e2cf;border-radius:6px;overflow:hidden;}
+  .stat-line__bar-bg{flex:1;height:6px;background:var(--c-e9e2cf);border-radius:6px;overflow:hidden;}
   .stat-line__bar-fill{height:100%;background:var(--stat-color, var(--gold));transition:width 0.5s ease;}
   .stat-line__count{flex:none;width:32px;text-align:right;color:var(--muted);font-size:0.7rem;}
   .stat-line__skill{flex:0 0 100%;margin:2px 0 0 28px;font-size:0.68rem;color:var(--gold);}
@@ -937,7 +987,7 @@
     font-weight:700;
     font-size:0.8rem;
     color:var(--gold);
-    background:#fdf1e0;
+    background:var(--c-fdf1e0);
     border:1px solid var(--gold);
     border-radius:999px;
     padding:4px 11px;
@@ -950,7 +1000,7 @@
   /* 인벤토리 장비 카드는 개수가 적을 때(특히 1개) 가로로 억지로 늘어나 보이는 문제가 있어
      고정 폭(150~190px)으로 바꾸고 왼쪽 정렬해 카드 크기가 항상 일정하게 유지되도록 함 */
   #equipment-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(150px,190px));justify-content:start;}
-  .npc-card,.equipment-card,.monster-card,.chronicle-item{border:1px solid var(--line);border-radius:11px;background:#f8f4ea;padding:9px 10px;}
+  .npc-card,.equipment-card,.monster-card,.chronicle-item{border:1px solid var(--line);border-radius:11px;background:var(--c-f8f4ea);padding:9px 10px;}
   .npc-card{display:flex;flex-direction:column;gap:5px;}
   .npc-card__head,.equipment-card__head,.monster-card__head,.chronicle-item__head{display:flex;align-items:center;gap:7px;}
   .npc-card__main{
@@ -973,7 +1023,7 @@
 .npc-card__dialogue{
   margin:6px 0 0;
   padding:9px 12px;
-  background:#fffdf8;
+  background:var(--c-fffdf8);
   border:1px solid var(--line);
   border-radius:10px;
   font-size:.67rem;
@@ -981,7 +1031,7 @@
   color:var(--ink-soft);
 }
   .npc-card__icon,.monster-card__icon{font-size:1.15rem;}
-  .npc-card__icon{width:64px;height:76px;display:grid;place-items:center;flex:none;border:1px solid var(--line);border-radius:8px;background:#eee7d8;overflow:hidden;}
+  .npc-card__icon{width:64px;height:76px;display:grid;place-items:center;flex:none;border:1px solid var(--line);border-radius:8px;background:var(--c-eee7d8);overflow:hidden;}
   .npc-card__icon img{width:100%;height:100%;object-fit:contain;object-position:center bottom;}
   .npc-card__name,.equipment-card__name,.monster-card__name{font-family:'Noto Serif KR',serif;font-size:.75rem;font-weight:700;color:var(--ink);}
   .npc-card__role,.monster-card__condition{font-size:.62rem;color:var(--muted);}
@@ -992,8 +1042,8 @@
   .equipment-card{min-width:0;}
   .equipment-card__slot{font-size:.58rem;color:var(--gold);font-weight:700;}
   .equipment-card__effect{font-size:.61rem;line-height:1.35;color:var(--muted);margin-top:3px;}
-  .equipment-card__btn{margin-top:6px;width:100%;padding:5px 6px;border:1px solid var(--line);border-radius:8px;background:#fffaf0;color:var(--ink);font:inherit;font-size:.61rem;font-weight:700;cursor:pointer;}
-  .equipment-card.equipped{border-color:var(--gold);background:#fdf6e6;}
+  .equipment-card__btn{margin-top:6px;width:100%;padding:5px 6px;border:1px solid var(--line);border-radius:8px;background:var(--c-fffaf0);color:var(--ink);font:inherit;font-size:.61rem;font-weight:700;cursor:pointer;}
+  .equipment-card.equipped{border-color:var(--gold);background:var(--c-fdf6e6);}
   .equipment-card.locked{opacity:.5;}
   .monster-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:7px;}
   .monster-card{display:flex;flex-direction:column;gap:4px;}
@@ -1005,7 +1055,7 @@
   display:block;
   text-align:center;
 }
-  .monster-card.defeated{border-color:var(--gold);background:#fdf6e6;}
+  .monster-card.defeated{border-color:var(--gold);background:var(--c-fdf6e6);}
   .monster-card__status{margin-left:auto;font-size:.58rem;font-weight:700;color:var(--muted);white-space:nowrap;}
   .monster-card.defeated .monster-card__status{color:var(--sage);}
   .chronicle-list{display:flex;flex-direction:column;gap:6px;}
@@ -1026,10 +1076,10 @@
   .ability-chip{
     display:flex;flex-direction:column;align-items:flex-start;gap:2px;
     padding:7px 8px;border-radius:10px;
-    background:#f4f0e7;border:1px solid var(--line);
+    background:var(--c-f4f0e7);border:1px solid var(--line);
     color:var(--muted);font-size:0.68rem;
   }
-  .ability-chip.unlocked{background:#fdf6e6;border-color:var(--gold);color:var(--ink-soft);}
+  .ability-chip.unlocked{background:var(--c-fdf6e6);border-color:var(--gold);color:var(--ink-soft);}
   .ability-chip__top{display:flex;align-items:center;gap:4px;width:100%;}
   .ability-chip__name{font-weight:700;}
   .ability-chip__desc{font-size:0.61rem;line-height:1.35;color:inherit;opacity:0.82;}
@@ -1042,7 +1092,7 @@
   .journey-region{
     display:flex;align-items:flex-start;gap:14px;
     padding:16px 18px;border:1.5px solid var(--gold);border-radius:14px;
-    background:linear-gradient(135deg,#fdf8ea,#f8f0dd);
+    background:linear-gradient(135deg,var(--c-fdf8ea),var(--c-f8f0dd));
     box-shadow:0 2px 10px rgba(163,130,63,0.08);
   }
   .journey-region__icon{
@@ -1050,84 +1100,84 @@
     width:44px;height:44px;
     display:flex;align-items:center;justify-content:center;
     font-size:1.6rem;line-height:1.2;
-    background:#fff;border:1px solid var(--gold);border-radius:12px;
+    background:var(--c-ffffff);border:1px solid var(--gold);border-radius:12px;
   }
   .journey-region__body{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px;}
   .journey-region__head-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .journey-region__eyebrow{font-size:0.72rem;color:var(--gold);font-weight:700;letter-spacing:0.02em;}
   .journey-region__pct{flex:none;font-size:0.78rem;font-weight:800;color:var(--seal);font-family:'Noto Serif KR', serif;}
   .journey-region__title{font-family:'Noto Serif KR', serif;font-size:1.05rem;font-weight:700;color:var(--ink);}
-  .journey-region__bar{height:8px;background:#e8ddc4;border-radius:999px;overflow:hidden;margin:2px 0 1px;}
-  .journey-region__bar-fill{height:100%;background:linear-gradient(90deg,#b49a62,var(--gold));border-radius:999px;transition:width .25s ease;}
+  .journey-region__bar{height:8px;background:var(--c-e8ddc4);border-radius:999px;overflow:hidden;margin:2px 0 1px;}
+  .journey-region__bar-fill{height:100%;background:linear-gradient(90deg,var(--c-b49a62),var(--gold));border-radius:999px;transition:width .25s ease;}
   .journey-region__detail{font-size:0.78rem;line-height:1.6;color:var(--ink-soft);}
 
   .journey-map{display:flex;align-items:stretch;gap:18px;overflow-x:auto;padding:1px 12px 8px;margin:18px 0 0;scrollbar-width:thin;touch-action: pan-x;}
-  .journey-map__node{position:relative;min-width:104px;flex:0 0 104px;padding:9px 8px;border:1px solid var(--line);border-radius:11px;background:#f5f0e5;text-align:center;color:var(--muted);}
+  .journey-map__node{position:relative;min-width:104px;flex:0 0 104px;padding:9px 8px;border:1px solid var(--line);border-radius:11px;background:var(--c-f5f0e5);text-align:center;color:var(--muted);}
   .journey-map__node:not(:last-child)::after{content:'›';position:absolute;right:-14px;top:50%;transform:translateY(-50%);z-index:2;font-size:1rem;color:var(--gold);font-weight:700;}
-  .journey-map__node.current{border-color:var(--gold);background:#fdf6e6;box-shadow:0 2px 8px rgba(163,130,63,.10);color:var(--ink-soft);}
-  .journey-map__node.done{background:#eef2e9;border-color:#a8b79f;color:var(--ink-soft);}
+  .journey-map__node.current{border-color:var(--gold);background:var(--c-fdf6e6);box-shadow:0 2px 8px rgba(163,130,63,.10);color:var(--ink-soft);}
+  .journey-map__node.done{background:var(--c-eef2e9);border-color:var(--c-a8b79f);color:var(--ink-soft);}
   .journey-map__icon{display:block;font-size:1.25rem;line-height:1.2;margin-bottom:3px;}
   .journey-map__name{display:block;font-family:'Noto Serif KR',serif;font-size:.68rem;font-weight:700;line-height:1.3;}
   .journey-map__sub{display:block;font-size:.57rem;margin-top:3px;color:var(--muted);}
-  .journey-map__boss{display:block;margin-top:6px;font-size:.58rem;color:#8b6553;}
+  .journey-map__boss{display:block;margin-top:6px;font-size:.58rem;color:var(--t-8b6553);}
   .subject-regions{display:grid;margin-top:12px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px;margin-top:7px;}
-  .subject-region{padding:10px;border:1px solid var(--line);border-radius:11px;background:#fbf8f1;}
-  .subject-region.current{border-color:var(--gold);background:#fdf8ed;}
-  .subject-region.done{background:#f1f3ed;border-color:#a8b79f;}
+  .subject-region{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--c-fbf8f1);}
+  .subject-region.current{border-color:var(--gold);background:var(--c-fdf8ed);}
+  .subject-region.done{background:var(--c-f1f3ed);border-color:var(--c-a8b79f);}
   .subject-region__head{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
   .subject-region__icon{font-size:1.1rem;}
   .subject-region__name{font-family:'Noto Serif KR',serif;font-size:.75rem;font-weight:700;color:var(--ink);flex:1;}
   .subject-region__pct{font-size:.62rem;color:var(--gold);font-weight:700;}
-  .subject-region__bar{height:6px;background:#e8e1d4;border-radius:999px;overflow:hidden;}
-  .subject-region__fill{height:100%;background:linear-gradient(90deg,#b49a62,var(--gold));border-radius:999px;transition:width .25s ease;}
-  .subject-region.done .subject-region__fill{background:#879f85;}
+  .subject-region__bar{height:6px;background:var(--c-e8e1d4);border-radius:999px;overflow:hidden;}
+  .subject-region__fill{height:100%;background:linear-gradient(90deg,var(--c-b49a62),var(--gold));border-radius:999px;transition:width .25s ease;}
+  .subject-region.done .subject-region__fill{background:var(--c-879f85);}
   .subject-region__meta{display:flex;justify-content:space-between;gap:6px;margin-top:5px;font-size:.58rem;color:var(--muted);}
   .subject-boss{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);}
   .subject-boss__name{display:flex;justify-content:space-between;gap:6px;font-size:.59rem;color:var(--ink-soft);font-weight:700;margin-bottom:4px;}
-  .subject-boss__bar{height:7px;background:#eadfd8;border-radius:999px;overflow:hidden;display:flex;justify-content:flex-end;}
-  .subject-boss__fill{height:100%;background:#c94b43;border-radius:999px;transition:width .25s ease;}
-  .subject-region.done .subject-boss__fill{background:#879f85;}
+  .subject-boss__bar{height:7px;background:var(--c-eadfd8);border-radius:999px;overflow:hidden;display:flex;justify-content:flex-end;}
+  .subject-boss__fill{height:100%;background:var(--c-c94b43);border-radius:999px;transition:width .25s ease;}
+  .subject-region.done .subject-boss__fill{background:var(--c-879f85);}
   /* 상단 "지금 탐험 중인 지역" 카드는 접혀있는 목록보다 훨씬 크게 보여주는 대표 카드라
      같은 클래스를 재사용하되 이 안에서만 여백과 글자 크기를 키워 옹색해 보이지 않게 한다. */
-  .journey-region__body .subject-boss{margin-top:11px;padding-top:11px;border-top:1px dashed #d9c99a;}
+  .journey-region__body .subject-boss{margin-top:11px;padding-top:11px;border-top:1px dashed var(--c-d9c99a);}
   .journey-region__body .subject-boss__name{font-size:0.74rem;margin-bottom:6px;}
   .journey-region__body .subject-boss__bar{height:9px;}
   .subject-regions-details{margin-top:7px;}
-  .subject-regions-details > summary{cursor:pointer;list-style:none;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#f8f4ea;color:var(--ink-soft);font-size:.66rem;font-weight:700;}
+  .subject-regions-details > summary{cursor:pointer;list-style:none;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--c-f8f4ea);color:var(--ink-soft);font-size:.66rem;font-weight:700;}
   .subject-regions-details > summary::-webkit-details-marker{display:none;}
   .subject-regions-details > summary::before{content:'▸';display:inline-block;margin-right:6px;color:var(--gold);transition:transform .2s ease;}
   .subject-regions-details[open] > summary::before{transform:rotate(90deg);}
   .subject-regions-details .subject-regions{margin-top:7px;}
   .journey-region__detail strong{color:var(--ink-soft);}
 
-  .study-trend{margin:0 0 12px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#f8f4ea;}
+  .study-trend{margin:0 0 12px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--c-f8f4ea);}
   .study-trend__head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px;}
   .study-trend__title{font-family:'Noto Serif KR',serif;font-size:0.78rem;font-weight:700;color:var(--ink-soft);}
   .study-trend__summary{font-size:0.66rem;color:var(--muted);white-space:nowrap;}
   .study-trend__bars{height:62px;display:flex;align-items:flex-end;gap:5px;}
   .study-trend__day{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px;}
   .study-trend__bar-wrap{width:100%;height:45px;display:flex;align-items:flex-end;}
-  .study-trend__bar{width:100%;min-height:3px;border-radius:5px 5px 2px 2px;background:#d9cfb9;}
-  .study-trend__day.today .study-trend__bar{background:linear-gradient(180deg,var(--gold),#c9a45c);}
-  .study-trend__day.has-time .study-trend__bar{background:linear-gradient(180deg,#879f85,var(--sage));}
+  .study-trend__bar{width:100%;min-height:3px;border-radius:5px 5px 2px 2px;background:var(--c-d9cfb9);}
+  .study-trend__day.today .study-trend__bar{background:linear-gradient(180deg,var(--gold),var(--c-c9a45c));}
+  .study-trend__day.has-time .study-trend__bar{background:linear-gradient(180deg,var(--c-879f85),var(--sage));}
   .study-trend__label{font-size:0.58rem;color:var(--muted);}
 
   .exam-setting-row{display:flex;flex-direction:column;gap:5px;margin:0 0 12px;font-size:0.76rem;color:var(--muted);}
-  .exam-setting-row input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fbf8f1;color:var(--ink);font:inherit;}
-  .encounter-card{padding:11px 12px;border:1px solid var(--gold);border-radius:12px;background:#fdf8ed;}
+  .exam-setting-row input{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;}
+  .encounter-card{padding:11px 12px;border:1px solid var(--gold);border-radius:12px;background:var(--c-fdf8ed);}
   .encounter-card__title{margin:0 0 5px;font-family:'Noto Serif KR', serif;font-size:0.82rem;font-weight:700;color:var(--ink);}
   .encounter-card__text{margin:0;font-size:0.72rem;line-height:1.55;color:var(--ink-soft);}
   .encounter-card__choices{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
   .encounter-choice{
-    flex:1 1 130px;background:#fff;border:1px solid var(--line);border-radius:10px;
+    flex:1 1 130px;background:var(--c-ffffff);border:1px solid var(--line);border-radius:10px;
     padding:8px 9px;color:var(--ink-soft);font-size:0.7rem;font-weight:700;cursor:pointer;
     transition:border-color 0.15s ease,transform 0.1s ease;
   }
   .encounter-choice:hover{border-color:var(--gold);}
   .encounter-choice:active{transform:scale(0.97);}
   .narrative-quest-list{display:flex;flex-direction:column;gap:8px;}
-  .narrative-quest{padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:#fbf8f1;}
-  .narrative-quest.done{border-color:#a8b79f;background:#f1f3ed;}
+  .narrative-quest{padding:10px 11px;border:1px solid var(--line);border-radius:12px;background:var(--c-fbf8f1);}
+  .narrative-quest.done{border-color:var(--c-a8b79f);background:var(--c-f1f3ed);}
   .narrative-quest__head{display:flex;align-items:center;gap:7px;}
   .narrative-quest__icon{font-size:1rem;}
   .narrative-quest__name{font-family:'Noto Serif KR',serif;font-size:.76rem;font-weight:700;color:var(--ink);flex:1;}
@@ -1135,11 +1185,11 @@
   .narrative-quest__desc{margin:4px 0 7px;font-size:.66rem;line-height:1.45;color:var(--muted);}
   .narrative-quest__progress{font-size:.62rem;color:var(--ink-soft);line-height:1.5;}
   .narrative-quest__reward{margin-top:5px;font-size:.62rem;color:var(--gold);font-weight:700;}
-  .narrative-quest__claim{margin-top:7px;width:100%;padding:7px 9px;border:1px solid var(--gold);border-radius:9px;background:#fff;color:var(--ink-soft);font-size:.66rem;font-weight:700;cursor:pointer;}
-  .narrative-quest__claim:hover{background:#fdf6e6;}
+  .narrative-quest__claim{margin-top:7px;width:100%;padding:7px 9px;border:1px solid var(--gold);border-radius:9px;background:var(--c-ffffff);color:var(--ink-soft);font-size:.66rem;font-weight:700;cursor:pointer;}
+  .narrative-quest__claim:hover{background:var(--c-fdf6e6);}
   .narrative-study-panel{margin-top:0;}
   .encounter-memory-panel{margin-top:0;}
-  .encounter-memory__item{padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:#fbf8f1;}
+  .encounter-memory__item{padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:var(--c-fbf8f1);}
   .encounter-memory__item + .encounter-memory__item{margin-top:5px;}
   .encounter-memory__head{display:flex;align-items:center;gap:6px;font-size:.62rem;color:var(--muted);}
   .encounter-memory__head strong{flex:1;color:var(--ink-soft);font-size:.67rem;}
@@ -1168,10 +1218,10 @@
 
   /* RPG 상태색: 기존 퀘스트 상태 문법과 동일한 의미 체계 */
   .rpg-status--active{color:var(--seal);}
-  .rpg-status--available{color:#8a6a1f;}
+  .rpg-status--available{color:var(--t-8a6a1f);}
   .rpg-status--done{color:var(--sage);}
   .rpg-status--locked{color:var(--muted);}
-  .rpg-status--rare{color:#4f6f8f;}
+  .rpg-status--rare{color:var(--t-4f6f8f);}
 
   /* 현재 지역은 '내가 지금 있는 곳'이라는 정보가 먼저 읽히도록 */
   #journey-region{
@@ -1179,7 +1229,7 @@
     box-shadow:var(--shadow), inset 0 0 0 1px rgba(163,130,63,0.12);
   }
   #journey-region .journey-region__title{color:var(--ink);}
-  #journey-region .journey-region__pct{font-weight:800;color:#8a6a1f;}
+  #journey-region .journey-region__pct{font-weight:800;color:var(--t-8a6a1f);}
 
   /* 현재 여정 노드는 완료/잠김 노드보다 한 단계 선명하게 */
   .journey-map__node.current{
@@ -1272,9 +1322,9 @@
     color:var(--sage);
     border:1px solid rgba(79,115,88,0.25);
   }
-  .rpg-quest-card--locked .rpg-quest-card__status{background:#eee9db;color:var(--muted);border-color:var(--line);}
-  .rpg-quest-card--available .rpg-quest-card__status{background:#f8ecc9;color:#8a6a1f;border-color:rgba(163,130,63,0.35);}
-  .rpg-quest-card--active .rpg-quest-card__status{background:#f3dedb;color:var(--seal);border-color:rgba(169,59,50,0.28);}
+  .rpg-quest-card--locked .rpg-quest-card__status{background:var(--c-eee9db);color:var(--muted);border-color:var(--line);}
+  .rpg-quest-card--available .rpg-quest-card__status{background:var(--c-f8ecc9);color:var(--t-8a6a1f);border-color:rgba(163,130,63,0.35);}
+  .rpg-quest-card--active .rpg-quest-card__status{background:var(--c-f3dedb);color:var(--seal);border-color:rgba(169,59,50,0.28);}
 
   .rpg-quest-card__desc{
     font-size:0.86rem;
@@ -1311,7 +1361,7 @@
     padding:13px 14px;
     border:1px solid var(--line);
     border-radius:11px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     margin-bottom:14px;
   }
   .rpg-quest-objective{
@@ -1326,7 +1376,7 @@
   .rpg-quest-objective__mark{flex:none;font-size:0.9rem;line-height:1.4;}
   .rpg-quest-objective__text{flex:1;line-height:1.55;color:var(--ink-soft);}
   .rpg-quest-objective--done .rpg-quest-objective__text{color:var(--muted);text-decoration:line-through;text-decoration-color:rgba(122,115,98,0.4);}
-  .rpg-quest-objective__count{flex:none;font-size:0.72rem;color:var(--muted);white-space:nowrap;background:#f0e9d6;padding:2px 8px;border-radius:999px;}
+  .rpg-quest-objective__count{flex:none;font-size:0.72rem;color:var(--muted);white-space:nowrap;background:var(--c-f0e9d6);padding:2px 8px;border-radius:999px;}
 
   .rpg-quest-action{
     width:100%;
@@ -1357,9 +1407,9 @@
     padding:12px 13px;
     border:1px solid var(--line);
     border-radius:11px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
   }
-  .rpg-quest-npc-card--met{border-color:#a8b79f;background:#f1f3ed;}
+  .rpg-quest-npc-card--met{border-color:var(--c-a8b79f);background:var(--c-f1f3ed);}
   .rpg-quest-npc-card__name{
     font-family:'Noto Serif KR', serif;
     font-weight:700;
@@ -1377,20 +1427,20 @@
     padding:8px 10px;
     border:1px solid var(--gold);
     border-radius:9px;
-    background:#fff;
+    background:var(--c-ffffff);
     color:var(--ink-soft);
     font-size:0.74rem;
     font-weight:700;
     cursor:pointer;
   }
-  .rpg-quest-npc-card__btn:hover{background:#fdf6e6;}
+  .rpg-quest-npc-card__btn:hover{background:var(--c-fdf6e6);}
 
   .rpg-quest-dialogue{
     margin-top:14px;
     padding:16px 17px;
     border:1px solid var(--gold);
     border-radius:12px;
-    background:linear-gradient(155deg, #f8f3e8 0%, #f3ecd9 100%);
+    background:linear-gradient(155deg, var(--c-f8f3e8) 0%, var(--c-f3ecd9) 100%);
     position:relative;
   }
   .rpg-quest-dialogue::before{
@@ -1431,7 +1481,7 @@
   .rpg-quest-card--complete-all{text-align:center;padding:28px 20px;}
   .rpg-quest-card--complete-all .rpg-quest-card__title{margin-top:6px;font-size:1.05rem;}
   .rpg-quest-card--complete-all .rpg-quest-card__desc{margin:7px 0 0;}
-  .encounter-memory__item{padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:#fbf8f1;}
+  .encounter-memory__item{padding:7px 8px;border:1px solid var(--line);border-radius:9px;background:var(--c-fbf8f1);}
   .encounter-memory__item + .encounter-memory__item{margin-top:5px;}
   .encounter-memory__head{display:flex;align-items:center;gap:6px;font-size:.62rem;color:var(--muted);}
   .encounter-memory__head strong{flex:1;color:var(--ink-soft);font-size:.67rem;}
@@ -1447,35 +1497,35 @@
     object-position:center bottom;
     border:1px solid var(--line);
     border-radius:9px;
-    background:#eee7d8;
+    background:var(--c-eee7d8);
   }
   .rpg-quest-npc-card__visual{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
-  .rpg-quest-npc-card__fallback-icon{width:58px;height:70px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:#eee7d8;font-size:1.65rem;}
+  .rpg-quest-npc-card__fallback-icon{width:58px;height:70px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:var(--c-eee7d8);font-size:1.65rem;}
   .rpg-quest-direct-actions{
     margin-top:12px;
     padding:13px 14px;
     border:1px solid var(--line);
     border-radius:11px;
-    background:#f8f3e8;
+    background:var(--c-f8f3e8);
   }
   .rpg-quest-action-card{
     margin-top:9px;
     padding:11px 12px;
     border:1px dashed var(--line);
     border-radius:10px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
   }
-  .rpg-quest-action-card--done{border-color:#a8b79f;background:#f1f3ed;}
+  .rpg-quest-action-card--done{border-color:var(--c-a8b79f);background:var(--c-f1f3ed);}
   .rpg-quest-action-card__title{font-family:'Noto Serif KR',serif;font-weight:700;font-size:.82rem;color:var(--ink);}
   .rpg-quest-action-card__desc{font-size:.72rem;line-height:1.6;color:var(--muted);margin:5px 0 9px;}
-  .rpg-quest-choice-card{margin-top:9px;padding:11px 12px;border:1px dashed var(--line);border-radius:10px;background:#fffdf8;}
-  .rpg-quest-choice-card--selected{border-style:solid;border-color:var(--gold);background:#fff8e7;}
+  .rpg-quest-choice-card{margin-top:9px;padding:11px 12px;border:1px dashed var(--line);border-radius:10px;background:var(--c-fffdf8);}
+  .rpg-quest-choice-card--selected{border-style:solid;border-color:var(--gold);background:var(--c-fff8e7);}
   .rpg-quest-choice-card__title{font-weight:700;font-size:.82rem;color:var(--ink);line-height:1.5;}
   .rpg-quest-choice-card__desc{font-size:.72rem;line-height:1.6;color:var(--muted);margin:5px 0 9px;}
-  .rpg-quest-choice-card__btn{width:100%;padding:8px 10px;border:1px solid var(--gold);border-radius:9px;background:#fff;color:var(--ink-soft);font-size:.72rem;font-weight:700;cursor:pointer;}
-  .rpg-quest-choice-card__btn:hover{background:#fdf6e6;}
-  .rpg-quest-card--completed .rpg-quest-card__status{background:#e4eee2;color:var(--sage);border-color:rgba(79,115,88,0.25);}
-  .rpg-quest-card--completed::before{background:linear-gradient(180deg,var(--sage),#8da48d);}
+  .rpg-quest-choice-card__btn{width:100%;padding:8px 10px;border:1px solid var(--gold);border-radius:9px;background:var(--c-ffffff);color:var(--ink-soft);font-size:.72rem;font-weight:700;cursor:pointer;}
+  .rpg-quest-choice-card__btn:hover{background:var(--c-fdf6e6);}
+  .rpg-quest-card--completed .rpg-quest-card__status{background:var(--c-e4eee2);color:var(--sage);border-color:rgba(79,115,88,0.25);}
+  .rpg-quest-card--completed::before{background:linear-gradient(180deg,var(--sage),var(--c-8da48d));}
 
   /* ---------- 모험 레이어 통일 스타일 (상태창 · 여정 지도 · 유물함 · 체력 단련이 한 가족처럼 보이도록) ---------- */
   .quest-panel, .exercise-card{
@@ -1510,7 +1560,7 @@
   .exercise-opt{
     flex:1 1 70px;
     max-width:110px;
-    background:#fff;
+    background:var(--c-ffffff);
     border:1px solid var(--line);
     border-radius:12px;
     padding:10px 6px;
@@ -1537,7 +1587,7 @@
     padding:10px 8px;
     border-radius:12px;
     border:1px solid var(--line);
-    background:#fff;
+    background:var(--c-ffffff);
   }
   .food-item.disabled{opacity:0.5;}
   .food-item__icon{font-size:1.5rem;line-height:1;flex:none;}
@@ -1559,7 +1609,7 @@
   }
   .food-item__btn:hover:not(:disabled){transform:translateY(-1px);}
   .food-item__btn:active:not(:disabled){transform:scale(0.95);}
-  .food-item__btn:disabled{background:#eee;border-color:var(--line);color:var(--muted);cursor:not-allowed;}
+  .food-item__btn:disabled{background:var(--c-eeeeee);border-color:var(--line);color:var(--muted);cursor:not-allowed;}
   .inn-log{margin:10px 0 0;text-align:center;font-size:0.72rem;color:var(--muted);}
   /* 여관 말풍선은 잡화상(마르코) 말풍선과 같은 .npc-dialogue 틀을 그대로 써서
      디자인을 통일함 — 초상화를 텍스트 안에 인라인으로 넣지 않고 옆에 나란히 배치 */
@@ -1584,7 +1634,7 @@
     max-width:260px;
     margin:0 auto 14px;
     background:var(--seal);
-    color:#fff;
+    color:var(--t-ffffff);
     border:none;
     border-radius:12px;
     padding:11px;
@@ -1601,7 +1651,7 @@
     padding:7px 10px;
     border:1px dashed var(--line);
     border-radius:9px;
-    background:#faf7ef;
+    background:var(--c-faf7ef);
     color:var(--muted);
     font-size:0.68rem;
     line-height:1.5;
@@ -1609,7 +1659,7 @@
   }
   .rune-set-banner.active{
     border-color:var(--gold);
-    background:#fdf8ed;
+    background:var(--c-fdf8ed);
     color:var(--ink-soft);
   }
   .rune-set-banner strong{color:var(--gold);}
@@ -1624,20 +1674,20 @@
     padding:12px 10px;
     border-radius:12px;
     border:1px solid var(--line);
-    background:#fff;
+    background:var(--c-ffffff);
     text-align:center;
   }
-  .seal-item__icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-bottom:3px;border-radius:50%;border:1px solid #c6a35c;background:linear-gradient(145deg,#f9e8b3,#c58b32);color:#4f3511;font-family:serif;font-size:1.55rem;font-weight:700;line-height:1;}
+  .seal-item__icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;margin-bottom:3px;border-radius:50%;border:1px solid var(--c-c6a35c);background:linear-gradient(145deg,var(--c-f9e8b3),var(--c-c58b32));color:var(--t-4f3511);font-family:serif;font-size:1.55rem;font-weight:700;line-height:1;}
   .seal-item__name{font-size:0.66rem;color:var(--ink-soft);line-height:1.3;}
   .seal-item__rarity{font-size:0.6rem;color:var(--muted);}
   .seal-item__effect{font-size:0.6rem;color:var(--gold);line-height:1.35;margin-top:2px;}
   .seal-item.locked{opacity:0.6;filter:grayscale(1);}
   .seal-item.locked .seal-item__effect{color:var(--muted);}
-  .seal-item.owned.rarity-rare{border-color:#6f93bd;background:#f3f7fb;}
-  .seal-item.owned.rarity-legendary{border-color:var(--gold);background:#fdf6e6;}
+  .seal-item.owned.rarity-rare{border-color:var(--c-6f93bd);background:var(--c-f3f7fb);}
+  .seal-item.owned.rarity-legendary{border-color:var(--gold);background:var(--c-fdf6e6);}
   .seal-item.owned.rarity-legendary .seal-item__name{color:var(--seal);font-weight:700;}
-  .seal-item.owned.rarity-rare .seal-item__icon{background:linear-gradient(145deg,#dce9fb,#8eb1d9);border-color:#6f93bd;color:#243f63;}
-  .seal-item.owned.rarity-legendary .seal-item__icon{background:linear-gradient(145deg,#fff0b7,#d39a35);border-color:var(--gold);color:#6f4811;box-shadow:0 0 0 2px rgba(163,130,63,0.14);}
+  .seal-item.owned.rarity-rare .seal-item__icon{background:linear-gradient(145deg,var(--c-dce9fb),var(--c-8eb1d9));border-color:var(--c-6f93bd);color:var(--t-243f63);}
+  .seal-item.owned.rarity-legendary .seal-item__icon{background:linear-gradient(145deg,var(--c-fff0b7),var(--c-d39a35));border-color:var(--gold);color:var(--t-6f4811);box-shadow:0 0 0 2px rgba(163,130,63,0.14);}
   .seal-item__level{font-size:0.58rem;font-weight:700;color:var(--seal);margin-top:1px;}
   .seal-enhance-btn{
     margin-top:5px;
@@ -1646,7 +1696,7 @@
     padding:4px 8px;
     border-radius:8px;
     border:1px solid var(--gold);
-    background:#fff;
+    background:var(--c-ffffff);
     color:var(--gold);
     cursor:pointer;
     display:flex;
@@ -1688,18 +1738,18 @@
     padding:4px 2px;
     border:1px solid var(--line);
     border-radius:6px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink);
   }
   .progress-bar-bg{
-    background:#e9e2cf;
+    background:var(--c-e9e2cf);
     border-radius:10px;
     height:10px;
     overflow:hidden;
     margin-bottom:6px;
   }
   .progress-bar-fill{
-    background:linear-gradient(90deg, var(--sage), #6f9a78);
+    background:linear-gradient(90deg, var(--sage), var(--c-6f9a78));
     width:0%;
     height:100%;
     transition:width 0.4s ease;
@@ -1730,7 +1780,7 @@
     padding:8px 6px 6px;
     border:1.5px solid var(--line);
     border-radius:12px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     transition:transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
     color:var(--ink);
   }
@@ -1745,7 +1795,7 @@
   .stamp-opt.selected{
     flex-grow:1.35;
     border-color:var(--seal-soft);
-    background:#f8ece9;
+    background:var(--c-f8ece9);
     transform:scale(1.01);
   }
   .stamp-opt.selected span.stamp-caption{color:var(--seal);}
@@ -1767,7 +1817,7 @@
     font-size:0.98rem;
     font-weight:700;
     background:var(--seal);
-    color:#fdf2ef;
+    color:var(--t-fdf2ef);
     border:none;
     border-radius:12px;
     cursor:pointer;
@@ -1804,7 +1854,7 @@
     align-items:center;
     gap:8px;
     padding:8px 10px;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     border:1px solid var(--line);
     border-radius:10px;
   }
@@ -1858,7 +1908,7 @@
   .chip-row{display:flex;flex-wrap:wrap;gap:9px;}
   .chip-btn{
     border:1.5px solid var(--line);
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink-soft);
     font-size:0.78rem;
     padding:9px 14px;
@@ -1876,10 +1926,10 @@
   .chip-btn.identity.selected{
     background:var(--sage);
     border-color:var(--sage);
-    color:#fff;
+    color:var(--t-ffffff);
   }
   .chip-btn.mission.selected{
-    color:#fff;
+    color:var(--t-ffffff);
     background:var(--m-color, var(--ink));
     border-color:var(--m-color, var(--ink));
   }
@@ -1893,7 +1943,7 @@
     border-radius:8px;
     font-family:inherit;
     font-size:0.82rem;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink);
   }
 
@@ -1906,7 +1956,7 @@
     text-align:center;
     font-size:0.62rem;
     font-weight:700;
-    color:#fff;
+    color:var(--t-ffffff);
   }
   .day-check:not(:empty){
     width:16px;
@@ -1937,7 +1987,7 @@
     padding:4px 10px;
     border-radius:14px;
     font-size:0.74rem;
-    color:#fff;
+    color:var(--t-ffffff);
   }
   .mission-stat-chip .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.85);}
   .mission-stat-empty{font-size:0.78rem;color:var(--muted);}
@@ -1968,7 +2018,7 @@
   .view-tabs{
     display:flex;
     flex-wrap:wrap;
-    background:#ece4cf;
+    background:var(--c-ece4cf);
     border-radius:10px;
     padding:3px;
     gap:2px;
@@ -1996,7 +2046,7 @@
   }
   .month-nav button{
     border:1px solid var(--line);
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     width:38px;height:38px;
     border-radius:50%;
     cursor:pointer;
@@ -2030,7 +2080,7 @@
 
   .calendar-grid{display:grid;gap:7px;}
   .day-cell{
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     border:1px solid var(--line);
     border-radius:10px;
     padding:6px 5px;
@@ -2045,18 +2095,18 @@
   .day-cell:hover{border-color:var(--gold);}
   .day-cell.blank{visibility:hidden;pointer-events:none;}
   .day-cell.future{opacity:0.55;}
-  .day-cell.today{border:2px solid var(--seal-soft);background:#f8ece9;}
+  .day-cell.today{border:2px solid var(--seal-soft);background:var(--c-f8ece9);}
   .day-cell.goal-met{background:var(--sage-soft);border:2px solid var(--sage);}
-  .day-cell.goal-met.today{background:#f2ece1;border-color:var(--seal-soft);}
-  .day-cell.heatmap-cell{border-color:rgba(79,115,88,.16);background:#f5f2e8;justify-content:flex-start;gap:4px;}
+  .day-cell.goal-met.today{background:var(--c-f2ece1);border-color:var(--seal-soft);}
+  .day-cell.heatmap-cell{border-color:rgba(79,115,88,.16);background:var(--c-f5f2e8);justify-content:flex-start;gap:4px;}
   .day-cell.heatmap-cell .day-num{font-size:.68rem;}
   .day-cell.heatmap-cell .heatmap-meta{font-size:.58rem;line-height:1.25;color:var(--muted);}
-  .day-cell.heatmap-cell.heat-0{background:#f7f4eb;}
-  .day-cell.heatmap-cell.heat-1{background:#e5eee5;}
-  .day-cell.heatmap-cell.heat-2{background:#cbdccf;}
-  .day-cell.heatmap-cell.heat-3{background:#a8c3ae;}
-  .day-cell.heatmap-cell.heat-4{background:#7fa38a;color:#fff;}
-  .day-cell.heatmap-cell.heat-4 .day-num,.day-cell.heatmap-cell.heat-4 .heatmap-meta{color:#fff;}
+  .day-cell.heatmap-cell.heat-0{background:var(--c-f7f4eb);}
+  .day-cell.heatmap-cell.heat-1{background:var(--c-e5eee5);}
+  .day-cell.heatmap-cell.heat-2{background:var(--c-cbdccf);}
+  .day-cell.heatmap-cell.heat-3{background:var(--c-a8c3ae);}
+  .day-cell.heatmap-cell.heat-4{background:var(--c-7fa38a);color:var(--t-ffffff);}
+  .day-cell.heatmap-cell.heat-4 .day-num,.day-cell.heatmap-cell.heat-4 .heatmap-meta{color:var(--t-ffffff);}
   .heatmap-summary{margin-top:12px;font-size:.66rem;color:var(--muted);line-height:1.45;}
   .heatmap-legend{display:flex;align-items:center;gap:5px;margin-top:9px;font-size:.62rem;color:var(--muted);}
   .heatmap-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
@@ -2097,7 +2147,7 @@
   .reset-link:hover{color:var(--seal);}
   .print-btn{
     border:1px solid var(--line);
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink-soft);
     font-size:0.8rem;
     padding:6px 12px;
@@ -2134,7 +2184,7 @@
   .modal-stamp-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
   .modal-stamp-chip{
     display:flex;align-items:center;gap:6px;
-    background:#f3ede0;border:1px solid var(--line);
+    background:var(--c-f3ede0);border:1px solid var(--line);
     border-radius:20px;padding:5px 8px 5px 12px;
     font-size:0.95rem;
   }
@@ -2142,18 +2192,18 @@
     border:none;background:none;color:var(--muted);cursor:pointer;font-size:0.8rem;
     width:18px;height:18px;border-radius:50%;
   }
-  .modal-stamp-chip button:hover{background:#e3d9c2;color:var(--seal);}
+  .modal-stamp-chip button:hover{background:var(--c-e3d9c2);color:var(--seal);}
   .modal-add-label{font-size:0.78rem;color:var(--muted);margin-bottom:8px;}
   .modal-add-pool{display:flex;flex-wrap:wrap;gap:6px;}
   .modal-add-pool button{
     font-size:1.1rem;
     padding:7px 10px;
     border:1px solid var(--line);
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     border-radius:10px;
     cursor:pointer;
   }
-  .modal-add-pool button:hover{border-color:var(--seal-soft);background:#f8ece9;}
+  .modal-add-pool button:hover{border-color:var(--seal-soft);background:var(--c-f8ece9);}
 
   .modal-time-row{
     display:flex;
@@ -2169,7 +2219,7 @@
     padding:5px 7px;
     font-family:inherit;
     font-size:0.85rem;
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     color:var(--ink);
   }
 
@@ -2181,7 +2231,7 @@
   .period-tabs button{
     flex:1;
     border:1px solid var(--line);
-    background:#fbf8f1;
+    background:var(--c-fbf8f1);
     border-radius:8px;
     padding:6px 0;
     font-size:0.78rem;
@@ -2201,6 +2251,9 @@
     margin:12px 0 6px;
   }
   .modal-section-title:first-child{margin-top:0;}
+  /* [버그 수정] 시간대 제목이 flex 안에서 스탬프 옆에 붙어버려 "아침녘 (2) 🍅 🍅 낮뜨락 (4)"처럼
+     한 줄에 섞여 보였다. 제목은 항상 한 줄을 통째로 쓰게 한다. */
+  .modal-stamp-list > .modal-section-title{flex:0 0 100%;width:100%;}
 
   .cell-time{
     font-size:0.56rem;
@@ -2317,7 +2370,7 @@
     cursor:pointer;
   }
   .session-record-toast__choice:hover{background:rgba(255,255,255,.16);}
-  .session-record-toast__close{flex-basis:80px;color:#c9c2b2;}
+  .session-record-toast__close{flex-basis:80px;color:var(--t-c9c2b2);}
   .session-record-toast__close:hover{background:rgba(255,255,255,.08);}
 
   /* ---------- 백업 권유 배너 ---------- */
@@ -2327,8 +2380,8 @@
     justify-content:space-between;
     gap:10px;
     flex-wrap:wrap;
-    background:#fdf3df;
-    border:1px solid #e6cf9a;
+    background:var(--c-fdf3df);
+    border:1px solid var(--c-e6cf9a);
     border-radius:14px;
     padding:10px 16px;
     font-size:0.82rem;
@@ -2365,13 +2418,13 @@
   .slump-nudge__mission{font-size:.68rem;line-height:1.4;color:var(--gold);font-weight:700;margin-top:2px;}
 
   /* ---------- 시험 당일 최종 화면 ---------- */
-  .exam-finale{background:#f8f4ea;border:1px solid var(--gold);border-radius:16px;padding:16px;box-shadow:0 3px 14px rgba(163,130,63,.12);}
+  .exam-finale{background:var(--c-f8f4ea);border:1px solid var(--gold);border-radius:16px;padding:16px;box-shadow:0 3px 14px rgba(163,130,63,.12);}
   .exam-finale__head{text-align:center;margin-bottom:13px;}
   .exam-finale__eyebrow{font-size:.62rem;letter-spacing:.12em;color:var(--gold);font-weight:700;}
   .exam-finale__title{margin:3px 0 0;font-family:'Noto Serif KR',serif;font-size:1.05rem;color:var(--ink);}
   .exam-finale__sub{margin:4px 0 0;font-size:.66rem;color:var(--muted);}
   .exam-finale__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;}
-  .exam-finale__stat{padding:9px 7px;border:1px solid var(--line);border-radius:10px;background:#fffaf0;text-align:center;}
+  .exam-finale__stat{padding:9px 7px;border:1px solid var(--line);border-radius:10px;background:var(--c-fffaf0);text-align:center;}
   .exam-finale__icon{display:block;font-size:1.05rem;margin-bottom:2px;}
   .exam-finale__value{display:block;font-family:'Noto Serif KR',serif;font-size:.82rem;font-weight:800;color:var(--ink);}
   .exam-finale__label{display:block;margin-top:2px;font-size:.58rem;color:var(--muted);}
@@ -2385,8 +2438,8 @@
     justify-content:space-between;
     gap:10px;
     flex-wrap:wrap;
-    background:#eef0f4;
-    border:1px solid #c9cede;
+    background:var(--c-eef0f4);
+    border:1px solid var(--c-c9cede);
     border-radius:14px;
     padding:10px 16px;
     font-size:0.82rem;
@@ -2408,7 +2461,7 @@
   gap: 20px;
   margin: 20px 0 24px;
   padding: 20px 28px;
-  background: #f7f1e5;
+  background: var(--c-f7f1e5);
   border-radius: 18px;
 }
 
@@ -2421,13 +2474,340 @@
 
   .npc-dialogue__text {
   font-size: 15px;
-  color: #2f3d5a;
+  color: var(--t-2f3d5a);
   line-height: 1.6;
 }
+  /* ===== 자동 생성 색 토큰 (라이트 기본값) ===== */
+  :root{
+    --c-1c2333:#1c2333;
+    --c-2c2419:#2c2419;
+    --c-3a4f3d:#3a4f3d;
+    --c-6f93bd:#6f93bd;
+    --c-6f9a78:#6f9a78;
+    --c-7fa38a:#7fa38a;
+    --c-7fae86:#7fae86;
+    --c-879f85:#879f85;
+    --c-8da48d:#8da48d;
+    --c-8eb1d9:#8eb1d9;
+    --c-a8b79f:#a8b79f;
+    --c-a8c3ae:#a8c3ae;
+    --c-a9c6e8:#a9c6e8;
+    --c-b49a62:#b49a62;
+    --c-bcd4bf:#bcd4bf;
+    --c-c25a4f:#c25a4f;
+    --c-c58b32:#c58b32;
+    --c-c6a35c:#c6a35c;
+    --c-c94b43:#c94b43;
+    --c-c9a45c:#c9a45c;
+    --c-c9cede:#c9cede;
+    --c-cbdccf:#cbdccf;
+    --c-cfe0f5:#cfe0f5;
+    --c-d39a35:#d39a35;
+    --c-d98c81:#d98c81;
+    --c-d9b6f0:#d9b6f0;
+    --c-d9c99a:#d9c99a;
+    --c-d9cfb9:#d9cfb9;
+    --c-dce9fb:#dce9fb;
+    --c-e08a3e:#e08a3e;
+    --c-e0bb6c:#e0bb6c;
+    --c-e3d9c2:#e3d9c2;
+    --c-e4eee2:#e4eee2;
+    --c-e5eee5:#e5eee5;
+    --c-e6cf9a:#e6cf9a;
+    --c-e8ddc4:#e8ddc4;
+    --c-e8e1d4:#e8e1d4;
+    --c-e9e2cf:#e9e2cf;
+    --c-eadfd8:#eadfd8;
+    --c-ece2c9:#ece2c9;
+    --c-ece4cf:#ece4cf;
+    --c-eee7d8:#eee7d8;
+    --c-eee9db:#eee9db;
+    --c-eeeeee:#eeeeee;
+    --c-eef0f4:#eef0f4;
+    --c-eef2e9:#eef2e9;
+    --c-f0a99c:#f0a99c;
+    --c-f0d2b8:#f0d2b8;
+    --c-f0e9d6:#f0e9d6;
+    --c-f1f3ed:#f1f3ed;
+    --c-f2ece1:#f2ece1;
+    --c-f3ddff:#f3ddff;
+    --c-f3dedb:#f3dedb;
+    --c-f3e2c8:#f3e2c8;
+    --c-f3ecd9:#f3ecd9;
+    --c-f3ede0:#f3ede0;
+    --c-f3f7fb:#f3f7fb;
+    --c-f4f0e7:#f4f0e7;
+    --c-f5f0e5:#f5f0e5;
+    --c-f5f2e8:#f5f2e8;
+    --c-f6dca3:#f6dca3;
+    --c-f7f1e5:#f7f1e5;
+    --c-f7f4eb:#f7f4eb;
+    --c-f8ecc9:#f8ecc9;
+    --c-f8ece2:#f8ece2;
+    --c-f8ece9:#f8ece9;
+    --c-f8f0dd:#f8f0dd;
+    --c-f8f3e8:#f8f3e8;
+    --c-f8f4ea:#f8f4ea;
+    --c-f9e8b3:#f9e8b3;
+    --c-faf7ef:#faf7ef;
+    --c-fbf8f1:#fbf8f1;
+    --c-fde2ae:#fde2ae;
+    --c-fdece0:#fdece0;
+    --c-fdeec4:#fdeec4;
+    --c-fdf1e0:#fdf1e0;
+    --c-fdf3df:#fdf3df;
+    --c-fdf6e6:#fdf6e6;
+    --c-fdf8ea:#fdf8ea;
+    --c-fdf8ed:#fdf8ed;
+    --c-fff0b7:#fff0b7;
+    --c-fff8e7:#fff8e7;
+    --c-fffaf0:#fffaf0;
+    --c-fffdf8:#fffdf8;
+    --c-ffffff:#ffffff;
+    --t-243f63:#243f63;
+    --t-2c4e73:#2c4e73;
+    --t-2f3d5a:#2f3d5a;
+    --t-4f3511:#4f3511;
+    --t-4f6f8f:#4f6f8f;
+    --t-5b3a7a:#5b3a7a;
+    --t-6b5940:#6b5940;
+    --t-6f4811:#6f4811;
+    --t-76564f:#76564f;
+    --t-7a5a12:#7a5a12;
+    --t-8a6a1f:#8a6a1f;
+    --t-8b6553:#8b6553;
+    --t-a9d6ae:#a9d6ae;
+    --t-c7bfa8:#c7bfa8;
+    --t-c9b98a:#c9b98a;
+    --t-c9c2b2:#c9c2b2;
+    --t-cfd3e0:#cfd3e0;
+    --t-d8b6b0:#d8b6b0;
+    --t-d8b872:#d8b872;
+    --t-d8c797:#d8c797;
+    --t-e7a89f:#e7a89f;
+    --t-f0c6bd:#f0c6bd;
+    --t-f4d9d3:#f4d9d3;
+    --t-fdf2ef:#fdf2ef;
+    --t-ffd9d0:#ffd9d0;
+    --t-fff2ee:#fff2ee;
+    --t-ffffff:#ffffff;
+  }
+
+  /* ===== 다크 모드 ===== */
+  html[data-theme="dark"]{
+    color-scheme:dark;
+    --ink:#e9e4d7;
+    --ink-soft:#cac5b8;
+    --paper:#14161b;
+    --paper-card:#1d2026;
+    --seal:#e58274;
+    --seal-soft:#c9584c;
+    --gold:#d4ad63;
+    --sage:#8fbf9c;
+    --sage-soft:#22302a;
+    --line:#3a3e47;
+    --muted:#9b978c;
+    --shadow: 0 10px 30px -18px rgba(0,0,0,0.75);
+    --c-1c2333:#ccd3e3;
+    --c-2c2419:#e6ded3;
+    --c-3a4f3d:#b0c5b3;
+    --c-6f93bd:#426690;
+    --c-6f9a78:#65906e;
+    --c-7fa38a:#5c8067;
+    --c-7fae86:#518058;
+    --c-879f85:#627a60;
+    --c-8da48d:#5b725b;
+    --c-8eb1d9:#384a5f;
+    --c-a8b79f:#516048;
+    --c-a8c3ae:#3c5742;
+    --c-a9c6e8:#263241;
+    --c-b49a62:#9d834b;
+    --c-bcd4bf:#283f2b;
+    --c-c25a4f:#ac4b41;
+    --c-c58b32:#bb8f4c;
+    --c-c6a35c:#a07f3d;
+    --c-c94b43:#af4943;
+    --c-c9a45c:#9d7c3c;
+    --c-c9cede:#23293a;
+    --c-cbdccf:#25382a;
+    --c-cfe0f5:#1c2530;
+    --c-d39a35:#b28a44;
+    --c-d98c81:#77362d;
+    --c-d9b6f0:#31233b;
+    --c-d9c99a:#584e33;
+    --c-d9cfb9:#413826;
+    --c-dce9fb:#19202a;
+    --c-e08a3e:#a26d3e;
+    --c-e0bb6c:#816831;
+    --c-e3d9c2:#3b3423;
+    --c-e4eee2:#1d2c1a;
+    --c-e5eee5:#1b291b;
+    --c-e6cf9a:#463d29;
+    --c-e8ddc4:#393222;
+    --c-e8e1d4:#352d1f;
+    --c-e9e2cf:#363020;
+    --c-eadfd8:#31251d;
+    --c-ece2c9:#373020;
+    --c-ece4cf:#352f1f;
+    --c-eee7d8:#30291c;
+    --c-eee9db:#2f2a1b;
+    --c-eeeeee:#202020;
+    --c-eef0f4:#181c25;
+    --c-eef2e9:#212818;
+    --c-f0a99c:#422b27;
+    --c-f0d2b8:#3a2e22;
+    --c-f0e9d6:#302a1c;
+    --c-f1f3ed:#212519;
+    --c-f2ece1:#2b2519;
+    --c-f3ddff:#221828;
+    --c-f3dedb:#2d1d1a;
+    --c-f3e2c8:#352c1f;
+    --c-f3ecd9:#2e291b;
+    --c-f3ede0:#2b2619;
+    --c-f3f7fb:#11171d;
+    --c-f4f0e7:#282318;
+    --c-f5f0e5:#292318;
+    --c-f5f2e8:#282417;
+    --c-f6dca3:#3f3725;
+    --c-f7f1e5:#282318;
+    --c-f7f4eb:#262216;
+    --c-f8ecc9:#312c1d;
+    --c-f8ece2:#292018;
+    --c-f8ece9:#261a17;
+    --c-f8f0dd:#2a2519;
+    --c-f8f3e8:#272217;
+    --c-f8f4ea:#262116;
+    --c-f9e8b3:#393422;
+    --c-faf7ef:#242015;
+    --c-fbf8f1:#1d1911;
+    --c-fde2ae:#3a3122;
+    --c-fdece0:#281e17;
+    --c-fdeec4:#312c1d;
+    --c-fdf1e0:#282117;
+    --c-fdf3df:#282318;
+    --c-fdf6e6:#262116;
+    --c-fdf8ea:#242015;
+    --c-fdf8ed:#1d1911;
+    --c-fff0b7:#363220;
+    --c-fff8e7:#252015;
+    --c-fffaf0:#1d1911;
+    --c-fffdf8:#1d1a11;
+    --c-ffffff:#171717;
+    --t-243f63:#9db7da;
+    --t-2c4e73:#8caed3;
+    --t-2f3d5a:#a5b3d0;
+    --t-4f3511:#e5d2b9;
+    --t-4f6f8f:#b1c2d4;
+    --t-5b3a7a:#a685c5;
+    --t-6b5940:#bfad94;
+    --t-6f4811:#dcc4a2;
+    --t-76564f:#d1beba;
+    --t-7a5a12:#d9c599;
+    --t-8a6a1f:#d1ba84;
+    --t-8b6553:#d1bdb3;
+    --t-a9d6ae:#91cb98;
+    --t-c7bfa8:#c1b89f;
+    --t-c9b98a:#cfc198;
+    --t-c9c2b2:#bdb4a0;
+    --t-cfd3e0:#eceef3;
+    --t-d8b6b0:#c99991;
+    --t-d8b872:#d6c193;
+    --t-d8c797:#d4c18c;
+    --t-e7a89f:#d29188;
+    --t-f0c6bd:#f4edec;
+    --t-f4d9d3:#f4edec;
+    --t-fdf2ef:#f4eeec;
+    --t-ffd9d0:#f4edec;
+    --t-fff2ee:#f4eeec;
+    --t-ffffff:#f0f0f0;
+  }
+
+  /* 다크 모드 손질: 자동 반전만으로는 어색해지는 곳들 */
+  html[data-theme="dark"] body{
+    background:
+      radial-gradient(1200px 500px at 10% -10%, #1e2129 0%, transparent 60%),
+      var(--paper);
+  }
+  html[data-theme="dark"] .doc-header{
+    background:linear-gradient(155deg,#242832 0%, #2e333e 100%);
+    color:#ece7da;
+  }
+  html[data-theme="dark"] .doc-header__exam,
+  html[data-theme="dark"] .exam-edit-sep,
+  html[data-theme="dark"] .exam-edit-suffix{color:#b9bccb;}
+  html[data-theme="dark"] .exam-edit-input,
+  html[data-theme="dark"] .reason-input{color:#ece7da;}
+  html[data-theme="dark"] .day-cell.today{box-shadow:inset 0 0 0 2px var(--seal);}
+  html[data-theme="dark"] img,
+  html[data-theme="dark"] .npc-dialogue__portrait img{filter:brightness(0.92);}
+  html[data-theme="dark"] input,
+  html[data-theme="dark"] textarea,
+  html[data-theme="dark"] select{color-scheme:dark;}
+  /* 히트맵 범례 — 인라인 색을 쓰면 다크 모드에서 칸 색과 따로 놀아서 토큰으로 묶는다 */
+  .heatmap-legend i.legend-heat-0{background:var(--c-f7f4eb);border:1px solid var(--line);}
+  .heatmap-legend i.legend-heat-1{background:var(--c-e5eee5);}
+  .heatmap-legend i.legend-heat-2{background:var(--c-cbdccf);}
+  .heatmap-legend i.legend-heat-3{background:var(--c-a8c3ae);}
+  .heatmap-legend i.legend-heat-4{background:var(--c-7fa38a);}
+
+  /* ---------- 간단 보기에서의 기록 개수 배지 ---------- */
+  .cell-count{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:18px;
+    height:18px;
+    padding:0 5px;
+    margin-top:2px;
+    border-radius:999px;
+    background:var(--sage-soft);
+    color:var(--sage);
+    border:1px solid var(--line);
+    font-size:0.62rem;
+    font-weight:700;
+    line-height:1;
+  }
+  .day-cell.goal-met .cell-count{background:var(--sage);color:var(--paper-card);border-color:transparent;}
+
+  /* ---------- 테마 전환 버튼 ---------- */
+  .theme-toggle{
+    position:absolute;
+    top:14px;
+    right:16px;
+    z-index:5;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 11px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.28);
+    background:rgba(255,255,255,0.10);
+    color:#f0ece0;
+    font-family:'Noto Sans KR', sans-serif;
+    font-size:0.7rem;
+    font-weight:600;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:background 0.18s ease, transform 0.12s ease;
+  }
+  .theme-toggle:active{transform:scale(0.95);}
+  .theme-toggle:hover{background:rgba(255,255,255,0.2);}
+  html[data-theme="dark"] .theme-toggle{color:#ece7da;}
+  @media(max-width:500px){
+    .theme-toggle{top:10px;right:10px;padding:5px 9px;font-size:0.66rem;}
+    .doc-header{padding-top:46px;}
+  }
+
+  /* 인쇄는 언제나 밝게 */
+  @media print{
+    html[data-theme="dark"]{color-scheme:light;}
+    html[data-theme="dark"] body{background:#fff;color:#111;}
+    html[data-theme="dark"] .doc-header{background:#fff;color:#111;}
+  }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css">
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#6b4f32">
 </head>
 <body>
 
@@ -2448,6 +2828,9 @@
         <input type="text" id="reason-input" class="reason-input" placeholder="왜 이 시험을 준비하나요? 적어두면 매일 보여드릴게요" maxlength="120">
       </div>
     </div>
+    <button type="button" id="theme-toggle-btn" class="theme-toggle no-print" aria-label="화면 테마 바꾸기" title="화면 테마 바꾸기">
+      <span id="theme-toggle-icon">🌗</span><span id="theme-toggle-text">시스템</span>
+    </button>
     <div class="seal" id="seal-box">
       <span class="seal__label">D-DAY</span>
       <span class="seal__value" id="dday-value">D-000</span>
@@ -2578,7 +2961,7 @@
     <div id="calendar-grid" class="calendar-grid grid-7"></div>
     <p id="heatmap-summary" class="heatmap-summary" hidden></p>
     <div id="heatmap-legend" class="heatmap-legend" hidden>
-      <span>적음</span><i style="background:#f7f4eb"></i><i style="background:#e5eee5"></i><i style="background:#cbdccf"></i><i style="background:#a8c3ae"></i><i style="background:#7fa38a"></i><span>많음</span>
+      <span>적음</span><i class="legend-heat-0"></i><i class="legend-heat-1"></i><i class="legend-heat-2"></i><i class="legend-heat-3"></i><i class="legend-heat-4"></i><span>많음</span>
     </div>
     <div class="legend">
       <span><i style="background:#f8ece9;border:1px solid var(--seal-soft)"></i>오늘</span>
@@ -2967,8 +3350,30 @@
   const DEFAULT_EXAM_TYPE = '제16회 변호사시험';
   const STORAGE_KEY = 'barExamPlannerData';
 
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  // 이 앱은 '달무리'를 19:00~05:00(익일)로 정의한다. 즉 새벽 공부는 전날 밤의 연장이다.
+  // 그런데 날짜는 페이지를 연 시각 기준으로만 정해졌기 때문에, 탭을 켜둔 채 새벽까지 공부하면
+  // 전날에 기록되고(의도대로) 새벽에 앱을 새로 열면 다음 날에 기록되는(의도와 다름) 모순이 있었다.
+  // 실제 기록에도 02:27·00:19·03:11 같은 새벽 스탬프가 전날 칸에 들어가 있다.
+  // 이제 '공부하는 하루'는 05시에 넘어간다 — 새벽 시간은 언제나 전날의 연장으로 이어진다.
+  const STUDY_DAY_START_HOUR = 5;
+  function studyDayOf(dateObj){
+    const d = new Date(dateObj);
+    if(d.getHours() < STUDY_DAY_START_HOUR) d.setDate(d.getDate() - 1);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  // 달력에서 '미래'를 판단할 때만 쓰는 실제 달력 날짜. 새벽 2시에 오늘 칸이 미래로 잠겨
+  // 기록을 못 넣는 일이 없도록, 잠금 판단은 진짜 날짜로 한다.
+  function calendarTodayDate(){
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  // [버그 수정] 예전엔 const 였다. 이 앱은 탭을 켜둔 채 며칠씩 쓰게 되는데(특히 iOS 사파리는
+  // 탭을 그대로 살려둔다), 그러면 하루가 지나도 today가 어제에 멈춰 있었다. 그 상태로 스탬프를
+  // 찍으면 어제 칸에 기록되고, 달력의 '오늘' 표시도 어제에 남아서 "찍었는데 안 보인다"가 된다.
+  // 아래 startDayRolloverWatch()가 날짜 변경을 감지해 today를 갱신한다.
+  let today = studyDayOf(new Date());
 
   function addDays(date, n){
     const d = new Date(date);
@@ -3583,11 +3988,25 @@
     nd.setDate(nd.getDate() - nd.getDay()); // getDay(): 일=0 ... 토=6, 그대로 빼면 그 주의 일요일
     return nd;
   }
+  const PERIOD_KEYS = ['morning','afternoon','evening'];
+  // [버그 수정] 예전에는 rec.sections 가 없거나 morning/afternoon/evening 중 하나가
+  // 배열이 아닌 기록(예전 버전 백업, 중간에 끊긴 저장 등)을 만나면 여기서 TypeError가 났다.
+  // 이 함수는 달력 칸을 그리는 가장 첫 단계라, 한 날짜만 어긋나도 그 뒤 렌더링이 통째로
+  // 중단되면서 "스탬프를 찍었는데 달력에 아무것도 안 뜨는" 증상이 나타났다.
+  // 이제는 어떤 모양의 기록이 들어와도 조용히 정상 모양으로 고쳐서 읽는다.
   function entriesFor(dateStr){
-    const rec = state.entries[dateStr];
+    const rec = state.entries ? state.entries[dateStr] : null;
     if(!rec) return [];
-    if(Array.isArray(rec)) return rec; // 마이그레이션 전 안전장치
-    return [...rec.sections.morning, ...rec.sections.afternoon, ...rec.sections.evening];
+    if(Array.isArray(rec)) return rec.filter(e => typeof e === 'string'); // 마이그레이션 전 안전장치
+    if(typeof rec !== 'object') return [];
+    const sections = rec.sections;
+    if(!sections || typeof sections !== 'object') return [];
+    const out = [];
+    PERIOD_KEYS.forEach(key => {
+      const list = sections[key];
+      if(Array.isArray(list)) list.forEach(e => { if(typeof e === 'string') out.push(e); });
+    });
+    return out;
   }
   // '일단 앉음(🪑)'류 최소 실행 스탬프는 기록엔 남기되(스트릭 유지·시간대 확인용),
   // 오늘 목표 진행률·주간/월간 집계·레벨 총합 같은 '채우는' 지표에서는 제외한다.
@@ -4077,32 +4496,97 @@
   }
   // 하루 기록은 { startTime, endTime, sections:{morning,afternoon,evening} } 형태로 저장한다.
   // 예전 버전(스탬프 이모지 배열만 저장)으로 쌓인 기록은 오후 구간으로 옮겨와 데이터 손실 없이 이어 쓴다.
+  // 어떤 모양으로 저장돼 있든 "정상적인 하루 기록"으로 고쳐서 돌려준다.
+  // 오래된 백업, 다른 버전에서 만든 파일, 저장 도중 끊긴 데이터까지 전부 여기로 통과시킨다.
+  // 반환값의 changed가 true면 실제로 손을 댄 것 → 저장이 필요하다.
+  function coerceDayRecord(rec){
+    let changed = false;
+    if(Array.isArray(rec)){
+      return {
+        rec: { startTime:null, endTime:null,
+               sections: Object.assign(blankSections(), { afternoon: rec.filter(e => typeof e === 'string') }),
+               stampTimes: [] },
+        changed: true
+      };
+    }
+    if(!rec || typeof rec !== 'object'){
+      return { rec: { startTime:null, endTime:null, sections: blankSections(), stampTimes:[] }, changed: true };
+    }
+    if(!rec.sections || typeof rec.sections !== 'object' || Array.isArray(rec.sections)){
+      rec.sections = blankSections();
+      changed = true;
+    }
+    PERIOD_KEYS.forEach(key => {
+      const list = rec.sections[key];
+      if(!Array.isArray(list)){
+        // 배열이 아니면(문자열 하나만 들어있거나 undefined인 경우 포함) 살릴 수 있는 건 살린다
+        rec.sections[key] = (typeof list === 'string' && list) ? [list] : [];
+        changed = true;
+      }else{
+        const clean = list.filter(e => typeof e === 'string');
+        if(clean.length !== list.length){ rec.sections[key] = clean; changed = true; }
+      }
+    });
+    // sections 안에 morning/afternoon/evening 말고 엉뚱한 키가 들어있으면(구버전 키 등)
+    // 버리지 말고 낮뜨락으로 합쳐서 기록을 잃지 않게 한다.
+    Object.keys(rec.sections).forEach(key => {
+      if(PERIOD_KEYS.includes(key)) return;
+      const stray = rec.sections[key];
+      if(Array.isArray(stray)) stray.filter(e => typeof e === 'string').forEach(e => rec.sections.afternoon.push(e));
+      delete rec.sections[key];
+      changed = true;
+    });
+    if(rec.startTime === undefined || (rec.startTime !== null && typeof rec.startTime !== 'string')){ rec.startTime = null; changed = true; }
+    if(rec.endTime === undefined || (rec.endTime !== null && typeof rec.endTime !== 'string')){ rec.endTime = null; changed = true; }
+    if(!Array.isArray(rec.stampTimes)){ rec.stampTimes = []; changed = true; }
+    return { rec, changed };
+  }
+
+  // 날짜 키가 'YYYY-M-D'처럼 어긋나 있으면 달력이 그 날을 영영 못 찾는다(= 스탬프가 사라진 것처럼 보인다).
+  // 'YYYY-MM-DD'로 통일해서 되살린다.
+  function normalizeDateKey(key){
+    if(typeof key !== 'string') return null;
+    const m = key.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if(!m) return null;
+    return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  }
+
   function migrateEntries(){
     let migrated = false;
+    if(!state.entries || typeof state.entries !== 'object' || Array.isArray(state.entries)){
+      state.entries = {};
+      migrated = true;
+    }
     Object.keys(state.entries).forEach(dateStr => {
-      const rec = state.entries[dateStr];
-      if(Array.isArray(rec)){
-        state.entries[dateStr] = { startTime:null, endTime:null, sections: Object.assign(blankSections(), { afternoon: rec.slice() }), stampTimes:[] };
+      const result = coerceDayRecord(state.entries[dateStr]);
+      if(result.changed) migrated = true;
+      const key = normalizeDateKey(dateStr);
+      if(key && key !== dateStr){
+        // 같은 날짜가 두 가지 표기로 흩어져 있으면 한쪽으로 합친다
+        const existing = state.entries[key];
+        if(existing){
+          const merged = coerceDayRecord(existing).rec;
+          PERIOD_KEYS.forEach(p => { merged.sections[p] = merged.sections[p].concat(result.rec.sections[p]); });
+          merged.stampTimes = merged.stampTimes.concat(result.rec.stampTimes).slice(-200);
+          merged.startTime = merged.startTime || result.rec.startTime;
+          merged.endTime = merged.endTime || result.rec.endTime;
+          state.entries[key] = merged;
+        }else{
+          state.entries[key] = result.rec;
+        }
+        delete state.entries[dateStr];
         migrated = true;
-      }else if(rec && typeof rec === 'object'){
-        if(!rec.sections){ rec.sections = blankSections(); migrated = true; }
-        PERIODS.forEach(p => { if(!Array.isArray(rec.sections[p.key])){ rec.sections[p.key] = []; migrated = true; } });
-        if(rec.startTime === undefined){ rec.startTime = null; migrated = true; }
-        if(rec.endTime === undefined){ rec.endTime = null; migrated = true; }
-        if(!Array.isArray(rec.stampTimes)){ rec.stampTimes = []; migrated = true; }
+      }else{
+        state.entries[dateStr] = result.rec;
       }
     });
     if(migrated) saveState();
   }
   function ensureDayRecord(dateStr){
-    let rec = state.entries[dateStr];
-    if(!rec || Array.isArray(rec)){
-      rec = { startTime:null, endTime:null, sections: blankSections(), stampTimes:[] };
-      state.entries[dateStr] = rec;
-    }else if(!Array.isArray(rec.stampTimes)){
-      rec.stampTimes = [];
-    }
-    return rec;
+    if(!state.entries || typeof state.entries !== 'object') state.entries = {};
+    const result = coerceDayRecord(state.entries[dateStr]);
+    state.entries[dateStr] = result.rec;
+    return result.rec;
   }
 
   // ---------- 저장/불러오기 (로컬 파일로 열어도 새로고침 후 유지되도록 localStorage 사용) ----------
@@ -4196,11 +4680,24 @@ state.rpgNpcTrust = (parsed.rpgNpcTrust && typeof parsed.rpgNpcTrust === 'object
     normalizeExamConfig();
     normalizeEncounterState();
   }
+  // [버그 수정] 예전엔 저장이 실패해도 console에만 찍고 조용히 넘어갔다. iOS 사파리는 저장 공간이
+  // 부족하거나 한동안 앱을 안 쓰면 저장소를 비우기 때문에, 사용자는 아무 경고도 못 본 채 기록이
+  // 사라진 걸 나중에야 알게 된다. 이제는 실패하면 즉시 알리고 백업을 권한다.
+  let saveFailureNotified = false;
   function saveState(){
     try{
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      saveFailureNotified = false;
+      return true;
     }catch(e){
       console.error('저장 실패', e);
+      if(!saveFailureNotified){
+        saveFailureNotified = true; // 스탬프 하나 찍을 때마다 도배되지 않게 한 번만
+        try{
+          showToast('⚠️ 기록을 브라우저에 저장하지 못했어요. 지금 백업 파일을 저장해 주세요.');
+        }catch(_){}
+      }
+      return false;
     }
   }
 // ============================================================
@@ -7714,7 +8211,7 @@ function renderRpgQuests(){
     const list = entriesFor(dateStr);
     const rec = state.entries[dateStr];
     const isToday = sameDay(d, today);
-    const isFuture = d > today;
+    const isFuture = d > calendarTodayDate(); // 새벽 시간에 진짜 오늘 칸이 미래로 잠기지 않도록 실제 날짜로 판단
     const goalMet = scorableEntries(dateStr).length >= goalForDate(dateStr);
     const compact = !opts.label; // 주간 보기는 opts.label을 넘겨받아 넓게, 월간 보기는 좁으므로 정보를 줄인다
     const dense = state.calendarDense !== false; // '간단히 보기'에서는 점/체크만 남기고 스티커·시간·토마토를 생략
@@ -7733,11 +8230,18 @@ function renderRpgQuests(){
     const goalCheck = `<div class="day-check">${goalMet ? '✓' : ''}</div>`;
 
     if(!dense){
+      // [버그 수정] 예전 간단 보기는 목표를 채운 날의 ✓ 말고는 아무것도 그리지 않았다.
+      // 목표가 12개인 사람에게는 6개를 기록한 날도 완전히 빈 칸으로 보여서, 기록이
+      // 통째로 날아간 것처럼 느껴졌다. 간단 보기에서도 '기록이 있다'는 사실은 남긴다.
+      const total = list.length;
+      const countBadge = total > 0 ? `<span class="cell-count">${total}</span>` : '';
       cell.innerHTML = `
         <div class="day-num">${opts.label !== undefined ? opts.label : d.getDate()}</div>
         ${goalCheck}
         ${missionDots}
+        ${countBadge}
       `;
+      if(total > 0) cell.classList.add('has-record');
       cell.addEventListener('click', () => openModal(d));
       return cell;
     }
@@ -7882,7 +8386,7 @@ function renderRpgQuests(){
     activeModalDate = new Date(d);
     const dateStr = formatDate(d);
     const rec = state.entries[dateStr];
-    const isFuture = d > today;
+    const isFuture = d > calendarTodayDate(); // 새벽 시간에 진짜 오늘 칸이 미래로 잠기지 않도록 실제 날짜로 판단
 
     if(!modalSelectedPeriod){
       modalSelectedPeriod = (dateStr === formatDate(today)) ? currentPeriodKey() : 'afternoon';
@@ -7925,6 +8429,7 @@ function renderRpgQuests(){
           chip.innerHTML = `<span>${emoji}</span><button aria-label="삭제">×</button>`;
           chip.querySelector('button').addEventListener('click', () => {
             periodList.splice(idx,1);
+            focusCalendarOn(activeModalDate);
             persistAndRefresh();
             openModal(activeModalDate);
           });
@@ -7961,6 +8466,19 @@ function renderRpgQuests(){
     });
   }
 
+  // 지금 보고 있는 주/월에 해당 날짜가 없으면 그 날짜가 보이도록 달력 커서를 옮긴다
+  function focusCalendarOn(d){
+    if(!d) return;
+    const target = new Date(d);
+    if(currentView === 'week'){
+      if(formatDate(sundayOf(target)) !== formatDate(sundayOf(weekCursor))) weekCursor = new Date(target);
+    }else{
+      if(target.getFullYear() !== monthCursor.getFullYear() || target.getMonth() !== monthCursor.getMonth()){
+        monthCursor = new Date(target.getFullYear(), target.getMonth(), 1);
+      }
+    }
+  }
+
   function renderModalAddPool(dateStr){
     const addPool = document.getElementById('modal-add-pool');
     addPool.innerHTML = '';
@@ -7971,7 +8489,10 @@ function renderRpgQuests(){
       if(s.minimal) btn.style.borderStyle = 'dashed';
       btn.addEventListener('click', () => {
         const rec = ensureDayRecord(dateStr);
-        rec.sections[modalSelectedPeriod].push(s.emoji);
+        rec.sections[modalSelectedPeriod || 'afternoon'].push(s.emoji);
+        // [버그 수정] 지난 날짜에 스탬프를 넣어도 달력이 다른 주/월을 보고 있으면 화면에
+        // 아무 변화가 없어서 "입력이 안 먹었다"고 보인다. 방금 고친 날짜로 달력을 옮겨준다.
+        focusCalendarOn(activeModalDate);
         persistAndRefresh();
         openModal(activeModalDate);
       });
@@ -7984,31 +8505,43 @@ function renderRpgQuests(){
   }
 
   // ---------- 이벤트 ----------
+  // [버그 수정] 예전에는 이 목록을 위에서부터 그냥 쭉 실행했다. 그래서 중간의 어떤 렌더 함수
+  // 하나가 오류를 내면 그 아래가 전부 건너뛰어졌다 — 하필 renderCalendar()가 목록 중간에 있어서,
+  // 앞쪽(오늘 패널·리포트) 중 하나만 삐끗해도 "스탬프는 저장됐는데 달력에만 안 보이는" 상태가 됐다.
+  // 이제 각 단계를 독립적으로 실행해, 하나가 실패해도 달력을 비롯한 나머지는 정상적으로 갱신된다.
+  function safeRun(label, fn){
+    try{
+      if(typeof fn === 'function') fn();
+    }catch(err){
+      console.error(`[렌더 오류] ${label}`, err);
+    }
+  }
   function persistAndRefresh(){
-    if(typeof syncRpgLiveProgress==='function') syncRpgLiveProgress();
+    safeRun('syncRpgLiveProgress', typeof syncRpgLiveProgress==='function' ? syncRpgLiveProgress : null);
     saveState();
-    renderDday();
-    renderTodayPanel();
-    renderReport();
-    renderCalendar();
-    renderMotivation();
-    renderLevelStrip();
-    renderClassStats();
-    renderWeeklyGate();
-    renderAchievements();
-    renderInn();
-    renderJourneyRegion();
-    renderChoiceEncounter();
-    renderEncounterMemory();
-    renderNarrativeQuests();
-    renderTabBadges();
-    renderStudyTrend();
-    renderBuffStrip();
-    renderExercisePanel();
-    renderTier2();
+    // 달력·오늘 패널을 가장 먼저 그린다 — 기록이 바로 눈에 보이는 게 제일 중요하다
+    safeRun('renderCalendar', renderCalendar);
+    safeRun('renderTodayPanel', renderTodayPanel);
+    safeRun('renderDday', renderDday);
+    safeRun('renderReport', renderReport);
+    safeRun('renderMotivation', renderMotivation);
+    safeRun('renderLevelStrip', renderLevelStrip);
+    safeRun('renderClassStats', renderClassStats);
+    safeRun('renderWeeklyGate', renderWeeklyGate);
+    safeRun('renderAchievements', renderAchievements);
+    safeRun('renderInn', renderInn);
+    safeRun('renderJourneyRegion', renderJourneyRegion);
+    safeRun('renderChoiceEncounter', renderChoiceEncounter);
+    safeRun('renderEncounterMemory', renderEncounterMemory);
+    safeRun('renderNarrativeQuests', renderNarrativeQuests);
+    safeRun('renderTabBadges', renderTabBadges);
+    safeRun('renderStudyTrend', renderStudyTrend);
+    safeRun('renderBuffStrip', renderBuffStrip);
+    safeRun('renderExercisePanel', renderExercisePanel);
+    safeRun('renderTier2', renderTier2);
     // 예전엔 스탬프를 찍어도 모험 퀘스트 카드가 갱신되지 않고 탭을 전환하거나
     // 새로고침해야만 진행 상황이 보였다 — 매번 즉시 갱신되도록 추가.
-    if(typeof renderRpgQuests==='function') renderRpgQuests();
+    safeRun('renderRpgQuests', typeof renderRpgQuests==='function' ? renderRpgQuests : null);
   }
 
   // 스탬프를 실제로 기록에 추가하고 사운드·피드백·축하 효과까지 처리하는 공용 함수.
@@ -8357,17 +8890,60 @@ function renderRpgQuests(){
     renderCalendar();
   });
 
+  // ---------- 다크 모드 토글 (시스템 → 라이트 → 다크 → 시스템) ----------
+  const THEME_LABELS = {
+    system: { icon:'🌗', text:'시스템' },
+    light:  { icon:'☀️', text:'라이트' },
+    dark:   { icon:'🌙', text:'다크' }
+  };
+  function updateThemeToggleLabel(){
+    const api = window.StudyQuestTheme;
+    if(!api) return;
+    const pref = api.get();
+    const label = THEME_LABELS[pref] || THEME_LABELS.system;
+    const iconEl = document.getElementById('theme-toggle-icon');
+    const textEl = document.getElementById('theme-toggle-text');
+    const btn = document.getElementById('theme-toggle-btn');
+    if(iconEl) iconEl.textContent = label.icon;
+    if(textEl) textEl.textContent = label.text;
+    if(btn) btn.title = `화면 테마: ${label.text} (눌러서 변경)`;
+  }
+  // 시스템 설정이 바뀌어 테마가 자동으로 뒤집힌 경우에도 버튼 라벨을 맞춰준다
+  window.__onThemeChange = () => updateThemeToggleLabel();
+  {
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    if(themeBtn){
+      themeBtn.addEventListener('click', () => {
+        if(window.StudyQuestTheme) window.StudyQuestTheme.cycle();
+        updateThemeToggleLabel();
+      });
+    }
+  }
+
+  // [버그 수정] 예전 라벨은 '🔎 상세히' / '⚪ 간단히' 였다. 이게 현재 상태를 뜻하는 건지
+  // 누르면 그렇게 된다는 뜻인지 알 수 없어서, 상세 모드일 때 '🔎 상세히'를 보고
+  // "더 자세히 보자"며 누르면 오히려 간단 모드로 꺼졌다. 그리고 간단 모드에서는 스탬프가
+  // 전혀 표시되지 않아서 기록이 통째로 사라진 것처럼 보였다 — 이번에 신고된 증상의 원인.
+  // 이제 "달력: 상세/간단"으로 현재 상태를 분명히 밝힌다.
   function updateDensityToggleLabel(){
     const btn = document.getElementById('density-toggle-btn');
+    if(!btn) return;
     const dense = state.calendarDense !== false;
-    btn.textContent = dense ? '🔎 상세히' : '⚪ 간단히';
+    btn.textContent = dense ? '달력: 🔎 상세' : '달력: ⚪ 간단';
     btn.setAttribute('aria-pressed', String(!dense));
+    btn.title = dense
+      ? '지금은 스탬프까지 보여주는 상세 보기예요. 누르면 간단 보기로 바뀝니다.'
+      : '지금은 간단 보기라 스탬프가 숨겨져 있어요. 누르면 스탬프가 다시 보입니다.';
   }
   document.getElementById('density-toggle-btn').addEventListener('click', () => {
     state.calendarDense = !(state.calendarDense !== false);
     updateDensityToggleLabel();
     saveState();
     renderCalendar();
+    // 스탬프가 사라진 걸 버그로 오해하지 않도록 무슨 일이 일어났는지 말해준다
+    showToast(state.calendarDense
+      ? '달력을 상세 보기로 바꿨어요. 스탬프가 모두 보여요.'
+      : '달력을 간단 보기로 바꿨어요. 스탬프는 숨고 기록 개수만 남아요.');
   });
 
   document.getElementById('modal-close').addEventListener('click', closeModal);
@@ -8641,6 +9217,11 @@ function renderRpgQuests(){
         // 유물함·잡화상·시험 결산·관문 설정 같은 화면이 탭을 옮기기 전까지 예전 값 그대로
         // 남아있는 문제가 있었다. init()과 동일한 수준으로 전체를 다시 그리도록 보강.
         if(typeof initializeRpgSystem === 'function') initializeRpgSystem();
+        // 불러온 직후엔 항상 오늘로 돌아오게 한다 — 엉뚱한 주/월을 보고 있으면
+        // 기록이 복원됐는데도 "안 들어왔다"고 오해하기 쉽다.
+        today = studyDayOf(new Date());
+        weekCursor = new Date(today);
+        monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
         persistAndRefresh();
         renderPhaseTrack();
         renderGateSettings();
@@ -8652,8 +9233,18 @@ function renderRpgQuests(){
         renderPomodoro();
         resumePomodoroTickingIfNeeded();
         checkBackupNudge();
-        alert('백업을 불러왔어요.');
+        // [개선] 예전엔 그냥 "백업을 불러왔어요"만 떴다. 기록이 실제로 들어왔는지 알 수 없어서,
+        // 달력에 안 보이면 데이터가 날아간 건지 화면 문제인지 구분할 방법이 없었다.
+        // 이제 복원된 분량을 숫자로 알려주고, 간단 보기 때문에 안 보이는 경우도 짚어준다.
+        const restoredDays = Object.keys(state.entries).filter(ds => entriesFor(ds).length > 0).length;
+        const restoredStamps = Object.keys(state.entries).reduce((sum, ds) => sum + entriesFor(ds).length, 0);
+        const lines = [`백업을 불러왔어요.\n기록 ${restoredDays}일 · 스탬프 ${restoredStamps}개를 복원했어요.`];
+        if(state.calendarDense === false){
+          lines.push('\n달력이 "간단 보기"로 저장돼 있어 스탬프가 숨겨져 있어요.\n달력 위쪽 "달력: ⚪ 간단" 버튼을 누르면 다시 보여요.');
+        }
+        alert(lines.join(''));
       }catch(err){
+        console.error('백업 불러오기 실패', err);
         alert('올바른 백업 파일이 아니에요.');
       }
     };
@@ -8693,9 +9284,9 @@ function renderRpgQuests(){
   const _origPersist = persistAndRefresh;
   persistAndRefresh = function(){
     _origPersist();
-    renderPhaseTrack();
-    renderExamFinale();
-    checkAvoidanceNudge();
+    safeRun('renderPhaseTrack', renderPhaseTrack);
+    safeRun('renderExamFinale', renderExamFinale);
+    safeRun('checkAvoidanceNudge', checkAvoidanceNudge);
   };
 
   // ---------- 초기화 ----------
@@ -8937,46 +9528,75 @@ if(journeyMap){
   })();
 
 
+  // 여기도 예전엔 한 줄이라도 오류가 나면 그 아래 화면이 통째로 안 그려졌다.
+  // 특히 renderCalendar()보다 앞에 있던 함수가 실패하면 달력이 아예 비어 보였다.
+  // 자정을 넘겼는지 감시한다. 탭을 며칠 켜둬도 '오늘'이 어제에 멈추지 않도록.
+  // iOS 사파리·크롬은 백그라운드 탭의 타이머를 늦추거나 멈추므로, 주기적 확인에만 기대지 않고
+  // 화면으로 돌아오는 순간(visibilitychange/focus/pageshow)에도 반드시 다시 확인한다.
+  function checkDayRollover(){
+    const now = studyDayOf(new Date());
+    if(now.getTime() === today.getTime()) return false;
+    const prev = today;
+    const wasOnTodayWeek = formatDate(sundayOf(weekCursor)) === formatDate(sundayOf(prev));
+    const wasOnTodayMonth = monthCursor.getFullYear() === prev.getFullYear() && monthCursor.getMonth() === prev.getMonth();
+    today = now;
+    // 오늘을 보고 있던 사람은 계속 오늘을 보게 한다 (과거를 들여다보던 중이면 건드리지 않는다)
+    if(wasOnTodayWeek) weekCursor = new Date(today);
+    if(wasOnTodayMonth) monthCursor = new Date(today.getFullYear(), today.getMonth(), 1);
+    safeRun('rollover:migrateDailyGoal', migrateDailyGoal);
+    persistAndRefresh();
+    return true;
+  }
+  function startDayRolloverWatch(){
+    setInterval(checkDayRollover, 60 * 1000);
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) checkDayRollover(); });
+    window.addEventListener('focus', checkDayRollover);
+    window.addEventListener('pageshow', checkDayRollover);
+  }
+
   function init(){
     loadState();
-    initializeRpgSystem();
-    if(typeof syncRpgLiveProgress==='function') syncRpgLiveProgress();
-    renderRpgQuests();
-    document.getElementById('reason-input').value = state.reason || '';
-    autoResizeReason();
-    renderDday();
-    renderStampPool();
-    renderTodayPanel();
-    renderReport();
-    renderCalendar();
-    renderPhaseTrack();
-    renderMotivation();
-    renderLevelStrip();
-    renderClassStats();
-    renderWeeklyGate();
-    renderGateSettings();
-    renderAchievements();
-    renderInn();
-    renderExamFinale();
-    renderExercisePool();
-    renderExercisePanel();
-    renderGachaSection();
-    renderShop();
-    renderBuffStrip();
-    renderTier2();
-    renderJourneyRegion();
-    renderChoiceEncounter();
-    renderEncounterMemory();
-    renderNarrativeQuests();
-    renderRpgQuests();
-    renderTabBadges();
-    renderStudyTrend();
-    updateSoundToggleLabel();
-    updateDensityToggleLabel();
-    checkBackupNudge();
-    checkAvoidanceNudge();
-    renderPomodoro();
-    resumePomodoroTickingIfNeeded();
+    safeRun('initializeRpgSystem', initializeRpgSystem);
+    safeRun('syncRpgLiveProgress', typeof syncRpgLiveProgress==='function' ? syncRpgLiveProgress : null);
+    safeRun('reason-input', () => {
+      document.getElementById('reason-input').value = state.reason || '';
+      autoResizeReason();
+    });
+    safeRun('renderCalendar', renderCalendar);
+    safeRun('renderStampPool', renderStampPool);
+    safeRun('renderTodayPanel', renderTodayPanel);
+    safeRun('renderDday', renderDday);
+    safeRun('renderReport', renderReport);
+    safeRun('renderRpgQuests', renderRpgQuests);
+    safeRun('renderPhaseTrack', renderPhaseTrack);
+    safeRun('renderMotivation', renderMotivation);
+    safeRun('renderLevelStrip', renderLevelStrip);
+    safeRun('renderClassStats', renderClassStats);
+    safeRun('renderWeeklyGate', renderWeeklyGate);
+    safeRun('renderGateSettings', renderGateSettings);
+    safeRun('renderAchievements', renderAchievements);
+    safeRun('renderInn', renderInn);
+    safeRun('renderExamFinale', renderExamFinale);
+    safeRun('renderExercisePool', renderExercisePool);
+    safeRun('renderExercisePanel', renderExercisePanel);
+    safeRun('renderGachaSection', renderGachaSection);
+    safeRun('renderShop', renderShop);
+    safeRun('renderBuffStrip', renderBuffStrip);
+    safeRun('renderTier2', renderTier2);
+    safeRun('renderJourneyRegion', renderJourneyRegion);
+    safeRun('renderChoiceEncounter', renderChoiceEncounter);
+    safeRun('renderEncounterMemory', renderEncounterMemory);
+    safeRun('renderNarrativeQuests', renderNarrativeQuests);
+    safeRun('renderTabBadges', renderTabBadges);
+    safeRun('renderStudyTrend', renderStudyTrend);
+    safeRun('updateSoundToggleLabel', updateSoundToggleLabel);
+    safeRun('updateDensityToggleLabel', updateDensityToggleLabel);
+    safeRun('updateThemeToggleLabel', updateThemeToggleLabel);
+    safeRun('checkBackupNudge', checkBackupNudge);
+    safeRun('checkAvoidanceNudge', checkAvoidanceNudge);
+    safeRun('renderPomodoro', renderPomodoro);
+    safeRun('resumePomodoroTickingIfNeeded', resumePomodoroTickingIfNeeded);
+    startDayRolloverWatch();
   }
   init();
 })();
