@@ -3562,7 +3562,7 @@
   // "기본값 위에 병합"하는 안전망으로 쓴다 — 나중에 상태 필드가 늘어나도 그 두 곳에
   // 개별 복원 코드를 추가하는 걸 깜빡하면 조용히 사라지던 문제를 구조적으로 막기 위함.
   function createDefaultState(){
-    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [],
+    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, merchantSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [], regionBossesDefeated: [],
     rpgQuests: {},
     rpgWorld: { flags: {}, history: [], investigations: {}, items: {}, dialogue: { activeNpc:null, step:0 } },
     rpgNpcTrust: {},
@@ -4148,6 +4148,7 @@
           state.gateType = parsed.gateType;
           state.hasShiftedClass = !!parsed.hasShiftedClass;
           state.tomatoSpent = (typeof parsed.tomatoSpent === 'number' && parsed.tomatoSpent >= 0) ? parsed.tomatoSpent : 0;
+          state.merchantSpent = (typeof parsed.merchantSpent === 'number' && parsed.merchantSpent >= 0) ? parsed.merchantSpent : 0;
           state.mealsEaten = Array.isArray(parsed.mealsEaten) ? parsed.mealsEaten : [];
           state.innkeeperQuestClaimedDate = (typeof parsed.innkeeperQuestClaimedDate === 'string') ? parsed.innkeeperQuestClaimedDate : null;
           state.pendingEncounter = (parsed.pendingEncounter && typeof parsed.pendingEncounter === 'object') ? parsed.pendingEncounter : null;
@@ -4155,6 +4156,7 @@
           state.encounterLog = Array.isArray(parsed.encounterLog) ? parsed.encounterLog.slice(-30) : [];
           state.questLog = Array.isArray(parsed.questLog) ? parsed.questLog.slice(-50) : [];
           state.hiddenQuestsClaimed = Array.isArray(parsed.hiddenQuestsClaimed) ? parsed.hiddenQuestsClaimed : [];
+          state.regionBossesDefeated = Array.isArray(parsed.regionBossesDefeated) ? parsed.regionBossesDefeated : [];
           state.rpgQuests = (parsed.rpgQuests && typeof parsed.rpgQuests === 'object') ? parsed.rpgQuests : {};
 state.rpgWorld = (parsed.rpgWorld && typeof parsed.rpgWorld === 'object')
   ? parsed.rpgWorld
@@ -8602,6 +8604,7 @@ function renderRpgQuests(){
         state.gateType = parsed.gateType;
         state.hasShiftedClass = !!parsed.hasShiftedClass;
         state.tomatoSpent = (typeof parsed.tomatoSpent === 'number' && parsed.tomatoSpent >= 0) ? parsed.tomatoSpent : 0;
+        state.merchantSpent = (typeof parsed.merchantSpent === 'number' && parsed.merchantSpent >= 0) ? parsed.merchantSpent : 0;
         state.mealsEaten = Array.isArray(parsed.mealsEaten) ? parsed.mealsEaten : [];
         state.innkeeperQuestClaimedDate = (typeof parsed.innkeeperQuestClaimedDate === 'string') ? parsed.innkeeperQuestClaimedDate : null;
         state.pendingEncounter = (parsed.pendingEncounter && typeof parsed.pendingEncounter === 'object') ? parsed.pendingEncounter : null;
@@ -8609,6 +8612,7 @@ function renderRpgQuests(){
         state.encounterLog = Array.isArray(parsed.encounterLog) ? parsed.encounterLog.slice(-30) : [];
           state.questLog = Array.isArray(parsed.questLog) ? parsed.questLog.slice(-50) : [];
           state.hiddenQuestsClaimed = Array.isArray(parsed.hiddenQuestsClaimed) ? parsed.hiddenQuestsClaimed : [];
+        state.regionBossesDefeated = Array.isArray(parsed.regionBossesDefeated) ? parsed.regionBossesDefeated : [];
         state.rpgQuests = (parsed.rpgQuests && typeof parsed.rpgQuests === 'object') ? parsed.rpgQuests : {};
         state.rpgWorld = (parsed.rpgWorld && typeof parsed.rpgWorld === 'object') ? parsed.rpgWorld : { flags:{}, history:[], investigations:{}, items:{}, dialogue:{ activeNpc:null, step:0 } };
         state.rpgWorld.flags = (state.rpgWorld.flags && typeof state.rpgWorld.flags === 'object') ? state.rpgWorld.flags : {};
