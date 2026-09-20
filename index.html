@@ -750,6 +750,9 @@
     gap:14px;
     align-items:start;
   }
+  .game-tabs-swiper .swiper-slide[data-tab-slide="record"] > .grid-top:has(.record-fold[open]){
+  align-items:stretch;
+}
 
   .game-tabs__nav{
     display:flex;
@@ -1000,9 +1003,11 @@
   .tier2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;}
   /* 마을 사람들 카드는 auto-fit+1fr 조합이 넓은 화면에서 카드를 과하게 늘려 비어 보이던 문제 —
      장비 그리드처럼 폭 상한을 둬서 카드 수가 적어도 어색하게 안 늘어나게 한다. */
-  #npc-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(280px,330px));justify-content:center;gap:10px;}
-  /* 인벤토리 장비 카드는 개수가 적을 때(특히 1개) 가로로 억지로 늘어나 보이는 문제가 있어
+  #npc-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;}
+     /* 인벤토리 장비 카드는 개수가 적을 때(특히 1개) 가로로 억지로 늘어나 보이는 문제가 있어
      고정 폭(150~190px)으로 바꾸고 왼쪽 정렬해 카드 크기가 항상 일정하게 유지되도록 함 */
+     /* 카드 폭 상한(330px)을 없애고, 가능한 폭만큼 늘어나게 했습니다. 맥북 전체화면 폭(페이지 최대 960px)에서는 카드가 330px에서 약 458px로 넓어집니다.
+     아이패드 세로와 폰에서는 폭에 맞게 2열과 1열로 알아서 바뀝니다. */   
   #equipment-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(150px,190px));justify-content:start;}
   .npc-card,.equipment-card,.monster-card,.chronicle-item{border:1px solid var(--line);border-radius:11px;background:var(--c-f8f4ea);padding:9px 10px;}
   .npc-card{display:flex;flex-direction:column;gap:5px;padding:12px 13px;}
@@ -1040,7 +1045,7 @@
   }
   .npc-card__icon,.monster-card__icon{font-size:1.15rem;}
   .npc-card__icon{
-    width:92px;
+    width:clamp(92px,24%,116px);
     flex:none;
     align-self:stretch;
     min-height:120px;
@@ -3147,8 +3152,8 @@
   }
   @keyframes nudgeMist{from{background-position-x:0;}to{background-position-x:-400px;}}
   .avoidance-nudge > *{position:relative;}
-  .avoidance-nudge__row{display:flex;align-items:flex-start;gap:12px;flex:1 1 220px;min-width:0;}
-  .avoidance-nudge .npc-face{--sz:46px;}
+  .avoidance-nudge__row{display:flex;align-items:center;gap:12px;flex:1 1 220px;min-width:0;}
+  .avoidance-nudge .npc-face{--sz:60px;}
   .avoidance-nudge__npc:empty{display:none;}
   .slump-nudge__name{display:block;font-size:0.7rem;font-weight:700;color:var(--gold);margin-bottom:2px;}
 
@@ -3615,7 +3620,7 @@
       <details class="record-fold" open>
         <summary class="quest-panel__header"><span class="quest-panel__header-icon">📜</span><span class="quest-panel__header-title">모험 기록부</span></summary>
         <div class="record-fold__body">
-      <div class="panel-npc" data-panel-npc="knight" data-line="관문은 세게 미는 자가 아니라, 매일 두드리는 자에게 열린다."></div>
+      <div class="panel-npc" data-panel-npc="knight" data-line="관문은 단숨에 부술 수 없어. 매일 두드려야만 열리지."></div>
       <div class="weekly-gate" id="weekly-gate">
         <div class="weekly-gate__top">
           <span class="weekly-gate__name" id="gate-name">🗿 관문지기</span>
@@ -3718,7 +3723,7 @@
         <span class="quest-panel__header-sub"></span>
       </summary>
       <div class="fold-panel__body">
-        <div class="panel-npc" data-panel-npc="archivist" data-line="남겨두지 않으면 없던 일이 됩니다."></div>
+        <div class="panel-npc" data-panel-npc="archivist" data-line="흔적을 남기지 않는 시간은 흐르지 않는 것과 같아요. 제가 당신의 여정을 기록하겠습니다."></div>
         <div class="chronicle-list" id="adventure-chronicle"></div>
       </div>
     </details>
@@ -6800,7 +6805,7 @@ function renderRpgQuests(){
       const gift = SHOP_ITEMS.find(i => i.id === MARCO_QUEST_GIFT_ID);
       marcoEl.innerHTML = claimedToday
         ? '✓ 오늘의 부탁 완료 — 마르코가 챙겨준 선물을 받았어요.'
-        : `오늘의 부탁: 운동 기록 ${q.have}/${q.need}회 남기면 마르코가 ${gift ? gift.icon + ' ' + withJosa(gift.name,'을','를') : '선물을'} 챙겨준대요.`;
+        : `오늘의 부탁: 운동 기록 ${q.have}/${q.need}회 남기면 마르코가  ${gift ? gift.icon + ' ' + withJosa(gift.name,'을','를') : '선물을'} 챙겨준대요.`;
       marcoEl.classList.toggle('done', claimedToday);
     }
     const ianEl = document.getElementById('ian-quest');
@@ -7643,7 +7648,7 @@ function renderRpgQuests(){
     { id:'innkeeper', icon:'🧑‍🍳', name:'마르타', role:'여관 주인 · 휴식과 회복', image:'study-quest-npc-innkeeper.png', trustMax:5,
       trust:()=>innkeeperTrust(),
       dialogue:t=>tierLine('innkeeper',t,[5,3,0]),
-      unlock:t=>t>=5 ? '특별 메뉴 · 영웅의 식탁 해금' : '여관 식사 100회에서 특별 메뉴 해금' },
+      unlock:t=>t>=5 ? '특별 메뉴 · 영웅의 식탁 해금' : '여관 식사 100회째 특별 메뉴 해금' },
     { id:'sage', icon:'🧙', name:'에드윈', role:'현자 · 업적과 성장', image:'study-quest-npc-sage.png', trustMax:5,
       trust:()=>sageTrust(),
       dialogue:t=>tierLine('sage',t,[5,3,0]),
@@ -7651,11 +7656,11 @@ function renderRpgQuests(){
     { id:'archivist', icon:'📚', name:'세라', role:'기록관 · 달력과 기록', image:'study-quest-npc-archivist.png', trustMax:5,
       trust:()=>archivistTrust(),
       dialogue:t=>tierLine('archivist',t,[5,3,0]),
-      unlock:t=>t>=5 ? '최고 기록 보상 골드 +10 해금' : '활동일 100일에서 최고 기록 보상 해금' },
+      unlock:t=>t>=5 ? '최고 기록 보상 골드 +10 해금' : '활동일 100일 기록 시 최고 기록 보상 해금' },
     { id:'knight', icon:'🛡️', name:'레온', role:'관문의 기사 · 주간 관문', image:'study-quest-npc-knight.png', trustMax:5,
       trust:()=>knightTrust(),
       dialogue:t=>tierLine('knight',t,[5,3,0]),
-      unlock:t=>t>=5 ? '주간 관문 보상 골드 +50% 해금' : '누적 스탬프 750개에서 관문 보상 강화 해금' },
+      unlock:t=>t>=5 ? '주간 관문 보상 골드 +50% 해금' : '누적 스탬프 750개면 관문 보상 강화 해금' },
     { id:'merchant', icon:'⚓', name:'마르코', role:'항구의 상인 · 잡화상', image:'study-quest-npc-merchant.png', trustMax:5,
       trust:()=>merchantTrust(),
       dialogue:t=>tierLine('merchant',t,[5,4,3,0]),
@@ -7663,15 +7668,15 @@ function renderRpgQuests(){
     { id:'noa', icon:'🧥', name:'노아', role:'협곡의 감시자 · 형법', image:'study-quest-npc-noa.png', trustMax:5,
       trust:()=>noaTrust(),
       dialogue:t=>tierLine('noa',t,[5,3,0]),
-      unlock:t=>t>=5 ? '형법 지역 정복 보상 골드 +10 해금' : '형법 지역 정복(미션 30회)에서 보상 강화 해금' },
+      unlock:t=>t>=5 ? '형법 지역 정복 보상 골드 +10 해금' : '형법 미션 30회 정복하면 보상 강화 해금' },
     { id:'elian', icon:'🗂️', name:'엘리안', role:'관문의 접수관 · 행정법', image:'study-quest-npc-elian.png', trustMax:5,
       trust:()=>elianTrust(),
       dialogue:t=>tierLine('elian',t,[5,3,0]),
-      unlock:t=>t>=5 ? '행정법 지역 정복 보상 골드 +10 해금' : '행정법 지역 정복(미션 30회)에서 보상 강화 해금' },
+      unlock:t=>t>=5 ? '행정법 지역 정복 보상 골드 +10 해금' : '행정법 미션 30회 정복하면 보상 강화 해금' },
     { id:'adel', icon:'⚖️', name:'아델', role:'추적로의 수사관 · 형사소송법', image:'study-quest-npc-adel.png', trustMax:5,
       trust:()=>adelTrust(),
       dialogue:t=>tierLine('adel',t,[5,3,0]),
-      unlock:t=>t>=5 ? '형사소송법 지역 정복 보상 골드 +10 해금' : '형사소송법 지역 정복(미션 30회)에서 보상 강화 해금' },
+      unlock:t=>t>=5 ? '형사소송법 지역 정복 보상 골드 +10 해금' : '형사소송법 미션 30회 달성하면 보상 강화 해금' },
   ];
   // ---------- NPC 신뢰도 ----------
   // 예전엔 NPC별로 기준이 제각각이라(마르타 식사 5회, 레온 스탬프 200개 등) 어떤 NPC는
@@ -10813,7 +10818,7 @@ function renderRpgQuests(){
     const missionEl=document.getElementById('slump-nudge-mission');
     const npcEl=document.getElementById('slump-nudge-npc');
     const nameEl=document.getElementById('slump-nudge-name');
-    if(npcEl && !npcEl.firstChild) npcEl.innerHTML = npcFaceHTML('archivist', 46);
+    if(npcEl && !npcEl.firstChild) npcEl.innerHTML = npcFaceHTML('archivist');
     if(nameEl) nameEl.textContent = npcProfile('archivist').name;
     if(titleEl) titleEl.textContent = doneToday ? '🌤️ 안개 속 첫걸음을 내디뎠어요' : (heavy ? '🌫️ 길이 안개에 잠겼어요' : '🌫️ 안개가 짙어졌어요');
     if(dialogueEl) dialogueEl.textContent = doneToday
@@ -10825,7 +10830,24 @@ function renderRpgQuests(){
       ? '✅ 안개 속 첫걸음 · 오늘 첫 공부 스탬프 완료'
       : '🎯 안개 속 첫걸음 · 오늘 공부 스탬프 1개 남기기';
     banner.dataset.key = key;
+    syncNudgeFaceSize(); 
   }
+    // 세라 초상을 오른쪽 문구 블록(이름·제목·대사·미션)의 높이에 맞춘다.
+  function syncNudgeFaceSize(){
+    const body = document.querySelector('#avoidance-nudge .slump-nudge__body');
+    const face = document.querySelector('#slump-nudge-npc .npc-face');
+    if(!body || !face) return;
+    const h = body.offsetHeight;
+    if(!h) return; // 배너가 숨겨져 있으면 측정 불가
+    // 좁은 화면에서 초상↔문구 줄바꿈이 서로 키우는 되먹임을 막기 위해 한 줄 폭의 18%를 상한으로 둔다.
+    const rowW = (body.parentElement && body.parentElement.clientWidth) || 0;
+    const cap = Math.max(46, Math.min(104, Math.round(rowW * 0.18)));
+    face.style.setProperty('--sz', Math.max(46, Math.min(cap, h - 4)) + 'px');
+  }
+  (function(){
+    const body = document.querySelector('#avoidance-nudge .slump-nudge__body');
+    if(body && 'ResizeObserver' in window) new ResizeObserver(syncNudgeFaceSize).observe(body);
+  })();
   document.getElementById('avoidance-nudge-dismiss').addEventListener('click', () => {
     const b = document.getElementById('avoidance-nudge');
     avoidanceDismissedKey = b.dataset.key || null;
