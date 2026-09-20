@@ -8318,7 +8318,7 @@ function renderRpgQuests(){
     three_bridges:['🌉','세 개의 다리','구성요건, 위법성, 책임이라 적힌 세 개의 다리가 협곡 위에 걸려 있다.'],
     returned_form:['📮','반려된 서류','반려 사유란에 형식 요건 하나가 붉게 표시되어 있다.'],
     burden_scale:['⚖️','기울어진 저울','증거가 한쪽에 몰려 있다. 저울이 누구 쪽으로 기울었는지 확인한다.'],
-    tainted_trace:['🩸','위법한 흔적','절차를 어기고 확보된 흔적 하나가 증거 더미에 섞여 있다.'],
+    tainted_trace:['🩸','위법의 흔적','절차를 어기고 확보된 흔적 하나가 증거 더미에 섞여 있다.'],
     hidden_path_marker:['🌿','이름 없는 이정표','지도에 없는 갈림길에 손으로 새긴 표식이 남아 있다.']
   };
   const PROLOGUE_GATE = [{type:'QUEST_COMPLETED',questId:'Q003'}];
@@ -8424,12 +8424,12 @@ function renderRpgQuests(){
       objectives:[{id:'meet_adel',type:'TALK',npc:'adel',minCount:1,description:'아델과 대화하기'},{id:'criminalproc_entry',type:'REGION_PROGRESS',region:'criminalProcedure',minCount:6,description:'형사소송법 미션 6회 선택하기'}],
       rewards:{xp:60,gold:12}, effects:[{type:'SET_FLAG',key:'trailEntered',value:true}],
       history:{title:'추적의 첫 장',description:'형사소송법의 추적로에서 기록부터 확인했다.'} },
-    { id:'Q026', tags:['MAIN','CRIMINAL_PROC','INVESTIGATION'], name:'위법한 흔적',
-      description:'수집된 흔적 하나가 절차를 어기고 확보된 것이다. 이 흔적을 어떻게 다뤄야 하는지 확인해야 한다.',
+    { id:'Q026', tags:['MAIN','CRIMINAL_PROC','INVESTIGATION'], name:'위법의 흔적',
+      description:'수집된 흔적 하나가 적법한 절차를 어긴 채 확보되었다. 이 흔적을 어떻게 다뤄야 하는지 확인해야 한다.',
       start:{location:'criminal_procedure_trail',npc:'adel'}, prerequisites:[{type:'QUEST_COMPLETED',questId:'Q025'}],
       objectives:[{id:'inspect_tainted_trace',type:'INVESTIGATE',target:'tainted_trace',minCount:1},{id:'criminalproc_middle',type:'REGION_PROGRESS',region:'criminalProcedure',minCount:15,description:'형사소송법 미션 15회 선택하기'}],
       rewards:{xp:70,gold:15}, effects:[{type:'SET_FLAG',key:'taintedTraceFound',value:true}],
-      history:{title:'위법한 흔적',description:'절차를 어긴 증거가 이 길에서 왜 위험한지 확인했다.'} },
+      history:{title:'위법의 흔적',description:'절차를 어긴 채 확보된 증거가 왜 위험한지 확인했다.'} },
     { id:'Q027', tags:['MAIN','BOSS','CRIMINAL_PROC','CHOICE'], name:'진실의 추적자',
       description:'추적로 끝에서 추적자가 마지막 물음을 던진다. 진실과 절차가 부딪힐 때 무엇을 택할지 스스로 선택해야 한다.',
       start:{location:'criminal_procedure_trail',npc:'adel'}, prerequisites:[{type:'QUEST_COMPLETED',questId:'Q026'}],
