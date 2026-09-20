@@ -997,6 +997,9 @@
 
   /* ---------- Tier 2: NPC · 장비 · 몬스터 도감 · 모험 연대기 ---------- */
   .tier2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;}
+  /* 마을 사람들 카드는 auto-fit+1fr 조합이 넓은 화면에서 카드를 과하게 늘려 비어 보이던 문제 —
+     장비 그리드처럼 폭 상한을 둬서 카드 수가 적어도 어색하게 안 늘어나게 한다. */
+  #npc-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(220px,260px));justify-content:center;}
   /* 인벤토리 장비 카드는 개수가 적을 때(특히 1개) 가로로 억지로 늘어나 보이는 문제가 있어
      고정 폭(150~190px)으로 바꾸고 왼쪽 정렬해 카드 크기가 항상 일정하게 유지되도록 함 */
   #equipment-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(150px,190px));justify-content:start;}
@@ -2212,7 +2215,7 @@
     font-size:0.78rem;
     color:var(--muted);
   }
-  .modal-time-row label{display:flex;flex-direction:column;gap:4px;}
+  .modal-time-row label{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;}
   .modal-time-row input[type="time"]{
     border:1px solid var(--line);
     border-radius:8px;
@@ -2221,6 +2224,9 @@
     font-size:0.85rem;
     background:var(--c-fbf8f1);
     color:var(--ink);
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
   }
 
   .period-tabs{
@@ -2303,6 +2309,8 @@
     .stat-line__bar-bg{flex:1 1 100%;order:5;margin-top:2px;}
     .exercise-card .quest-panel__header{align-items:flex-start;}
     .exercise-today-log{flex:1 1 100%;max-width:none;margin-left:0;text-align:left;}
+    /* 유틸리티 버튼 줄이 우측 정렬로 들쭉날쭉해지던 문제 — 좁은 화면에선 가운데 정렬이 더 자연스럽다 */
+    .utility-row{justify-content:center;}
   }
 
   :focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
@@ -2950,8 +2958,6 @@
     position:relative;display:block;
     padding:0 0 0 50px;
     font-family:'Noto Serif KR',serif;
-    background:repeating-linear-gradient(to bottom, transparent 0 23px, var(--ruled) 23px 24px);
-    background-position:0 3px;
     margin-top:4px;
   }
   .chronicle-list::before{
@@ -2960,8 +2966,13 @@
   }
   .chronicle-list .chronicle-item{
     position:relative;display:block;
-    border:0;border-radius:0;background:transparent;box-shadow:none;
+    border:0;border-radius:0;box-shadow:none;
     padding:0;margin:0;
+    /* 괘선을 리스트 전체가 아니라 항목마다 새로 그린다 — 아이폰처럼 좁은 화면에서
+       설명 문단이 줄바꿈되면 그 아래 항목들의 괘선이 통째로 밀려버리던 문제(아이패드처럼
+       넓어서 안 접히는 화면에서는 안 보이던 문제)를 항목 단위로 끊어서 원천 차단한다. */
+    background:repeating-linear-gradient(to bottom, transparent 0 23px, var(--ruled) 23px 24px);
+    background-position:0 3px;
   }
   .chronicle-list .chronicle-item::before{
     content:attr(data-idx);
@@ -3150,7 +3161,7 @@
   }
   .modal{
     max-height:85vh;max-height:85dvh;
-    overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
   }
   .modal-close{
     position:sticky;top:-10px;right:auto;float:right;
@@ -3501,7 +3512,7 @@
       <p class="permission-note" id="permission-note"></p>
 
       <div class="mini-section" style="margin-top:0;padding-top:0;border-top:none;">
-        <p class="mini-section__label" style="text-align:center;">오늘의 핵심 미션 (최대 3개)</p>
+        <p class="mini-section__label">오늘의 핵심 미션 (최대 3개)</p>
         <div class="chip-row" id="mission-chips"></div>
         <input type="text" id="mission-custom" class="mission-custom" placeholder="직접 입력 (예: 형사소송법 판례 정리)" style="display:none;">
         <p class="chip-limit-note" id="mission-limit-note"></p>
@@ -3775,6 +3786,10 @@
   </div>
   <div class="npc-dialogue__text" id="shop-line"></div>
 </div>
+        <p class="innkeeper-quest" id="marco-quest"></p>
+
+        <div class="panel-npc" data-panel-npc="ian" data-line="흥정은 내가 하지. 자네는 계획만 잘 세워오면 돼."></div>
+        <p class="innkeeper-quest" id="ian-quest"></p>
 
         <div class="food-menu" id="shop-menu"></div>
       </section>
@@ -4381,7 +4396,11 @@
       buff:{ kind:'goldPct', value:0.20 }, grantLabel:'오늘 골드 획득 +20%' },
     { id:'secret-chart', icon:'🗺️', name:'비밀 시장의 지도', cost:75, unlockTrust:4,
       flavor:'항구 너머 비밀 시장으로 가는 지도. 아는 사람만 압니다.',
-      buff:{ kind:'emojiGoldFlat', value:6, targetEmoji:'⚖️' }, grantLabel:'오늘 모의고사 스탬프 골드+6개' }
+      buff:{ kind:'emojiGoldFlat', value:6, targetEmoji:'⚖️' }, grantLabel:'오늘 모의고사 스탬프 골드+6개' },
+    // 이안의 신뢰(오늘의 부탁 누적) Lv.5에서 해금 — 흥정의 달인다운 항구적 할인 부적
+    { id:'ians-contract', icon:'📜', name:'이안의 계약서', cost:40, unlockIanTrust:5,
+      flavor:'이안이 직접 서명한 계약서. 오늘 하루, 웬만한 흥정은 다 통해요.',
+      buff:{ kind:'goldPct', value:0.25 }, grantLabel:'오늘 골드 획득 +25%' }
   ];
   // ---------- 기간제 버프 엔진 (여관 음식·상점 소모품이 공통으로 사용) ----------
   function activeBuffsToday(){
@@ -4417,14 +4436,18 @@
   function renderShop(){
     const wrap=document.getElementById('shop-menu'); if(!wrap) return;
     const balEl=document.getElementById('shop-coin-balance'); if(balEl) balEl.innerHTML=`${coinHTML(state.coins||0)} 보유`;
+    renderShopFavors();
     const trust=merchantTrust();
     // unlockTrust가 걸린 물건은 아직 신뢰 레벨이 부족하면 구매 버튼 대신 잠금 표시를 보여준다 —
     // 마르코의 "희귀 재료/비밀 시장/고대 제작소" 대사가 실제로 이어지는 지점.
     const consumables=`<div class="shop-subhead">🧪 소모품</div>`+SHOP_ITEMS.map(item=>{
-      const locked=item.unlockTrust&&trust<item.unlockTrust;
+      const trustLocked=item.unlockTrust&&trust<item.unlockTrust;
+      const ianLocked=item.unlockIanTrust&&ianTrust()<item.unlockIanTrust;
+      const locked=trustLocked||ianLocked;
+      const lockLabel=ianLocked?`이안의 신뢰 Lv.${item.unlockIanTrust}`:`마르코의 신뢰 Lv.${item.unlockTrust}`;
       const ok=!locked&&(state.coins||0)>=item.cost;
-      const btnLabel=locked?`🔒 신뢰 Lv.${item.unlockTrust}`:coinHTML(item.cost,'coin-icon--button');
-      return `<div class="food-item${ok?'':' disabled'}"><span class="food-item__icon">${locked?'🔒':item.icon}</span><span class="food-item__body"><span class="food-item__name">${locked?'???':item.name}</span><span class="food-item__flavor">${locked?`마르코의 신뢰 Lv.${item.unlockTrust}에서 해금돼요.`:item.flavor}</span></span><button type="button" class="food-item__btn" data-shop="${item.id}" data-shop-type="consumable" ${locked?'disabled':''}>${btnLabel}</button></div>`;
+      const btnLabel=locked?`🔒 ${ianLocked?`이안 Lv.${item.unlockIanTrust}`:`신뢰 Lv.${item.unlockTrust}`}`:coinHTML(item.cost,'coin-icon--button');
+      return `<div class="food-item${ok?'':' disabled'}"><span class="food-item__icon">${locked?'🔒':item.icon}</span><span class="food-item__body"><span class="food-item__name">${locked?'???':item.name}</span><span class="food-item__flavor">${locked?`${lockLabel}에서 해금돼요.`:item.flavor}</span></span><button type="button" class="food-item__btn" data-shop="${item.id}" data-shop-type="consumable" ${locked?'disabled':''}>${btnLabel}</button></div>`;
     }).join('');
     const equipment=`<div class="shop-subhead">⚔️ 장비</div>`+SHOP_EQUIPMENT.filter(item=>!item.craftOnly).map(item=>{
       const owned=ownedEquipment(item.id);
@@ -4458,6 +4481,7 @@
   function buyShopItem(id,type='consumable'){
     const pool=type==='equipment'?SHOP_EQUIPMENT:SHOP_ITEMS; const item=pool.find(i=>i.id===id); if(!item) return;
     if(item.unlockTrust && merchantTrust()<item.unlockTrust){showNpcToast('merchant', '이건 아직 못 내줘. 단골 소리 들을 때까지 좀 더 들르게.');return;}
+    if(item.unlockIanTrust && ianTrust()<item.unlockIanTrust){showNpcToast('ian', '이건 아직 좀 일러. 부탁 몇 번만 더 들어주면 통할 거야.');return;}
     if(type==='equipment' && ownedEquipment(id)){showToast('이미 인벤토리에 있는 장비예요.');return;}
     if((state.coins||0)<item.cost){showNpcToast('merchant', '골드가 모자라는군. 조금 더 모아서 오게.');return;}
     if(!state.inventory) state.inventory={equipment:[],consumables:[]};
@@ -4487,7 +4511,7 @@
   // "기본값 위에 병합"하는 안전망으로 쓴다 — 나중에 상태 필드가 늘어나도 그 두 곳에
   // 개별 복원 코드를 추가하는 걸 깜빡하면 조용히 사라지던 문제를 구조적으로 막기 위함.
   function createDefaultState(){
-    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, vibrationOn: true, mainTrack: 'auto', bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, merchantSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [], regionBossesDefeated: [],
+    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, vibrationOn: true, mainTrack: 'auto', bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, merchantSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, marcoQuestClaimedDate: null, ianQuestClaimedDate: null, ianFavorCount: 0, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [], regionBossesDefeated: [],
     rpgQuests: {},
     rpgWorld: { flags: {}, history: [], investigations: {}, items: {}, dialogue: { activeNpc:null, step:0 } },
     rpgNpcTrust: {},
@@ -4844,6 +4868,13 @@
   }
   // 지역 보스(과목별 진행률 100%)를 처음 물리쳤을 때 — 예전엔 "물리쳤어요!" 문구만 뜨고
   // 실제 보상이 전혀 없던 부분을 실제 골드 보상 + 연대기 기록으로 연결한다.
+  // 지역 전용 NPC(노아·엘리안·아델)의 신뢰 Lv.5 보상 — 각자 담당 지역을 정복할 때 골드 보너스.
+  function regionNpcTrustBonus(name){
+    if(name === '형법') return noaTrust() >= 5 ? 10 : 0;
+    if(name === '행정법') return elianTrust() >= 5 ? 10 : 0;
+    if(name === '형사소송법') return adelTrust() >= 5 ? 10 : 0;
+    return 0;
+  }
   function checkRegionBossDefeats(){
     const counts = missionCountsAllTime();
     if(!Array.isArray(state.regionBossesDefeated)) state.regionBossesDefeated = [];
@@ -4852,7 +4883,7 @@
       if((counts[name]||0) >= SUBJECT_REGION_TARGET && !state.regionBossesDefeated.includes(name)){
         state.regionBossesDefeated.push(name);
         const boss = SUBJECT_BOSSES[name] || '지역의 파수꾼';
-        awardCoins(COIN_REWARD.regionBoss);
+        awardCoins(COIN_REWARD.regionBoss + regionNpcTrustBonus(name));
         addChronicle(`${name} 지역 보스 처치`, `${boss}을(를) 물리치고 ${name} 지역을 정복했어요.`);
         newlyDefeated.push({ name, boss });
       }
@@ -6372,7 +6403,9 @@ function renderRpgQuests(){
           if(cur.length >= MISSION_MAX_PER_DAY) return;
           state.missions[dateStr] = cur.concat(m);
         }
+        const ianQuestCleared = checkIanQuest();
         persistAndRefresh();
+        if(ianQuestCleared) celebrateIanQuest();
       });
       wrap.appendChild(btn);
     });
@@ -6581,6 +6614,76 @@ function renderRpgQuests(){
   }
   function celebrateInnkeeperQuest(){
     showNpcToast('innkeeper', '오늘 정말 열심히 했네! 이건 내 마음이야.', { reward: coinHTML(INNKEEPER_QUEST_REWARD) });
+  }
+
+  // 오늘 운동 기록 1회를 남기면 마르코가 챙겨주는 무료 소모품 — 하루 한 번, 자동 지급
+  const MARCO_QUEST_NEED = 1;
+  const MARCO_QUEST_GIFT_ID = 'travelers-lunch'; // 🥪 여행자의 도시락 — 몸을 챙긴 것에 대한 보답이라 컨셉이 맞다
+  function marcoQuestInfo(){
+    const have = Math.min(MARCO_QUEST_NEED, ((state.exercise && state.exercise[formatDate(today)]) || []).length);
+    return { need: MARCO_QUEST_NEED, have, done: have >= MARCO_QUEST_NEED };
+  }
+  function checkMarcoQuest(){
+    const info = marcoQuestInfo();
+    const todayStr = formatDate(today);
+    if(info.done && state.marcoQuestClaimedDate !== todayStr){
+      state.marcoQuestClaimedDate = todayStr;
+      if(!state.inventory) state.inventory = { equipment:[], consumables:[] };
+      state.inventory.consumables.push(MARCO_QUEST_GIFT_ID);
+      return true;
+    }
+    return false;
+  }
+  function celebrateMarcoQuest(){
+    const gift = SHOP_ITEMS.find(i => i.id === MARCO_QUEST_GIFT_ID);
+    showNpcToast('merchant', '오늘 몸도 좀 챙겼군! 이건 내가 그냥 얹어주는 거야.', { reward: gift ? `${gift.icon} ${gift.name}` : '' });
+  }
+
+  // 오늘 미션을 2개 이상 고르면 이안이 대신 흥정해서 골드를 돌려준다 — 하루 한 번, 자동 지급
+  const IAN_QUEST_NEED = 2;
+  const IAN_QUEST_REWARD = 10;
+  function ianQuestInfo(){
+    const have = Math.min(IAN_QUEST_NEED, (state.missions[formatDate(today)] || []).length);
+    return { need: IAN_QUEST_NEED, have, done: have >= IAN_QUEST_NEED };
+  }
+  function checkIanQuest(){
+    const info = ianQuestInfo();
+    const todayStr = formatDate(today);
+    if(info.done && state.ianQuestClaimedDate !== todayStr){
+      state.ianQuestClaimedDate = todayStr;
+      state.ianFavorCount = (state.ianFavorCount || 0) + 1;
+      awardCoins(IAN_QUEST_REWARD);
+      return true;
+    }
+    return false;
+  }
+  function celebrateIanQuest(){
+    showNpcToast('ian', '오늘 계획, 내가 대신 흥정해서 좀 깎아왔어.', { reward: coinHTML(IAN_QUEST_REWARD) });
+  }
+  // 이안의 신뢰도는 트러스트 시스템(마을 허브 NPC)과 달리, "오늘의 부탁"을 완료한 누적 횟수로만 쌓인다.
+  function ianTrust(){ return trustLevelFor(state.ianFavorCount || 0, NPC_TRUST_THRESHOLDS.ian); }
+
+  // 상점 패널의 마르코 대사 옆 "오늘의 부탁" 두 줄(마르코·이안)을 갱신한다.
+  function renderShopFavors(){
+    const marcoEl = document.getElementById('marco-quest');
+    if(marcoEl){
+      const q = marcoQuestInfo();
+      const claimedToday = state.marcoQuestClaimedDate === formatDate(today);
+      const gift = SHOP_ITEMS.find(i => i.id === MARCO_QUEST_GIFT_ID);
+      marcoEl.innerHTML = claimedToday
+        ? '✓ 오늘의 부탁 완료 — 마르코가 챙겨준 선물을 받았어요.'
+        : `오늘의 부탁: 운동 기록 ${q.have}/${q.need}회 남기면 마르코가 ${gift ? gift.icon + ' ' + gift.name : '선물'}을 챙겨준대요.`;
+      marcoEl.classList.toggle('done', claimedToday);
+    }
+    const ianEl = document.getElementById('ian-quest');
+    if(ianEl){
+      const q = ianQuestInfo();
+      const claimedToday = state.ianQuestClaimedDate === formatDate(today);
+      ianEl.innerHTML = claimedToday
+        ? `✓ 오늘의 부탁 완료 — 이안이 흥정해서 ${coinHTML(IAN_QUEST_REWARD)}을 돌려줬어요.`
+        : `오늘의 부탁: 미션 ${q.have}/${q.need}개 고르면 이안이 흥정해서 골드를 돌려준대요. (${coinHTML(IAN_QUEST_REWARD)})`;
+      ianEl.classList.toggle('done', claimedToday);
+    }
   }
 
   // ---------- 돌발 이벤트 — 뽀모도로를 "시작"하는 순간에만, 작은 확률로 ----------
@@ -7385,15 +7488,18 @@ function renderRpgQuests(){
     const newClass = classInfoForStats(statCountsAllTime());
     const didClassShift = prevClass.id !== newClass.id;
     if(didClassShift && prevClass.id !== DEFAULT_CLASS_TITLE.id) state.hasShiftedClass = true;
+    const marcoQuestCleared = checkMarcoQuest();
     saveState();
     renderClassStats();
     renderExercisePanel();
     renderAchievements();
     renderTabBadges();
+    if(typeof renderShopFavors === 'function') renderShopFavors();
     const label = (EXERCISE_TYPES.find(x => x.emoji === emoji) || {}).label || '';
     if(luckProced) showToast(randomLuckMessage());
     else showToast(`${emoji} ${label} 기록 완료! · ${coinHTML(exerciseGold)}`);
     if(didClassShift) showNpcToast('sage', `🌟 클래스가 바뀌었소: ${prevClass.title} → ${newClass.icon} ${newClass.title}`);
+    if(marcoQuestCleared) celebrateMarcoQuest();
   }
 
   // ---------- 여관 (토마토로 사 먹는 음식 — 뽀모도로=토마토라는 원래 뜻을 그대로 살린 코너) ----------
@@ -7419,6 +7525,18 @@ function renderRpgQuests(){
       trust:()=>merchantTrust(),
       dialogue:t=>tierLine('merchant',t,[5,4,3,0]),
       unlock:t=> t>=5 ? '고대 제작소 해금' : t>=4 ? '비밀 시장 해금' : t>=3 ? '희귀 재료 해금' : '누적 1500골드 사용 시 비밀 해금' },
+    { id:'noa', icon:'🧥', name:'노아', role:'협곡의 감시자 · 형법', image:'study-quest-npc-noa.png', trustMax:5,
+      trust:()=>noaTrust(),
+      dialogue:t=>tierLine('noa',t,[5,3,0]),
+      unlock:t=>t>=5 ? '형법 지역 정복 보상 골드 +10 해금' : '형법 지역 정복(미션 30회)에서 보상 강화 해금' },
+    { id:'elian', icon:'🗂️', name:'엘리안', role:'관문의 접수관 · 행정법', image:'study-quest-npc-elian.png', trustMax:5,
+      trust:()=>elianTrust(),
+      dialogue:t=>tierLine('elian',t,[5,3,0]),
+      unlock:t=>t>=5 ? '행정법 지역 정복 보상 골드 +10 해금' : '행정법 지역 정복(미션 30회)에서 보상 강화 해금' },
+    { id:'adel', icon:'⚖️', name:'아델', role:'추적로의 수사관 · 형사소송법', image:'study-quest-npc-adel.png', trustMax:5,
+      trust:()=>adelTrust(),
+      dialogue:t=>tierLine('adel',t,[5,3,0]),
+      unlock:t=>t>=5 ? '형사소송법 지역 정복 보상 골드 +10 해금' : '형사소송법 지역 정복(미션 30회)에서 보상 강화 해금' },
   ];
   // ---------- NPC 신뢰도 ----------
   // 예전엔 NPC별로 기준이 제각각이라(마르타 식사 5회, 레온 스탬프 200개 등) 어떤 NPC는
@@ -7429,7 +7547,13 @@ function renderRpgQuests(){
     sage:      [0, 3, 5, 7, 10, 12],         // 달성한 업적 수 (전체 14개 중)
     archivist: [0, 30, 50, 70, 90, 100],      // 누적 활동일수
     knight:    [0, 100, 200, 400, 700, 1000], // 누적 스탬프 수
-    merchant:  [0, 250, 500, 1000, 1500, 3000]  // 잡화상에서 쓴 누적 골드
+    merchant:  [0, 250, 500, 1000, 1500, 3000],  // 잡화상에서 쓴 누적 골드
+    // 지역 전용 NPC 3명은 각자 담당 과목의 미션 선택 횟수로 신뢰를 쌓는다.
+    // Lv.5가 곧 SUBJECT_REGION_TARGET(30회, 지역 정복)과 맞아떨어지게 맞춤.
+    noa:       [0, 5, 10, 15, 22, 30],        // 형법 미션 선택 횟수
+    elian:     [0, 5, 10, 15, 22, 30],        // 행정법 미션 선택 횟수
+    adel:      [0, 5, 10, 15, 22, 30],        // 형사소송법 미션 선택 횟수
+    ian:       [0, 5, 15, 30, 50, 80]         // "오늘의 부탁" 완료 누적 횟수
   };
   function trustLevelFor(value, thresholds){
     let idx = 0;
@@ -7444,6 +7568,9 @@ function renderRpgQuests(){
   function archivistTrust(){ return trustLevelFor(activeDaysAllTime(), NPC_TRUST_THRESHOLDS.archivist); }
   function knightTrust(){ return trustLevelFor(totalStampsAllTime(), NPC_TRUST_THRESHOLDS.knight); }
   function merchantTrust(){ return trustLevelFor(state.merchantSpent||0, NPC_TRUST_THRESHOLDS.merchant); }
+  function noaTrust(){ return trustLevelFor(missionCountsAllTime()['형법']||0, NPC_TRUST_THRESHOLDS.noa); }
+  function elianTrust(){ return trustLevelFor(missionCountsAllTime()['행정법']||0, NPC_TRUST_THRESHOLDS.elian); }
+  function adelTrust(){ return trustLevelFor(missionCountsAllTime()['형사소송법']||0, NPC_TRUST_THRESHOLDS.adel); }
   // 신뢰 구간별 대사를 여러 개 두고 날짜를 시드로 골라, 하루 동안은 같은 대사를 유지하되
   // 매일 자연스럽게 바뀌게 한다 — 예전엔 구간마다 대사가 고정 한 줄뿐이라 다시 봐도 늘 같았다.
   // 원래는 날짜로 해시를 만들어 하루 동안 같은 대사만 나왔는데, 탭을 옮길 때마다(마을 사람들
@@ -7577,6 +7704,93 @@ function renderRpgQuests(){
         '“장사꾼이 손님 얼굴 안 잊어버리면 그게 실력이지.”','“첫 거래는 내가 좀 후하게 해줄게. 단골 만드는 투자랄까.”',
         '“여긴 눈치 보지 말고 편하게 둘러봐. 사라고 안 쪼아.”','“처음 온 사람한테는 다들 조심스러운데, 자넨 어때?”',
         '“물건 볼 줄 모르면 나한테 물어봐. 속이진 않을게. …아마도.”','“항구에 온 걸 환영하네. 여기 물건들, 다 사연이 있어.”'
+      ]
+    },
+    noa: {
+      5:[
+        '“…이 정도면 말해도 되겠지. 넌 내가 지켜본 사람들 중 드물게, 조문 앞에서 서두르지 않는 쪽이야.”',
+        '“레온이랑 네 얘기를 했어. 그 사람도 너를 괜찮게 보더군. 그 둘이 동시에 그러면, 진짜 괜찮은 거야.”',
+        '“가끔 웃는다고 했지. 요즘은 네가 지나갈 때가 그런 순간 중 하나야.”',
+        '“오래 지켜봤다고 했지. 이제 와 말하는데, 지켜보는 것도 재밌었어. 너 덕분에.”',
+        '“협곡을 떠도는 사람들 중에 다시 보고 싶은 얼굴은 몇 없어. 넌 그 몇 안에 들어.”',
+        '“레온한테 너 얘기했다니까 뭐라 안 하고 그냥 웃더군. 그 녀석도 아는 거지, 너란 사람.”',
+        '“…이런 말 하는 거 나답지 않은데. 고맙다, 자주 들러줘서.”'
+      ],
+      3:[
+        '“요즘 자주 보이는군. 조문 읽는 눈이 좀 나아졌나?”',
+        '“네가 지나갈 때마다 협곡이 조금 덜 어두워 보여. 착각이겠지만.”',
+        '“아델한테 네 얘기 들었어. 그 친구가 사람 칭찬하는 거, 흔한 일 아니야.”',
+        '“요즘은 협곡 초입에서부터 네 발소리를 알아듣겠어.”',
+        '“조문 읽는 속도가 빨라졌군. 서두르는 거랑은 다른 거야, 그건.”',
+        '“가끔 네가 안 보이면 무슨 일 있나 싶더군. …별일 아니길 바라면서.”',
+        '“아델이 너 얘기할 때 표정이 좀 풀리더라. 걔한테는 드문 일이야.”'
+      ],
+      0:[
+        '“쉬운 죄는 없어. 조문 하나하나가 다 무겁지.”',
+        '“여기 오는 사람들, 다 죄인 취급하려 들던데. 난 안 그래.”',
+        '“…웃지 마. 나도 가끔 웃어. 조문에 없는 일이니까 기록은 안 하지만.”',
+        '“죄를 미리 정해놓고 오는 사람들이 있어. 나는 그런 식으로 안 봐.”',
+        '“협곡 안개가 짙은 날엔 손전등보다 조문이 나아. 길을 잃진 않게 해주거든.”',
+        '“왜 여기 서 있냐고? 누군가는 지켜봐야 하니까. 그게 다야.”',
+        '“레온은 명령을 믿고, 나는 조문을 믿어. 둘 다 딱딱하다는 얘기 많이 듣지.”'
+      ]
+    },
+    elian: {
+      5:[
+        '“이제 말씀드릴 수 있겠네요 — 처음엔 그냥 접수 도와드리는 게 다였는데, 지금은 좀 응원하고 있어요, 진심으로.”',
+        '“세라 씨랑 당신 얘길 자주 해요. 둘 다 빈칸을 못 참는다고, 그게 닮았대요.”',
+        '“반려 서류 없이 여기까지 오신 분, 기억에 남을 것 같아요.”',
+        '“처음엔 그냥 손님이었는데, 요즘은 오시는 날이 기다려져요. 이상하죠?”',
+        '“세라 씨랑 당신 얘기하다 보면 시간 가는 줄 몰라요. 둘 다 좋아하나 봐요, 저.”',
+        '“이런 말 해도 될지 모르겠는데 — 당신 덕분에 이 일이 더 좋아졌어요.”',
+        '“관문 접수관 하면서 이런 마음 드는 거, 흔치 않은데. 소중히 할게요.”'
+      ],
+      3:[
+        '“요즘 서류가 점점 깔끔해지시네요. 저 은근 뿌듯해요.”',
+        '“세라 씨가 그러던데, 당신 요즘 기록도 꼼꼼해졌다고.”',
+        '“반려 사유, 요즘은 거의 안 써도 되겠어요.”',
+        '“요즘 서류에 실수가 확 줄었어요. 저 은근 지켜보고 있었거든요.”',
+        '“다음엔 뭘 준비해야 하는지 먼저 알려드릴까요? 그럴 정도는 됐어요, 우리.”',
+        '“세라 씨가 당신 기록 얘기하면서 웃던데, 저도 이해가 가요.”',
+        '“반려 도장, 요즘은 거의 안 꺼내요. 그게 은근 뿌듯하네요.”'
+      ],
+      0:[
+        '“서류 접수 도와드릴게요. …아, 오늘도 빈칸이 좀 있네요, 괜찮아요.”',
+        '“반려는 마음이 아니라 형식 때문이에요. 너무 속상해하지 마세요.”',
+        '“관문은 벽이 아니에요. 절차를 알면 열리는 문이죠.”',
+        '“형식만 갖추면 반은 끝난 거예요. 나머지 반은 제가 도와드릴게요.”',
+        '“관문이 무섭게 느껴지실 수 있는데, 사실 저는 서류 넘기는 거 좋아해요.”',
+        '“빈칸 있다고 너무 걱정 마세요. 저도 처음엔 실수투성이였어요.”',
+        '“여기 앉으세요. 커피는 없지만 안내는 확실하게 해드릴게요.”'
+      ]
+    },
+    adel: {
+      5:[
+        '“표정이 없다는 말, 자주 듣습니다. 하지만 오늘은 — 조금 반가웠다는 걸, 기록에 남기겠습니다.”',
+        '“노아 씨가 당신 얘길 자주 하더군요. 저도, 이번엔 동의합니다.”',
+        '“한때 결과만 보고 달린 적이 있습니다. 당신을 보면 그 시절이 자주 떠오릅니다. 다행히, 다른 방향으로요.”',
+        '“표정이 없다는 말을 자주 듣지만, 오늘 이 말은 진심으로 하겠습니다 — 신뢰합니다, 당신을.”',
+        '“한때 절차보다 결과를 좇았던 시절이 있었습니다. 당신을 보면 그때의 제가 아깝다는 생각이 듭니다.”',
+        '“노아 씨와 저는 다른 방식으로 사람을 봅니다. 둘 다 당신에게는 같은 결론을 내렸습니다.”',
+        '“기록에 남기지 않는 말이 하나 있습니다 — 오늘도 와줘서, 다행이라고.”'
+      ],
+      3:[
+        '“…요즘 절차를 꽤 잘 지키시는군요. 나쁘지 않습니다.”',
+        '“노아 씨가 당신 얘길 하더군요. 저도 동의합니다, 이번엔.”',
+        '“기록이 점점 흐트러짐이 없어지는군요. 눈에 보입니다.”',
+        '“요즘 당신의 기록에는 군더더기가 없더군요. 눈여겨보고 있었습니다.”',
+        '“노아 씨가 당신 얘기를 할 때, 평소와 다른 어조더군요. 저도 동의하는 부분입니다.”',
+        '“절차를 아는 사람과 지키는 사람은 다릅니다. 당신은 후자로 보입니다.”',
+        '“…궁금해서 묻는 겁니다. 오늘은 어떤 절차를 밟고 오셨습니까?”'
+      ],
+      0:[
+        '“기록부터 확인하겠습니다. 절차가 곧 진실입니다.”',
+        '“서두르는 분들이 많던데, 저는 서두르지 않습니다.”',
+        '“…표정이 굳어 있다고요? 원래 이렇습니다.”',
+        '“감정으로 판단하지 않습니다. 그게 제 일입니다.”',
+        '“많은 분들이 결과를 먼저 원하시죠. 저는 순서를 먼저 봅니다.”',
+        '“질문이 있으면 하십시오. 답은 절차 안에 있을 겁니다.”',
+        '“노아 씨는 직감을 믿고, 저는 기록을 믿습니다. 둘 다 틀린 적은 있습니다.”'
       ]
     }
   };
@@ -8112,11 +8326,11 @@ function renderRpgQuests(){
     { subject:'헌법', short:'헌법', quests:['Q004','Q005','Q006','Q007','Q008','Q009','Q010'] },
     { subject:'민법', short:'민법', quests:['Q014','Q015','Q016'] },
     { subject:'형법', short:'형법', quests:['Q017','Q018','Q019'] },
-    { subject:'행정법', short:'행정', quests:['Q020','Q021'] },
+    { subject:'행정법', short:'행정법', quests:['Q020','Q021'] },
     { subject:'상법', short:'상법', quests:['Q011','Q012','Q013'] },
-    { subject:'민사소송법', short:'민소', quests:['Q022','Q023','Q024'] },
-    { subject:'형사소송법', short:'형소', quests:['Q025','Q026','Q027'] },
-    { subject:'선택과목', short:'선택', quests:['Q028','Q029','Q030'] }
+    { subject:'민사소송법', short:'민소법', quests:['Q022','Q023','Q024'] },
+    { subject:'형사소송법', short:'형소법', quests:['Q025','Q026','Q027'] },
+    { subject:'선택과목', short:'선택법', quests:['Q028','Q029','Q030'] }
   ];
   function trackOpen(t){ return t.quests.some(id => getRpgQuestRecord(id).state !== RPG_QUEST_STATE.COMPLETED); }
   function pickMainQuestForDisplay(){
@@ -9644,6 +9858,7 @@ function renderRpgQuests(){
     safeRun('renderWeeklyGate', renderWeeklyGate);
     safeRun('renderAchievements', renderAchievements);
     safeRun('renderInn', renderInn);
+    safeRun('renderShop', typeof renderShop==='function' ? renderShop : null);
     safeRun('renderJourneyRegion', renderJourneyRegion);
     safeRun('renderChoiceEncounter', renderChoiceEncounter);
     safeRun('renderEncounterMemory', renderEncounterMemory);
@@ -9789,7 +10004,9 @@ function renderRpgQuests(){
     }else{
       state.missions[dateStr] = fixedOnly;
     }
+    const ianQuestCleared = checkIanQuest();
     persistAndRefresh();
+    if(ianQuestCleared) celebrateIanQuest();
   });
 
   document.getElementById('modal-start-time').addEventListener('change', function(){
