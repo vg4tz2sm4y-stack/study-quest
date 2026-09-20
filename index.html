@@ -867,6 +867,18 @@
   .weekly-gate.gate-cleared{background:linear-gradient(155deg,var(--c-3a4f3d),var(--c-1c2333));}
   .weekly-gate.gate-cleared .weekly-gate__bar-fill{background:linear-gradient(90deg,var(--sage),var(--c-7fae86));}
   .weekly-gate.gate-cleared .weekly-gate__hp-text{color:var(--t-a9d6ae);}
+  /* [다크모드] 관문 카드는 원래 '어두운 보스 카드'인데, 배경에 쓰는 --c-1c2333 등이 다크모드에서 밝은 색으로 뒤집혀
+     밝은 배경 위에 밝은 글씨(대비 약 1.3:1)가 되어 설명·HP가 거의 안 보였다.
+     다크모드에서도 어두운 배경을 유지하도록 색을 직접 지정하고, 글자는 대비 6:1 이상으로 고정한다. */
+  html[data-theme="dark"] .weekly-gate{background:linear-gradient(155deg,#3b3122,#222a3d);}
+  html[data-theme="dark"] .weekly-gate.gate-cleared{background:linear-gradient(155deg,#2f4a36,#222a3d);}
+  html[data-theme="dark"] .weekly-gate__name{color:#f3ede0;}
+  html[data-theme="dark"] .weekly-gate__hp-text{color:#edd39a;}
+  html[data-theme="dark"] .weekly-gate__note{color:#dcd4be;}
+  html[data-theme="dark"] .weekly-gate.gate-cleared .weekly-gate__hp-text{color:#b7e2bc;}
+  html[data-theme="dark"] .weekly-gate__bar-bg{background:rgba(255,255,255,0.16);}
+  html[data-theme="dark"] .weekly-gate__bar-fill{background:linear-gradient(90deg,#c25a4f,#e08a3e);}
+  html[data-theme="dark"] .weekly-gate.gate-cleared .weekly-gate__bar-fill{background:linear-gradient(90deg,#5f9469,#8fc99a);}
   .gate-settings{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:-6px 0 16px;}
   .gate-settings label{display:flex;flex-direction:column;gap:4px;font-size:0.68rem;color:var(--muted);}
   .gate-settings select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;}
@@ -976,7 +988,7 @@
   .stat-line__bar-bg{flex:1;height:6px;background:var(--c-e9e2cf);border-radius:6px;overflow:hidden;}
   .stat-line__bar-fill{height:100%;background:var(--stat-color, var(--gold));transition:width 0.5s ease;}
   .stat-line__count{flex:none;width:32px;text-align:right;color:var(--muted);font-size:0.7rem;}
-  .stat-line__skill{flex:0 0 100%;margin:2px 0 0 28px;font-size:0.68rem;color:var(--gold);}
+  .stat-line__skill{flex:0 0 calc(100% - 28px);margin:2px 0 0 28px;font-size:0.68rem;color:var(--gold);}
   .stat-line__skill--locked{color:var(--muted);opacity:0.75;}
   .weekly-damage-hours{display:block;margin-top:1px;font-size:.62rem;line-height:1;color:var(--muted);font-weight:600;text-align:right;}
   .stat-row strong#weekly-damage{display:flex;flex-direction:column;align-items:flex-end;}
@@ -1004,7 +1016,7 @@
   /* 마을 사람들 카드는 auto-fit+1fr 조합이 넓은 화면에서 카드를 과하게 늘려 비어 보이던 문제 —
      장비 그리드처럼 폭 상한을 둬서 카드 수가 적어도 어색하게 안 늘어나게 한다. */
   /* 마을 사람들 카드는 폭 상한 없이 가능한 폭만큼 늘어난다(맥북 전체화면에서 약 458px, 아이패드 세로·폰에서는 2열·1열로 자동 전환). */
-  #npc-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;}
+  #npc-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:10px;} /* min(100%,…): 폰처럼 340px보다 좁은 화면에서도 카드가 잘리지 않게 */
   /* 인벤토리 장비 카드는 개수가 적을 때(특히 1개) 가로로 억지로 늘어나 보이는 문제가 있어
      고정 폭(150~190px)으로 바꾸고 왼쪽 정렬해 카드 크기가 항상 일정하게 유지되도록 함 */
   #equipment-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(150px,190px));justify-content:start;}
@@ -8262,6 +8274,8 @@ function renderRpgQuests(){
 
   // ---------- 진동 — 화면을 안 봐도 무슨 일이 끝났는지 손끝으로 구분 ----------
   const VIBRATE_SUPPORTED = (typeof navigator !== 'undefined') && typeof navigator.vibrate === 'function';
+  // 터치 기기(폰·태블릿)에서만 진동 토글을 보여준다. 데스크톱 크롬은 vibrate 함수는 있지만 실제로는 아무 일도 안 일어난다.
+  const VIBRATE_UI_AVAILABLE = VIBRATE_SUPPORTED && (navigator.maxTouchPoints || 0) > 0;
   const BUZZ_PATTERNS = {
     focusEnd:[220,110,220,110,220],          // 집중 종료: 또렷하게 세 번
     breakEnd:[110,90,110],                   // 휴식 종료: 가볍게 두 번
@@ -8275,18 +8289,20 @@ function renderRpgQuests(){
   function updateVibrationToggleLabel(){
     const btn = document.getElementById('vibration-toggle-btn');
     if(!btn) return;
-    if(!VIBRATE_SUPPORTED){
-      btn.textContent = '📴 진동 미지원';
-      btn.disabled = true;
+    // 진동이 안 되는 환경(아이폰·아이패드처럼 API가 없는 브라우저, 맥북·PC처럼 함수만 있고 진동 장치가 없는 기기)에서는
+    // '미지원' 버튼을 회색으로 남겨두지 않고 아예 숨긴다. hidden 속성은 .print-btn 의 display 규칙에 덮일 수 있어 style로 숨긴다.
+    if(!VIBRATE_UI_AVAILABLE){
+      btn.style.display = 'none';
       return;
     }
+    btn.style.display = '';
     btn.textContent = state.vibrationOn ? '📳 진동 켜짐' : '📴 진동 꺼짐';
   }
   (function(){
     const btn = document.getElementById('vibration-toggle-btn');
     if(!btn) return;
     btn.addEventListener('click', () => {
-      if(!VIBRATE_SUPPORTED) return;
+      if(!VIBRATE_UI_AVAILABLE) return;
       state.vibrationOn = !state.vibrationOn;
       saveState();
       updateVibrationToggleLabel();
