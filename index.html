@@ -974,6 +974,7 @@
   .stat-line__bar-fill{height:100%;background:var(--stat-color, var(--gold));transition:width 0.5s ease;}
   .stat-line__count{flex:none;width:32px;text-align:right;color:var(--muted);font-size:0.7rem;}
   .stat-line__skill{flex:0 0 100%;margin:2px 0 0 28px;font-size:0.68rem;color:var(--gold);}
+  .stat-line__skill--locked{color:var(--muted);opacity:0.75;}
   .weekly-damage-hours{display:block;margin-top:1px;font-size:.62rem;line-height:1;color:var(--muted);font-weight:600;text-align:right;}
   .stat-row strong#weekly-damage{display:flex;flex-direction:column;align-items:flex-end;}
   .class-stats.stat-up{animation: tomatoPop 0.6s ease; }
@@ -999,48 +1000,75 @@
   .tier2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;}
   /* 마을 사람들 카드는 auto-fit+1fr 조합이 넓은 화면에서 카드를 과하게 늘려 비어 보이던 문제 —
      장비 그리드처럼 폭 상한을 둬서 카드 수가 적어도 어색하게 안 늘어나게 한다. */
-  #npc-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(220px,260px));justify-content:center;}
+  #npc-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(280px,330px));justify-content:center;gap:10px;}
   /* 인벤토리 장비 카드는 개수가 적을 때(특히 1개) 가로로 억지로 늘어나 보이는 문제가 있어
      고정 폭(150~190px)으로 바꾸고 왼쪽 정렬해 카드 크기가 항상 일정하게 유지되도록 함 */
   #equipment-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(150px,190px));justify-content:start;}
   .npc-card,.equipment-card,.monster-card,.chronicle-item{border:1px solid var(--line);border-radius:11px;background:var(--c-f8f4ea);padding:9px 10px;}
-  .npc-card{display:flex;flex-direction:column;gap:5px;}
+  .npc-card{display:flex;flex-direction:column;gap:5px;padding:12px 13px;}
   .npc-card__head,.equipment-card__head,.monster-card__head,.chronicle-item__head{display:flex;align-items:center;gap:7px;}
+  /* 초상화가 옆 소개 영역(이름·역할·대사·해금)의 높이만큼 함께 늘어나도록 stretch */
   .npc-card__main{
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.npc-card__body{
-  flex:1;
-  min-width:0;
-}
-
-.npc-card__head{
-  display:flex;
-  align-items:center;
-  gap:7px;
-}
-
-.npc-card__dialogue{
-  margin:6px 0 0;
-  padding:9px 12px;
-  background:var(--c-fffdf8);
-  border:1px solid var(--line);
-  border-radius:10px;
-  font-size:.67rem;
-  line-height:1.5;
-  color:var(--ink-soft);
-}
+    display:flex;
+    align-items:stretch;
+    gap:12px;
+    flex:1;
+  }
+  .npc-card__body{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+  }
+  .npc-card__head{
+    display:flex;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:2px 8px;
+  }
+  .npc-card__dialogue{
+    margin:5px 0 0;
+    padding:9px 12px;
+    background:var(--c-fffdf8);
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-size:.7rem;
+    line-height:1.55;
+    color:var(--ink-soft);
+    word-break:keep-all;
+  }
   .npc-card__icon,.monster-card__icon{font-size:1.15rem;}
-  .npc-card__icon{width:64px;height:76px;display:grid;place-items:center;flex:none;border:1px solid var(--line);border-radius:8px;background:var(--c-eee7d8);overflow:hidden;}
+  .npc-card__icon{
+    width:92px;
+    flex:none;
+    align-self:stretch;
+    min-height:120px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:var(--c-eee7d8);
+    overflow:hidden;
+    font-size:2.4rem;
+  }
   .npc-card__icon img{width:100%;height:100%;object-fit:contain;object-position:center bottom;}
-  .npc-card__name,.equipment-card__name,.monster-card__name{font-family:'Noto Serif KR',serif;font-size:.75rem;font-weight:700;color:var(--ink);}
-  .npc-card__role,.monster-card__condition{font-size:.62rem;color:var(--muted);}
-  .npc-card__trust{font-size:.62rem;color:var(--gold);font-weight:700;}
-  .npc-card__dialogue{font-size:.67rem;line-height:1.45;color:var(--ink-soft);margin:0;}
-  .npc-card__unlock{font-size:.59rem;color:var(--sage);}
+  .npc-card__icon--emoji{align-items:center;}
+  .npc-card__name,.equipment-card__name,.monster-card__name{font-family:'Noto Serif KR',serif;font-size:.8rem;font-weight:700;color:var(--ink);}
+  .npc-card__role,.monster-card__condition{font-size:.66rem;color:var(--muted);word-break:keep-all;}
+  .npc-card__trust{font-size:.66rem;color:var(--gold);font-weight:700;white-space:nowrap;}
+  /* 해금 조건은 줄이 바뀌어도 한 덩어리로 읽히도록 블록 + 촘촘한 줄간격 + 어절 단위 줄바꿈 */
+  .npc-card__unlock{
+    display:block;
+    margin-top:auto;
+    padding-top:6px;
+    font-size:.64rem;
+    line-height:1.45;
+    color:var(--sage);
+    word-break:keep-all;
+    text-wrap:balance;
+  }
   .equipment-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;}
   .equipment-card{min-width:0;}
   .equipment-card__slot{font-size:.58rem;color:var(--gold);font-weight:700;}
@@ -1455,6 +1483,30 @@
     opacity:0.5;
     font-size:1rem;
   }
+  /* 여관·잡화상의 .npc-dialogue처럼 NPC 초상화를 큼직하게 옆에 세우는 대화 상자 */
+  .rpg-quest-dialogue--portrait{
+    display:flex;
+    align-items:stretch;
+    gap:16px;
+    padding:16px 20px 16px 14px;
+  }
+  .rpg-quest-dialogue__portrait{
+    flex:none;
+    width:124px;
+    min-height:150px;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+  }
+  .rpg-quest-dialogue__portrait img{
+    width:100%;
+    height:100%;
+    max-height:190px;
+    object-fit:contain;
+    object-position:center bottom;
+  }
+  .rpg-quest-dialogue__fallback{font-size:3.4rem;line-height:1;align-self:center;}
+  .rpg-quest-dialogue__body{flex:1;min-width:0;display:flex;flex-direction:column;}
   .rpg-quest-dialogue__speaker{
     font-family:'Noto Serif KR', serif;
     font-weight:700;
@@ -1467,7 +1519,16 @@
     line-height:1.8;
     color:var(--ink-soft);
     margin-bottom:13px;
+    word-break:keep-all;
   }
+  .rpg-quest-dialogue__footer{
+    margin-top:auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .rpg-quest-dialogue__step{font-size:0.68rem;color:var(--muted);font-variant-numeric:tabular-nums;}
   .rpg-quest-dialogue__next{
     padding:8px 18px;
     border:1px solid var(--ink);
@@ -1477,9 +1538,12 @@
     font-size:0.78rem;
     font-weight:700;
     cursor:pointer;
-    float:right;
   }
   .rpg-quest-dialogue__next:hover{filter:brightness(1.15);}
+  @media (max-width:520px){
+    .rpg-quest-dialogue--portrait{gap:12px;padding:14px 16px 14px 10px;}
+    .rpg-quest-dialogue__portrait{width:96px;min-height:120px;}
+  }
 
   .rpg-quest-card--complete-all{text-align:center;padding:28px 20px;}
   .rpg-quest-card--complete-all .rpg-quest-card__title{margin-top:6px;font-size:1.05rem;}
@@ -2484,7 +2548,11 @@
   font-size: 15px;
   color: var(--t-2f3d5a);
   line-height: 1.6;
+  margin: 0;
+  word-break: keep-all;
 }
+  /* 잡화상에서 마르코 다음에 이어지는 이안의 말풍선 — 앞 말풍선 바로 아래에 붙여 한 묶음처럼 보이게 한다 */
+  .npc-dialogue--follow{margin-top:-8px;}
   /* ===== 자동 생성 색 토큰 (라이트 기본값) ===== */
   :root{
     --c-1c2333:#1c2333;
@@ -3781,15 +3849,24 @@
         </div>
         <p class="quest-panel__hint">골드로 소모품을 사보세요. 효과는 오늘 자정까지 이어집니다.</p>
         <div class="npc-dialogue">
-  <div class="npc-dialogue__portrait">
-    <img src="study-quest-npc-merchant.png" alt="마르코">
-  </div>
-  <div class="npc-dialogue__text" id="shop-line"></div>
-</div>
-        <p class="innkeeper-quest" id="marco-quest"></p>
+          <div class="npc-dialogue__portrait">
+            <img src="study-quest-npc-merchant.png" alt="마르코">
+          </div>
+          <div class="npc-dialogue__body">
+            <p class="npc-dialogue__text" id="shop-line"></p>
+            <p class="innkeeper-quest" id="marco-quest"></p>
+          </div>
+        </div>
 
-        <div class="panel-npc" data-panel-npc="ian" data-line="흥정은 내가 하지. 자네는 계획만 잘 세워오면 돼."></div>
-        <p class="innkeeper-quest" id="ian-quest"></p>
+        <div class="npc-dialogue npc-dialogue--follow">
+          <div class="npc-dialogue__portrait">
+            <img src="study-quest-npc-ian.png" alt="이안">
+          </div>
+          <div class="npc-dialogue__body">
+            <p class="npc-dialogue__text">“흥정은 내가 하지. 자네는 계획만 잘 세워오면 돼.”</p>
+            <p class="innkeeper-quest" id="ian-quest"></p>
+          </div>
+        </div>
 
         <div class="food-menu" id="shop-menu"></div>
       </section>
@@ -3966,6 +4043,35 @@
     '🔥': { int:1, dex:1, per:0, end:3 }  // 집중몰입 → 인내 중심, 실전역량은 배제
   };
   const STAT_LEVELS = [0, 35, 90, 170, 280, 420, 600];
+  // ---------- 스탯 스킬 ----------
+  // 스탯 레벨 idx 2(= Lv.3, 스탯 수치 90) 이상이면 각 스탯의 스킬이 해금되고,
+  // 그 스탯을 가장 많이 키워주는 "대표 스탬프"를 찍을 때 골드 보너스가 붙는다.
+  // (예전엔 "스킬 · 지식의 연결" 같은 이름표만 있고 실제 효과는 없었다.)
+  // 밸런스를 바꾸려면 아래 SKILL_BONUS_BY_LEVEL_IDX 숫자만 고치면 된다.
+  const SKILL_UNLOCK_LEVEL_IDX = 2;
+  const SKILL_BONUS_BY_LEVEL_IDX = { 2:1, 3:1, 4:2, 5:2, 6:3 }; // 스탯 Lv.3~4 → +1, Lv.5~6 → +2, Lv.7 → +3
+  const STAT_SKILLS = {
+    int:{ emoji:'📖', target:'암기·판례' },
+    dex:{ emoji:'✍️', target:'답안작성' },
+    per:{ emoji:'⚖️', target:'모의고사' },
+    end:{ emoji:'🔥', target:'집중몰입' }
+  };
+  function skillBonusForLevelIdx(idx){
+    if(idx < SKILL_UNLOCK_LEVEL_IDX) return 0;
+    return SKILL_BONUS_BY_LEVEL_IDX[Math.min(idx, 6)] || 0;
+  }
+  // 이 스탬프에 적용되는 스킬 보너스 합계와, 어떤 스킬이 붙었는지(표시용)를 돌려준다.
+  function skillStampBonusInfo(emoji, counts){
+    const c = counts || statCountsAllTime();
+    let bonus = 0; const names = [];
+    CLASS_STATS.forEach(st => {
+      const sk = STAT_SKILLS[st.key];
+      if(!sk || sk.emoji !== emoji) return;
+      const b = skillBonusForLevelIdx(statLevelIndexFor(c[st.key] || 0));
+      if(b > 0){ bonus += b; names.push(st.skill); }
+    });
+    return { bonus, names };
+  }
   const CLASS_TITLES = {
     int: { id:'scholar', title:'학자',   icon:'🧙', desc:'지식을 깊게 연결하는 성향' },
     dex: { id:'scribe',  title:'기록관', icon:'🖋️', desc:'생각을 정교하게 풀어내는 성향' },
@@ -6028,6 +6134,20 @@ const RPG_NPC_DATA={
 
 const RPG_NPC_ID_ALIASES={marta:'innkeeper',edwin:'sage',serra:'archivist',leon:'knight',marco:'merchant',guardian:'guardian'};
 function normalizeRpgNpcId(npcId){ return RPG_NPC_ID_ALIASES[npcId] || npcId; }
+// 한글 조사 자동 선택 — 이름 끝 글자에 받침이 있으면 첫 번째, 없으면 두 번째 조사를 붙인다.
+// (예: 아델 → "아델과", 노아 → "노아와" / 도시락 → "도시락을", 두루마리 → "두루마리를")
+// 이름이 한글이 아닌 글자로 끝나면(예: "???") 받침 없음으로 취급한다.
+function hasFinalConsonant(word){
+  const s=String(word==null?'':word).replace(/[\s\u200d\ufe0f]+$/,'');
+  if(!s) return false;
+  const code=s.charCodeAt(s.length-1);
+  if(code<0xAC00 || code>0xD7A3) return false;
+  return (code-0xAC00)%28!==0;
+}
+function withJosa(word, withBatchim, withoutBatchim){
+  const w=String(word==null?'':word);
+  return w+(hasFinalConsonant(w)?withBatchim:withoutBatchim);
+}
 function getRpgNpcView(npcId){
   const id=normalizeRpgNpcId(npcId);
   const base=(typeof NPCS!=='undefined' && Array.isArray(NPCS)) ? NPCS.find(n=>n.id===id) : null;
@@ -6179,7 +6299,7 @@ function renderRpgQuests(){
       const done=current>=target;
       const npc=getRpgNpcView(objective.npc);
       const text=objective.description || (
-        objective.type==='TALK' && npc?.name ? `${npc.name}와 대화하기` :
+        objective.type==='TALK' && npc?.name ? `${withJosa(npc.name,'과','와')} 대화하기` :
         objective.type==='STUDY_ACTION' ? '공부하기' :
         objective.type==='REGION_PROGRESS' ? '지역을 탐험하기' :
         objective.type==='INVESTIGATE' ? '조사하기' :
@@ -6253,7 +6373,7 @@ function renderRpgQuests(){
         return `<div class="rpg-quest-npc-card${done?' rpg-quest-npc-card--met':''}">
           <div class="rpg-quest-npc-card__visual">${visual}<div><div class="rpg-quest-npc-card__name">${npc.name}</div><div class="rpg-quest-npc-card__meta">${regionLabel(npc.location)} · ${npc.role||'등장인물'}</div></div></div>
           <div class="rpg-quest-npc-card__state">${done?'✅ 만남 완료':'⬜ 아직 만나지 않음'}</div>
-          ${done?'':`<button type="button" class="rpg-quest-npc-card__btn" onclick="window.startRpgDialogue('${npcId}')">${npc.name}와 대화하기</button>`}
+          ${done?'':`<button type="button" class="rpg-quest-npc-card__btn" onclick="window.startRpgDialogue('${npcId}')">${withJosa(npc.name,'과','와')} 대화하기</button>`}
         </div>`;
       }).join('')}</div>`;
     }
@@ -6266,11 +6386,19 @@ function renderRpgQuests(){
     const line=lines[dialogueStep];
     if(line){
       const npc=getRpgNpcView(activeNpc);
-      dialogueHtml=`<div class="rpg-quest-dialogue">
-        <div class="rpg-quest-dialogue__speaker">${line.speaker || npc.name}</div>
-        <div class="rpg-quest-dialogue__text">${line.text}</div>
-        <button type="button" class="rpg-quest-dialogue__next" onclick="window.advanceRpgDialogue()">다음</button>
-        <div style="clear:both;"></div>
+      const dlgPortrait=npc.image
+        ? `<img src="${npc.image}" alt="${npc.name||''}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'rpg-quest-dialogue__fallback',textContent:'${npc.icon||'👤'}'}))">`
+        : `<span class="rpg-quest-dialogue__fallback">${npc.icon||'👤'}</span>`;
+      dialogueHtml=`<div class="rpg-quest-dialogue rpg-quest-dialogue--portrait">
+        <div class="rpg-quest-dialogue__portrait">${dlgPortrait}</div>
+        <div class="rpg-quest-dialogue__body">
+          <div class="rpg-quest-dialogue__speaker">${line.speaker || npc.name}</div>
+          <div class="rpg-quest-dialogue__text">${line.text}</div>
+          <div class="rpg-quest-dialogue__footer">
+            <span class="rpg-quest-dialogue__step">${dialogueStep+1} / ${lines.length}</span>
+            <button type="button" class="rpg-quest-dialogue__next" onclick="window.advanceRpgDialogue()">${dialogueStep+1>=lines.length?'마치기':'다음'}</button>
+          </div>
+        </div>
       </div>`;
     }
   }
@@ -6672,7 +6800,7 @@ function renderRpgQuests(){
       const gift = SHOP_ITEMS.find(i => i.id === MARCO_QUEST_GIFT_ID);
       marcoEl.innerHTML = claimedToday
         ? '✓ 오늘의 부탁 완료 — 마르코가 챙겨준 선물을 받았어요.'
-        : `오늘의 부탁: 운동 기록 ${q.have}/${q.need}회 남기면 마르코가 ${gift ? gift.icon + ' ' + gift.name : '선물'}을 챙겨준대요.`;
+        : `오늘의 부탁: 운동 기록 ${q.have}/${q.need}회 남기면 마르코가 ${gift ? gift.icon + ' ' + withJosa(gift.name,'을','를') : '선물을'} 챙겨준대요.`;
       marcoEl.classList.toggle('done', claimedToday);
     }
     const ianEl = document.getElementById('ian-quest');
@@ -7295,7 +7423,6 @@ function renderRpgQuests(){
 
   // ---------- 성장 스탯 패널 ----------
   // 스탯은 공부시간과 행동 태그의 합으로 계산되고, 클래스는 그 장기적인 조합에서 자연스럽게 나타난다.
-  const SKILL_UNLOCK_LEVEL_IDX = 2; // STAT_LEVELS[2] = 35부터, 즉 Lv.3부터
   // 캐릭터 외형 시스템은 최종본에서 제외. 성장/클래스/장비 데이터는 그대로 유지한다.
 
   function renderClassStats(){
@@ -7316,7 +7443,11 @@ function renderRpgQuests(){
       const min = STAT_LEVELS[idx];
       const nextMin = STAT_LEVELS[idx+1];
       const pct = nextMin ? Math.min(100, ((count - min) / (nextMin - min)) * 100) : 100;
-      const skillTag = idx >= SKILL_UNLOCK_LEVEL_IDX ? `<span class="stat-line__skill">스킬 · ${s.skill}</span>` : '';
+      const skillDef = STAT_SKILLS[s.key];
+      const skillBonus = skillBonusForLevelIdx(idx);
+      const skillTag = (skillDef && skillBonus > 0)
+        ? `<span class="stat-line__skill" title="${skillDef.emoji} ${skillDef.target} 스탬프를 찍을 때마다 골드 보너스가 붙어요.">스킬 · ${s.skill} — ${skillDef.emoji} ${skillDef.target} 스탬프 골드 +${skillBonus}</span>`
+        : (skillDef ? `<span class="stat-line__skill stat-line__skill--locked">🔒 스킬 · ${s.skill} — Lv.${SKILL_UNLOCK_LEVEL_IDX+1}에서 해금</span>` : '');
       return `
         <div class="stat-line" style="--stat-color:${s.color};">
           <span class="stat-line__icon" aria-hidden="true">${s.icon}</span>
@@ -7349,7 +7480,11 @@ function renderRpgQuests(){
     void wrap.offsetWidth;
     wrap.classList.add('stat-up');
     spawnConfetti(wrap);
-    showNpcToast('sage', `${stat.icon} ${stat.code} ${stat.label} Lv.${levelIdx+1}에 이르렀소.`, { reward: coinHTML(COIN_REWARD.statLevelUp + totalBonusFor('statLevelUp')) });
+    // 스킬이 처음 열리거나 한 단계 강해지는 레벨이면 함께 알려준다.
+    let skillNote = '';
+    if(levelIdx === SKILL_UNLOCK_LEVEL_IDX) skillNote = ` 스킬 「${stat.skill}」${hasFinalConsonant(stat.skill) ? '을' : '를'} 익혔소.`;
+    else if(skillBonusForLevelIdx(levelIdx) > skillBonusForLevelIdx(levelIdx - 1)) skillNote = ` 스킬 「${stat.skill}」의 힘도 한층 강해졌소.`;
+    showNpcToast('sage', `${stat.icon} ${stat.code} ${stat.label} Lv.${levelIdx+1}에 이르렀소.${skillNote}`, { reward: coinHTML(COIN_REWARD.statLevelUp + totalBonusFor('statLevelUp')) });
   }
 
   // ---------- 관문지기 (3·5·7일과 유형별 난이도를 선택하고, 매주 일요일 새 주기를 연다) ----------
@@ -8409,7 +8544,7 @@ function renderRpgQuests(){
       return `
   <div class="npc-card">
     <div class="npc-card__main">
-      <span class="npc-card__icon">${visual}</span>
+      <span class="npc-card__icon${n.image?'':' npc-card__icon--emoji'}">${visual}</span>
       <div class="npc-card__body">
         <div class="npc-card__head">
           <span class="npc-card__name">${n.name}</span>
@@ -9929,6 +10064,8 @@ function renderRpgQuests(){
     if(!isMinimal) stampGold += equipmentBonusFor('stamp');
     if(isFirstOfDay) stampGold += equipmentBonusFor('firstStamp');
     stampGold += abilityStampBonus(emoji, isFirstOfDay);
+    const skillInfo = isMinimal ? { bonus:0, names:[] } : skillStampBonusInfo(emoji, prevStatCounts);
+    stampGold += skillInfo.bonus;
     stampGold += buffTotal('emojiGoldFlat', emoji);
     stampGold += consumeOneTimeBuff('nextStampGold');
     const goldPctBuff = buffTotal('goldPct');
@@ -9964,6 +10101,7 @@ function renderRpgQuests(){
       : (STAMP_MEANING[emoji] || '');
     const rewardBits = [];
     if(stampGold) rewardBits.push(coinHTML(stampGold));
+    if(skillInfo.bonus) rewardBits.push(`✨ ${skillInfo.names.join('·')} +${skillInfo.bonus}`);
     if(STAMP_STAT_HINT[emoji]) rewardBits.push(STAMP_STAT_HINT[emoji]);
     if(offeredEncounter) rewardBits.push('🧭 여정에서 만남 발견');
     document.getElementById('stamp-feedback').innerHTML = rewardBits.length
