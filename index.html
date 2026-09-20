@@ -1003,11 +1003,10 @@
   .tier2-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;}
   /* 마을 사람들 카드는 auto-fit+1fr 조합이 넓은 화면에서 카드를 과하게 늘려 비어 보이던 문제 —
      장비 그리드처럼 폭 상한을 둬서 카드 수가 적어도 어색하게 안 늘어나게 한다. */
+  /* 마을 사람들 카드는 폭 상한 없이 가능한 폭만큼 늘어난다(맥북 전체화면에서 약 458px, 아이패드 세로·폰에서는 2열·1열로 자동 전환). */
   #npc-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;}
-     /* 인벤토리 장비 카드는 개수가 적을 때(특히 1개) 가로로 억지로 늘어나 보이는 문제가 있어
+  /* 인벤토리 장비 카드는 개수가 적을 때(특히 1개) 가로로 억지로 늘어나 보이는 문제가 있어
      고정 폭(150~190px)으로 바꾸고 왼쪽 정렬해 카드 크기가 항상 일정하게 유지되도록 함 */
-     /* 카드 폭 상한(330px)을 없애고, 가능한 폭만큼 늘어나게 했습니다. 맥북 전체화면 폭(페이지 최대 960px)에서는 카드가 330px에서 약 458px로 넓어집니다.
-     아이패드 세로와 폰에서는 폭에 맞게 2열과 1열로 알아서 바뀝니다. */   
   #equipment-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(150px,190px));justify-content:start;}
   .npc-card,.equipment-card,.monster-card,.chronicle-item{border:1px solid var(--line);border-radius:11px;background:var(--c-f8f4ea);padding:9px 10px;}
   .npc-card{display:flex;flex-direction:column;gap:5px;padding:12px 13px;}
@@ -2087,6 +2086,16 @@
     justify-content:space-between;
     margin-bottom:16px;
   }
+  /* 주간·월간·히트맵 탭과 간단·상세 스위치를 한 줄에 나란히 둔다 (폰에서도 줄이 갈라지지 않게 nowrap) */
+  .calendar-toolbar__modes{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-width:0;
+  }
+  .calendar-toolbar .view-tabs{flex-wrap:nowrap;flex:none;}
+  /* 간단/상세는 보기 탭과 구분되도록 초록(sage) 강조색을 쓴다 */
+  .calendar-toolbar .density-tabs button.active{background:var(--sage);color:var(--paper);}
   .view-tabs{
     display:flex;
     flex-wrap:wrap;
@@ -2148,7 +2157,10 @@
     color:var(--muted);
     margin-bottom:8px;
   }
-  .grid-7{grid-template-columns:repeat(7,1fr);gap:7px;}
+  /* 1fr 은 최소 폭이 '내용의 최소 폭'이라 칸 안의 시간·스티커 때문에 7칸이 화면 밖으로 밀려났다 → minmax(0,1fr)로 균등 분할 */
+  .grid-7{grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;}
+  /* 히트맵은 모든 주(줄)의 높이를 같게 맞춰 격자가 들쭉날쭉하지 않게 한다 */
+  .calendar-grid.is-heatmap{grid-auto-rows:1fr;}
 
   .calendar-grid{display:grid;gap:7px;}
   .day-cell{
@@ -2157,6 +2169,7 @@
     border-radius:10px;
     padding:6px 5px;
     min-height:72px;
+    min-width:0;
     display:flex;
     flex-direction:column;
     justify-content:space-between;
@@ -2172,7 +2185,9 @@
   .day-cell.goal-met.today{background:var(--c-f2ece1);border-color:var(--seal-soft);}
   .day-cell.heatmap-cell{border-color:rgba(79,115,88,.16);background:var(--c-f5f2e8);justify-content:flex-start;gap:4px;}
   .day-cell.heatmap-cell .day-num{font-size:.68rem;}
-  .day-cell.heatmap-cell .heatmap-meta{font-size:.58rem;line-height:1.25;color:var(--muted);}
+  .day-cell.heatmap-simple{justify-content:flex-start;}
+  .day-cell.heatmap-cell .heatmap-meta{font-size:.58rem;line-height:1.3;color:var(--muted);word-break:keep-all;}
+  .heatmap-meta span{display:block;} /* 좁은 칸에서 '14개 · 1h'가 어색하게 끊기지 않도록 개수/시간을 두 줄로 */
   .day-cell.heatmap-cell.heat-0{background:var(--c-f7f4eb);}
   .day-cell.heatmap-cell.heat-1{background:var(--c-e5eee5);}
   .day-cell.heatmap-cell.heat-2{background:var(--c-cbdccf);}
@@ -2181,6 +2196,9 @@
   .day-cell.heatmap-cell.heat-4 .day-num,.day-cell.heatmap-cell.heat-4 .heatmap-meta{color:var(--t-ffffff);}
   .heatmap-summary{margin-top:12px;font-size:.66rem;color:var(--muted);line-height:1.45;}
   .heatmap-legend{display:flex;align-items:center;gap:5px;margin-top:9px;font-size:.62rem;color:var(--muted);}
+  .heatmap-legend[hidden]{display:none;} /* display:flex 가 hidden 속성을 덮어써서 히트맵이 아닐 때도 범례가 보이던 문제 */
+  /* 히트맵에서는 스티커·목표 달성 표시가 없으니 일반 범례는 '오늘'만 남긴다 */
+  .legend--heatmap span:not(:first-child){display:none;}
   .heatmap-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
   .day-num{font-size:0.75rem;font-weight:700;color:var(--ink-soft);white-space:nowrap;}
   .weekday-cell .day-num{font-size:0.7rem;color:var(--muted);font-weight:600;}
@@ -2336,6 +2354,23 @@
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+  }
+  /* ---------- 좁은 화면(폰) 캘린더 ----------
+     · 툴바: [주간|월간|히트맵] [간단|상세] 한 줄, 그 아래 ‹ 제목 › 오늘 한 줄
+     · 7칸이 화면 안에 들어오도록 간격·여백을 줄이고, 시간 문구는 말줄임 대신 두 줄로 나눠 보여준다 */
+  @media (max-width:520px){
+    .calendar-toolbar{gap:10px;margin-bottom:12px;}
+    .calendar-toolbar__modes{width:100%;justify-content:space-between;gap:6px;}
+    .calendar-toolbar .view-tabs button{padding:7px 10px;font-size:0.8rem;}
+    .month-nav{width:100%;display:grid;grid-template-columns:38px minmax(0,1fr) 38px auto;gap:8px;}
+    #period-title{min-width:0;font-size:0.92rem;}
+    .grid-7{gap:4px;}
+    .day-cell{padding:5px 3px;min-height:66px;}
+    .day-cell .day-num{font-size:0.7rem;}
+    .cell-time{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25;word-break:keep-all;}
+    .cell-stickers{max-height:none;font-size:0.68rem;}
+    .cell-tomato-badge{padding:2px 3px;font-size:0.62rem;}
+    .cell-tomato-badge b{font-size:0.56rem;}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -3542,12 +3577,17 @@
 
   <section class="card tab-content" data-tab-panel="record" hidden>
     <div class="calendar-toolbar">
-      <div class="view-tabs">
-        <button data-view="week" class="tab active" id="tab-week">주간</button>
-        <button data-view="month" class="tab" id="tab-month">월간</button>
-        <button data-view="heatmap" class="tab" id="tab-heatmap">🔥 히트맵</button>
+      <div class="calendar-toolbar__modes">
+        <div class="view-tabs">
+          <button data-view="week" class="tab active" id="tab-week">주간</button>
+          <button data-view="month" class="tab" id="tab-month">월간</button>
+          <button data-view="heatmap" class="tab" id="tab-heatmap">히트맵</button>
+        </div>
+        <div class="view-tabs density-tabs no-print" id="density-tabs" role="group" aria-label="달력 보기 방식">
+          <button type="button" data-density="simple" id="density-simple-btn" aria-pressed="false">간단</button>
+          <button type="button" data-density="detail" id="density-detail-btn" class="active" aria-pressed="true">상세</button>
+        </div>
       </div>
-      <button id="density-toggle-btn" class="today-jump-btn no-print" aria-pressed="false">🔎 상세히</button>
       <div class="month-nav">
         <button id="prev-btn" aria-label="이전">‹</button>
         <span id="period-title">-</span>
@@ -9727,7 +9767,7 @@ function renderRpgQuests(){
     const hiddenCount = otherStamps.length - otherShownArr.length;
     const shown = tomatoBadge + otherShownArr.join('');
     const extra = hiddenCount > 0 ? `<span class="cell-more">+${hiddenCount}</span>` : '';
-    const timeLabel = (!compact && rec && rec.startTime) ? `${rec.startTime}${rec.endTime ? '–'+rec.endTime : ''}` : '';
+    const timeLabel = (!compact && rec && rec.startTime) ? `${rec.startTime}${rec.endTime ? '–<wbr>'+rec.endTime : ''}` : ''; // <wbr>: 좁은 칸에서는 대시 뒤에서 줄바꿈
 
     cell.innerHTML = `
       <div class="day-num">${opts.label !== undefined ? opts.label : d.getDate()}</div>
@@ -9793,25 +9833,32 @@ function renderRpgQuests(){
     const focus = estimatedFocusMinutesForDate(dateStr);
     cell.classList.add('heatmap-cell', `heat-${level}`);
     cell.title = `${d.toLocaleDateString('ko-KR')} · 공부 ${stamps}개 · 순공 약 ${Math.floor(focus/60)}시간 ${focus%60}분`;
-    const dayNum = cell.querySelector('.day-num');
-    const stickers = cell.querySelector('.cell-stickers');
-    const time = cell.querySelector('.cell-time');
-    const missions = cell.querySelector('.mission-dots');
-    const more = cell.querySelector('.cell-more');
-    if(stickers) stickers.remove();
-    if(time) time.remove();
-    if(missions) missions.remove();
-    if(more) more.remove();
-    const meta = document.createElement('div');
-    meta.className = 'heatmap-meta';
-    meta.textContent = stamps ? `${stamps}개 · ${focus ? `${Math.floor(focus/60)}h` : '—'}` : '기록 없음';
-    cell.appendChild(meta);
+    // 히트맵은 '색'이 주인공이라 스티커·시간·미션 점은 빼고, 간단 보기에서 붙는 개수 배지(.cell-count)도 뺀다
+    // (개수는 아래 meta 문구가 이미 보여주므로 둘이 겹쳐서, 예전엔 '간단'이 '상세'보다 오히려 더 복잡해 보였다).
+    ['.cell-stickers', '.cell-time', '.mission-dots', '.cell-more', '.cell-count'].forEach(sel => {
+      const el = cell.querySelector(sel);
+      if(el) el.remove();
+    });
+    if(state.calendarDense !== false){
+      // 상세: 날짜 + 목표 달성 ✓ + 개수·순공 시간
+      const meta = document.createElement('div');
+      meta.className = 'heatmap-meta';
+      meta.innerHTML = stamps
+        ? `<span>${stamps}개</span><span>${focus ? `${Math.floor(focus/60)}h` : '—'}</span>`
+        : '<span>기록 없음</span>';
+      cell.appendChild(meta);
+    }else{
+      // 간단: 날짜와 색만. 목표 달성 ✓도 걷어내 순수한 열지도로 보이게 한다.
+      const check = cell.querySelector('.day-check');
+      if(check) check.remove();
+      cell.classList.add('heatmap-simple');
+    }
     return cell;
   }
 
   function renderHeatmap(){
     const y = monthCursor.getFullYear(), m = monthCursor.getMonth();
-    document.getElementById('period-title').textContent = `${y}년 ${m+1}월 · 히트맵`;
+    document.getElementById('period-title').textContent = `${y}년 ${m+1}월`;
     const grid = document.getElementById('calendar-grid');
     grid.innerHTML = '';
     const firstDay = new Date(y, m, 1);
@@ -9845,6 +9892,10 @@ function renderRpgQuests(){
     else if(currentView === 'heatmap') renderHeatmap();
     else renderMonth();
     const isHeatmap = currentView === 'heatmap';
+    const gridEl = document.getElementById('calendar-grid');
+    if(gridEl) gridEl.classList.toggle('is-heatmap', isHeatmap);
+    const baseLegend = document.querySelector('.legend');
+    if(baseLegend) baseLegend.classList.toggle('legend--heatmap', isHeatmap);
     if(summary) summary.hidden = !isHeatmap;
     if(legend) legend.hidden = !isHeatmap;
   }
@@ -10399,26 +10450,30 @@ function renderRpgQuests(){
   // 누르면 그렇게 된다는 뜻인지 알 수 없어서, 상세 모드일 때 '🔎 상세히'를 보고
   // "더 자세히 보자"며 누르면 오히려 간단 모드로 꺼졌다. 그리고 간단 모드에서는 스탬프가
   // 전혀 표시되지 않아서 기록이 통째로 사라진 것처럼 보였다 — 이번에 신고된 증상의 원인.
-  // 이제 "달력: 상세/간단"으로 현재 상태를 분명히 밝힌다.
+  // 이제 [간단 | 상세] 두 칸짜리 스위치로 현재 선택된 쪽이 항상 눈에 보이게 한다.
   function updateDensityToggleLabel(){
-    const btn = document.getElementById('density-toggle-btn');
-    if(!btn) return;
     const dense = state.calendarDense !== false;
-    btn.textContent = dense ? '달력: 🔎 상세' : '달력: ⚪ 간단';
-    btn.setAttribute('aria-pressed', String(!dense));
-    btn.title = dense
-      ? '지금은 스탬프까지 보여주는 상세 보기예요. 누르면 간단 보기로 바뀝니다.'
-      : '지금은 간단 보기라 스탬프가 숨겨져 있어요. 누르면 스탬프가 다시 보입니다.';
+    document.querySelectorAll('#density-tabs button').forEach(btn => {
+      const active = (btn.dataset.density === 'detail') === dense;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
   }
-  document.getElementById('density-toggle-btn').addEventListener('click', () => {
-    state.calendarDense = !(state.calendarDense !== false);
-    updateDensityToggleLabel();
-    saveState();
-    renderCalendar();
-    // 스탬프가 사라진 걸 버그로 오해하지 않도록 무슨 일이 일어났는지 말해준다
-    showToast(state.calendarDense
-      ? '달력을 상세 보기로 바꿨어요. 스탬프가 모두 보여요.'
-      : '달력을 간단 보기로 바꿨어요. 스탬프는 숨고 기록 개수만 남아요.');
+  document.querySelectorAll('#density-tabs button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wantDetail = btn.dataset.density === 'detail';
+      if((state.calendarDense !== false) === wantDetail) return; // 이미 선택된 쪽이면 아무 일도 없다
+      state.calendarDense = wantDetail;
+      updateDensityToggleLabel();
+      saveState();
+      renderCalendar();
+      // 스탬프가 사라진 걸 버그로 오해하지 않도록 무슨 일이 일어났는지 말해준다
+      showToast(wantDetail
+        ? '상세 보기예요. 스탬프가 모두 보여요.'
+        : (currentView === 'heatmap'
+            ? '간단 보기예요. 색과 날짜만 남겨요.'
+            : '간단 보기예요. 스탬프는 숨고 기록 개수만 남아요.'));
+    });
   });
 
   document.getElementById('modal-close').addEventListener('click', closeModal);
@@ -10718,7 +10773,7 @@ function renderRpgQuests(){
         const restoredStamps = Object.keys(state.entries).reduce((sum, ds) => sum + entriesFor(ds).length, 0);
         const lines = [`백업을 불러왔어요.\n기록 ${restoredDays}일 · 스탬프 ${restoredStamps}개를 복원했어요.`];
         if(state.calendarDense === false){
-          lines.push('\n달력이 "간단 보기"로 저장돼 있어 스탬프가 숨겨져 있어요.\n달력 위쪽 "달력: ⚪ 간단" 버튼을 누르면 다시 보여요.');
+          lines.push('\n달력이 "간단 보기"로 저장돼 있어 스탬프가 숨겨져 있어요.\n달력 위쪽 "간단 · 상세" 스위치에서 "상세"를 누르면 다시 보여요.');
         }
         alert(lines.join(''));
       }catch(err){
