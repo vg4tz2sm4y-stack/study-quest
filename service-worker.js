@@ -1,5 +1,5 @@
 // index.html이나 이미지를 바꿔서 배포할 때마다 아래 숫자를 올려야, 이미 설치된 기기에서도 새 버전이 보입니다.
-const CACHE = 'study-quest-v12';
+const CACHE = 'study-quest-v13';
 
 // 없으면 앱이 동작하지 않는 핵심 파일
 const CORE = ['./index.html', './manifest.json'];

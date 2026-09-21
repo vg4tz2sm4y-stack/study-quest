@@ -3428,6 +3428,34 @@
   .spirit-unit{border-top:1px dashed var(--line);}
   .spirit-unit summary{cursor:pointer;font-size:.68rem;padding:4px 0;}
   .spell-form input[type=text],.spell-form input[type=number]{width:100%;box-sizing:border-box;margin-bottom:8px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
+  /* 타이머 목표 · 세션 기록 카드 · 이해도 바 */
+  .timer-target{margin:0 0 12px;}
+  .timer-target .spirit-chips{justify-content:center;align-items:center;}
+  .timer-target select,.session-note select,.session-note input[type=text]{width:100%;box-sizing:border-box;margin:8px 0 0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
+  .session-note{margin-top:14px;padding:12px;border:1px solid var(--parch-edge);border-radius:12px;background:linear-gradient(180deg,var(--parch),var(--parch-2));text-align:left;}
+  .session-note[hidden],.timer-target[hidden]{display:none;}
+  .session-note__head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:var(--ink);}
+  .ease-wrap{margin:10px 0;}
+  .ease-label{display:flex;justify-content:space-between;font-size:.72rem;color:var(--ink-soft);margin-bottom:8px;}
+  .ease-slider{-webkit-appearance:none;appearance:none;width:100%;height:12px;border-radius:12px;outline:none;background:linear-gradient(90deg,var(--c-c25a4f),var(--gold),var(--sage));}
+  .ease-slider::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:var(--paper-card);border:3px solid var(--gold);box-shadow:0 2px 6px rgba(0,0,0,.3);}
+  .ease-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--paper-card);border:3px solid var(--gold);}
+  /* NPC 카드: 선물·하트는 우측 상단, 초상은 카드 높이에 맞춰 이미지가 커진다 */
+  .npc-card{position:relative;}
+  .npc-card__head{padding-right:78px;}
+  .npc-card__gift{position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:6px;margin:0;}
+  .gift-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--gold);background:var(--paper-card);font-size:1rem;cursor:pointer;padding:0;display:grid;place-items:center;}
+  .gift-btn:disabled{opacity:.45;cursor:default;}
+  .heart-fill{font-size:1.5rem;line-height:1;background:linear-gradient(to top,var(--seal) var(--fill,0%),var(--line) var(--fill,0%));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;}
+  .npc-card__icon{align-items:flex-start;}
+  .npc-card__icon img{width:100%;height:100%;object-fit:cover;object-position:50% 8%;}
+  /* 인벤토리(장비) 카드: 모바일에서 늘어나지 않게 */
+  #equipment-list.tier2-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));align-items:start;gap:6px;justify-content:stretch;}
+  #equipment-list .equipment-card{padding:7px 8px;}
+  #equipment-list .equipment-card__btn{margin-top:4px;padding:4px 6px;}
+  .inventory-group{padding:6px 0;}
+  @media(max-width:520px){#equipment-list.tier2-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
 
 
 
@@ -3583,6 +3611,8 @@
     </div>
   </div>
 
+  <div class="backup-nudge hidden no-print" id="mail-nudge"><span id="mail-nudge-text"></span><div class="backup-nudge__actions"><button class="backup-nudge__go" id="mail-nudge-go">확인하기</button></div></div>
+
   <div class="avoidance-nudge hidden no-print" id="avoidance-nudge">
     <div class="avoidance-nudge__row">
     <div class="avoidance-nudge__npc" id="slump-nudge-npc"></div>
@@ -3612,6 +3642,7 @@
       <span>세트 <input type="number" id="bell-cycles-input" min="1" max="8" step="1" value="3">회</span>
     </div>
     <p class="chip-limit-note" id="pomodoro-mode-note" style="text-align:center;margin:-6px 0 14px;">최소 25분 원칙이에요. 그 이상은 자유롭게 늘려도 좋아요.</p>
+    <div class="timer-target" id="timer-target" hidden></div>
     <div class="battle-strip" id="battle-strip" hidden></div>
     <div class="pomodoro-ring-wrap">
       <div class="pomodoro-ring" id="pomodoro-ring" style="--pct:0;">
@@ -3623,6 +3654,7 @@
     </div>
     <p class="pomodoro-message" id="pomodoro-message">25분, 스스로 정한 시간만큼 몰입해보세요.</p>
     <div class="pomodoro-controls" id="pomodoro-controls"></div>
+    <div class="session-note" id="session-note" hidden></div>
   </section>
 
   <div class="game-tabs quest-family" id="game-tabs">
@@ -3849,6 +3881,8 @@
     <div class="exercise-pool" id="exercise-pool"></div>
   </section>
 
+  <section class="quest-panel tab-content" data-tab-panel="record" hidden id="mail-panel"><details class="fold-panel"><summary class="quest-panel__header"><span class="quest-panel__header-icon">✉️</span><span class="quest-panel__header-title">편지 보관함</span><span class="quest-panel__header-sub" id="mail-sub"></span></summary><div class="fold-panel__body" id="mail-box"></div></details></section>
+
   <section class="quest-panel tab-content" data-tab-panel="record" hidden>
     <details class="fold-panel" open>
       <summary class="quest-panel__header">
@@ -3898,16 +3932,17 @@
       </section>
       <section class="quest-panel" id="spell-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">🔮</span><span class="quest-panel__header-title">주문서</span><span class="quest-panel__header-sub" id="spell-count"></span></div><div class="panel-npc" data-panel-npc="sage" data-line="외운 것은 입에 올릴 때 비로소 내 것이 되오. 짧게, 자주 영창하시오."></div><div class="spell-actions"><button type="button" class="spell-btn spell-btn--main" id="spell-cast-btn">🔮 영창하기</button><button type="button" class="spell-btn" id="spell-add-btn">＋ 주문 새기기</button></div></section>
 
-      <section class="quest-panel">
-        <div class="quest-panel__header">
+      <section class="quest-panel" id="town-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">🏘️</span><span class="quest-panel__header-title">마을 재건</span><span class="quest-panel__header-sub" id="town-sub"></span></div><p class="quest-panel__hint">골드를 나눠 투자해 마을을 키워요. 완공하면 새 메뉴·진열·게시판이 열려요.</p><div class="town-grid" id="town-grid"></div></section>
+
+      <section class="quest-panel"><details class="fold-panel" open><summary class="quest-panel__header">
           <span class="quest-panel__header-icon"></span>
           <span class="quest-panel__header-title">유물함</span>
           <span class="quest-panel__header-sub" id="seal-collection-count">0/7</span>
-        </div>
+        </summary><div class="fold-panel__body">
         <button type="button" class="gacha-draw-btn" id="gacha-draw-btn">유물함 열기 (<img src="study-quest-gold-coin.png" class="coin-icon coin-icon--button" alt="골드">30)</button>
         <div class="rune-set-banner" id="rune-set-banner">룬을 조합해 세트 효과를 활성화할 수 있어요.</div>
         <div class="seal-collection" id="seal-collection"></div>
-      </section>
+      </div></details></section>
 
       <section class="quest-panel">
         <details class="fold-panel">
@@ -3966,10 +4001,7 @@
     </div>
 
     <div class="game-tabs__panel adventure-inn-panel" data-tab-panel="adventure" hidden>
-      <section class="quest-panel" id="town-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">🏘️</span><span class="quest-panel__header-title">마을 재건</span><span class="quest-panel__header-sub" id="town-sub"></span></div><p class="quest-panel__hint">골드를 나눠 투자해 마을을 키워요. 완공하면 새 메뉴·진열·게시판이 열려요.</p><div class="town-grid" id="town-grid"></div></section>
       <section class="quest-panel" id="bounty-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">📌</span><span class="quest-panel__header-title">의뢰 게시판</span><span class="quest-panel__header-sub" id="bounty-sub"></span></div><div id="bounty-board"></div></section>
-      <section class="quest-panel" id="mail-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">✉️</span><span class="quest-panel__header-title">편지함</span><span class="quest-panel__header-sub" id="mail-sub"></span></div><div id="mail-box"></div></section>
-
       <section class="quest-panel">
         <div class="quest-panel__header">
           <span class="quest-panel__header-icon"></span>
@@ -4778,7 +4810,7 @@
   // "기본값 위에 병합"하는 안전망으로 쓴다 — 나중에 상태 필드가 늘어나도 그 두 곳에
   // 개별 복원 코드를 추가하는 걸 깜빡하면 조용히 사라지던 문제를 구조적으로 막기 위함.
   function createDefaultState(){
-    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, vibrationOn: true, mainTrack: 'auto', bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, spells: [], spellCasts: 0, spellDay: null, bounty: null, bountyDone: 0, letters: [], affection: {}, giftedOn: {}, giftKnown: {}, giftStock: {}, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, merchantSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, marcoQuestClaimedDate: null, ianQuestClaimedDate: null, ianFavorCount: 0, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [], regionBossesDefeated: [],
+    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, vibrationOn: true, mainTrack: 'auto', bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, spells: [], spellCasts: 0, spellDay: null, bounty: null, bountyDone: 0, letters: [], affection: {}, giftedOn: {}, giftKnown: {}, giftStock: {}, units: {}, studyLog: [], town: {}, spirit: {}, timerTarget: null, pendingSession: null, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, merchantSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, marcoQuestClaimedDate: null, ianQuestClaimedDate: null, ianFavorCount: 0, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [], regionBossesDefeated: [],
     rpgQuests: {},
     rpgWorld: { flags: {}, history: [], investigations: {}, items: {}, dialogue: { activeNpc:null, step:0 } },
     rpgNpcTrust: {},
@@ -5387,7 +5419,15 @@
     return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
   }
 
+  function normalizeExtras(){
+    ['letters','studyLog','spells'].forEach(k => { if(!Array.isArray(state[k])) state[k] = []; });
+    ['affection','giftedOn','giftKnown','giftStock','town','spirit','units'].forEach(k => { if(!state[k] || typeof state[k] !== 'object' || Array.isArray(state[k])) state[k] = {}; });
+    ['spellCasts','bountyDone'].forEach(k => { if(typeof state[k] !== 'number' || state[k] < 0) state[k] = 0; });
+    state.studyLog = state.studyLog.filter(e => e && typeof e === 'object' && typeof e.date === 'string' && Number.isFinite(e.min));
+    if(state.pendingSession && !state.studyLog.some(e => e.id === state.pendingSession)) state.pendingSession = null;
+  }
   function migrateEntries(){
+    normalizeExtras();
     let migrated = false;
     if(!state.entries || typeof state.entries !== 'object' || Array.isArray(state.entries)){
       state.entries = {};
@@ -6790,7 +6830,7 @@ function renderRpgQuests(){
     const growthDot = document.getElementById('growth-tab-dot');
     const canEat = FOOD_MENU.some(f => tomatoBalance() >= f.cost);
     const canDraw = (state.coins||0) >= GACHA_COST;
-    if(adventureDot) adventureDot.hidden = !(canEat || choiceEncounterForPending() || bountyReady() || mailUnread());
+    if(adventureDot) adventureDot.hidden = !(canEat || choiceEncounterForPending() || bountyReady());
     if(growthDot) growthDot.hidden = !canDraw;
   }
 
@@ -7836,6 +7876,7 @@ function renderRpgQuests(){
       trust:()=>adelTrust(),
       dialogue:t=>tierLine('adel',t,[5,3,0]),
       unlock:t=>t>=5 ? '형사소송법 지역 정복 보상 골드 +10 해금' : '형사소송법 미션 30회 달성하면 보상 강화 해금' },
+    { id:'unveiled', icon:'🌿', name:'이졸데', role:'비밀 길의 주인 · 선택과목', image:'study-quest-npc-unveiled.png', trustMax:5, show:()=>(missionCountsAllTime()['선택과목']||0) >= SUBJECT_REGION_TARGET, trust:()=>unveiledTrust(), dialogue:t=>tierLine('unveiled',t,[5,3,0]), unlock:t=>t>=5 ? '비밀 길의 이야기를 모두 나누었어요' : '선택과목 미션을 이어가면 신뢰가 깊어져요' },
   ];
   // ---------- NPC 신뢰도 ----------
   // 예전엔 NPC별로 기준이 제각각이라(마르타 식사 5회, 레온 스탬프 200개 등) 어떤 NPC는
@@ -8707,7 +8748,7 @@ function renderRpgQuests(){
   }
   function renderNPCs(){
     const wrap=document.getElementById('npc-list'); if(!wrap) return;
-    wrap.innerHTML=NPCS.map(n=>{
+    wrap.innerHTML=NPCS.filter(n=>!n.show||n.show()).map(n=>{
       const t=Math.min(n.trustMax,Math.max(0,Number(n.trust())));
       const visual=n.image ? `<img src="${n.image}" alt="${n.name}">` : n.icon;
       return `
@@ -9512,6 +9553,7 @@ function renderRpgQuests(){
     // 방금 끝난 블록 길이를 그대로 "순공 시간"에 더한다 — 몇 분짜리였는지는 타이머가 이미 알고 있으므로
     // 사용자가 따로 쪼개서 입력할 필요가 전혀 없다.
     logFocusMinutes(pomodoroDurationMs() / 60000);
+    recordSession(pomodoroDurationMs() / 60000, p.mode);
     if(p.mode === 'bell') playSchoolBellSound(); else playNormalTimerBell();
     buzz('focusEnd');
     if(p.mode === 'bell'){
@@ -9535,7 +9577,7 @@ function renderRpgQuests(){
         addTodayStamp('🍅', document.getElementById('pomodoro-ring'));
       }
       updateAmbientAudioForContext();
-      showSessionRecordToast(`🍅 뽀모도로 ${p.durationMin}분 완료 · 오늘 한 공부를 추가로 기록할까요?`);
+      showToast('📝 방금 공부한 내용을 아래 카드에 남겨 보세요.');
     }
     battleVictory(stampCount);
     renderPomodoro();
@@ -9563,7 +9605,7 @@ function renderRpgQuests(){
         p.endAt = null;
         saveState();
         buzz('sessionComplete');
-        showSessionRecordToast(`🔔 아카데미 세션 완료 · 오늘 한 공부를 추가로 기록할까요?`);
+        showToast('🔔 아카데미 세션 완료! 아래 카드에 마지막 공부 내용을 남겨 보세요.');
       }
     }else{
       p.phase = 'breakDone';
@@ -9797,7 +9839,9 @@ function renderRpgQuests(){
   function letterDef(x){ return x.dyn ? x : LETTERS.find(l => l.id === x.id); }
   function mailUnread(){ return (state.letters || []).filter(x => !x.read).length; }
   function mailSig(){ return (state.letters || []).map(x => x.id + (x.read ? 1 : 0)).join(); }
+  function mailNudge(){ const b = document.getElementById('mail-nudge'); if(!b) return; const n = mailUnread(); b.classList.toggle('hidden', !n); const t = document.getElementById('mail-nudge-text'); if(t) t.textContent = `✉️ 새 편지 ${n}통이 도착했어요.`; }
   function mailSub(){
+    mailNudge();
     const sub = document.getElementById('mail-sub'), n = mailUnread();
     if(sub) sub.textContent = n ? `새 편지 ${n}통` : `${(state.letters || []).length}통`;
   }
@@ -9828,7 +9872,7 @@ function renderRpgQuests(){
     });
     n += checkWeeklyJournal();
     Object.keys(GIFT_PREF).forEach(id => { for(let h = 1; h <= hearts(id); h++){ const c = state.letters.length; heartLetter(id, h); if(state.letters.length > c) n++; } });
-    if(n){ spiritReact(3, '편지가 왔어요! 얼른 열어봐요!'); saveState(); showToast(`✉️ 새 편지 ${n}통이 도착했어요. (모험 탭 편지함)`); }
+    if(n){ spiritReact(3, '편지가 왔어요! 얼른 열어봐요!'); saveState(); showToast(`✉️ 새 편지 ${n}통이 도착했어요. (위 알림에서 확인)`); }
     renderMailbox();
   }
   document.getElementById('mail-box').addEventListener('toggle', e => {
@@ -9849,37 +9893,30 @@ function renderRpgQuests(){
   function md(d){ return `${d.getMonth()+1}/${d.getDate()}`; }
   // 과목별 공부량은 '그날의 순공 시간을 그날 고른 미션 과목들에 나눈 추정치'
   function subjectStats(from, to){
-    const st = {}; MISSIONS.forEach(m => { st[m] = { days:0, min:0, stamps:0 }; });
-    const tg = {};
-    (state.focusLog || []).forEach(e => { if(e.subject && st[e.subject]){ tg[e.date] = tg[e.date] || {}; tg[e.date][e.subject] = (tg[e.date][e.subject] || 0) + (e.minutes || 0); } });
-    for(let d = new Date(from); d <= to; d = addDays(d, 1)){
-      const ds = formatDate(d), ms = [].concat((state.missions || {})[ds] || []).filter(m => st[m]);
-      const t = tg[ds] || {}, subj = ((state.entries || {})[ds] || {}).subj || {};
-      let tagged = 0; Object.keys(t).forEach(m => { st[m].min += t[m]; tagged += t[m]; });
-      const rest = Math.max(0, estimatedFocusMinutesForDate(ds) - tagged);
-      ms.forEach(m => { st[m].min += rest / ms.length; });
-      new Set(ms.concat(Object.keys(t), Object.keys(subj).filter(m => st[m]))).forEach(m => { st[m].days++; });
-      Object.keys(subj).forEach(m => { if(st[m]) st[m].stamps += subj[m]; });
-    }
+    const st = {}, f = formatDate(from), t = formatDate(to), dd = {};
+    MISSIONS.forEach(m => { st[m] = { days:0, min:0, n:0 }; });
+    logList().forEach(e => { if(e.date < f || e.date > t || !st[e.subject]) return; st[e.subject].min += e.min; st[e.subject].n++; (dd[e.subject] = dd[e.subject] || new Set()).add(e.date); });
+    MISSIONS.forEach(m => { st[m].days = dd[m] ? dd[m].size : 0; });
     return st;
   }
   function lastStudied(m){
-    const ds = Object.keys(state.missions || {}).filter(k => [].concat(state.missions[k] || []).includes(m)).sort().pop();
-    return ds ? Math.round((today - new Date(ds + 'T00:00:00')) / 86400000) : null;
+    let ds = null;
+    logList().forEach(e => { if(e.subject === m && (!ds || e.date > ds)) ds = e.date; });
+    return ds ? daysAgo(ds) : null;
   }
   function weekDigest(from, to){
     let days = 0, stamps = 0, min = 0; const types = {};
     for(let d = new Date(from); d <= to; d = addDays(d, 1)){
       const ds = formatDate(d), list = entriesFor(ds);
       if(list.length) days++;
-      stamps += scorableEntries(ds).length; min += estimatedFocusMinutesForDate(ds);
+      stamps += scorableEntries(ds).length; min += focusMinutesForDate(ds);
       list.forEach(e => { types[e] = (types[e] || 0) + 1; });
     }
     return { days, stamps, min, types, subj: subjectStats(from, to) };
   }
   function subjLines(sd){
     const rows = MISSIONS.filter(m => sd[m].days > 0).sort((a, b) => sd[b].days - sd[a].days || sd[b].min - sd[a].min);
-    return rows.length ? rows.map(m => `· ${m} ${sd[m].days}일${sd[m].min ? ` · 약 ${fmtMin(sd[m].min)}` : ''}`).join('\n') : '· 과목 미션이 기록되지 않았어요';
+    return rows.length ? rows.map(m => `· ${m} ${sd[m].days}일${sd[m].min ? ` · ${fmtMin(sd[m].min)}` : ''}`).join('\n') : '· 과목 미션이 기록되지 않았어요';
   }
   function neglectLine(sd){
     const list = MISSIONS.filter(m => !sd[m].days).map(m => [m, lastStudied(m)]).sort((a, b) => (b[1] == null ? 999 : b[1]) - (a[1] == null ? 999 : a[1])).slice(0, 3);
@@ -9915,27 +9952,27 @@ function renderRpgQuests(){
   function renderSpirit(){
     const face = document.getElementById('spirit-face');
     if(!face) return;
-    const ws = sundayOf(today), dg = weekDigest(ws, today), sd = dg.subj, all = missionCountsAllTime();
+    const ws = sundayOf(today), dg = weekDigest(ws, today), sd = dg.subj, all = missionCountsAllTime(), tot = subjectStats(firstRecordDate(), today);
     const fog = computeFogLevel(), st = computeStreak().streak, n = scorableEntries(formatDate(today)).length;
     const goal = goalForDate(formatDate(today)), ph = state.pomodoro.phase;
     const tap = (window.__spiritTap && Date.now() < window.__spiritTap.until) ? window.__spiritTap : null;
     const mood = tap ? [tap.idx, tap.line] : ph === 'focus' ? [4, '같이 집중해요. 잡음은 제가 지킬게요.'] : fog >= 2 ? [10, '…안개 때문에 눈이 감겨요. 한 걸음만 같이 걸어요.'] : (n > 0 && st >= 7) ? [11, `${st}일째 불꽃이 꺼지지 않아요!`] : (n > 0 && n >= goal) ? [3, '오늘 목표 달성! 정말 대단해요!'] : n > 0 ? [1, '오늘의 발자국, 잘 받아 적었어요.'] : fog === 1 ? [8, '어라, 요즘 조용하네요? 오늘 한 줄부터 다시 해봐요.'] : [null, '오늘 첫 스탬프를 기다리고 있어요.'];
-    const gaps = MISSIONS.filter(m => (all[m] || 0) > 0).map(m => [m, lastStudied(m)]).filter(r => r[1] != null && r[1] >= 7).sort((a, b) => b[1] - a[1]);
-    const hint = gaps.length ? ` ${withJosa(gaps[0][0], '이', '가')} ${gaps[0][1]}일째 조용해요. 오늘 한 번 들러볼까요?` : (!Object.keys(all).length ? ' 오늘의 핵심 미션에서 과목을 고르면 공부 지도를 그려 줄게요.' : '');
+    const gaps = MISSIONS.map(m => [m, lastStudied(m)]).filter(r => r[1] != null && r[1] >= 7).sort((a, b) => b[1] - a[1]);
+    const hint = gaps.length ? ` ${withJosa(gaps[0][0], '이', '가')} ${gaps[0][1]}일째 조용해요. 오늘 한 번 들러볼까요?` : (!logList().length ? ' 타이머를 시작할 때 과목을 고르면 공부 지도를 그려 줄게요.' : '');
     setSpiritFace(face, mood[0]);
     face.style.filter = spiritLv() ? `drop-shadow(0 0 ${4 + spiritLv() * 3}px rgba(240,190,80,.8))` : '';
     { const nm = document.getElementById('spirit-name'); if(nm) nm.textContent = SPIRIT_EVO[spiritLv()].name; }
     document.getElementById('spirit-line').textContent = mood[1] + hint;
     const rows = MISSIONS.map(m => {
       const v = sd[m], g = lastStudied(m);
-      return `<div class="spirit-row"><span>${m}</span><div class="spirit-row__bar"><div class="spirit-row__fill" style="width:${Math.min(100, v.days / 7 * 100)}%;--m:${missionColor(m)}"></div></div><span>${v.days}일${v.min ? ` · ${(v.min/60).toFixed(1)}h` : ''}<br><small>누적 ${all[m] || 0}일 · ${g == null ? '기록 없음' : g === 0 ? '오늘' : g + '일 전'}</small></span></div>`;
+      return `<div class="spirit-row"><span>${m}</span><div class="spirit-row__bar"><div class="spirit-row__fill" style="width:${Math.min(100, v.days / 7 * 100)}%;--m:${missionColor(m)}"></div></div><span>${v.days ? `${v.days}일 · ${fmtMin(v.min)}` : '기록 없음'}<br><small>누적 ${tot[m].min ? fmtMin(tot[m].min) : '-'} · ${g == null ? '마지막 -' : g === 0 ? '오늘' : g + '일 전'}</small></span></div>`;
     }).join('');
     const acts = ['📖','✍️','⚖️','🔥','🍅'].filter(e => dg.types[e]).map(e => `${e} ${dg.types[e]}`).join(' · ');
     const strong = MISSIONS.slice().sort((a, b) => (all[b] || 0) - (all[a] || 0))[0];
     const weak = MISSIONS.slice().sort((a, b) => ((all[a] || 0) - (all[b] || 0)) || ((lastStudied(b) ?? 999) - (lastStudied(a) ?? 999)))[0];
-    const sw = ((all[strong] || 0) > 0 && weak !== strong) ? `<p class="spirit-note">💪 지금까지 가장 많이 다진 과목은 <b>${strong}</b>, 더 살펴볼 과목은 <b>${weak}</b>이에요.</p>` : '';
+    const sw = '';
     renderSpiritEvo();
-    document.getElementById('spirit-map').innerHTML = rows + (acts ? `<p class="spirit-note">이번 주 활동 · ${acts}</p>` : '') + sw + '<p class="spirit-note spirit-note--muted">과목별 시간은 그날 순공 시간을 그날 고른 미션 과목에 나눈 추정치예요. 누적은 미션을 고른 날 수예요.' + (spiritLv() >= 1 ? ' 과목 태깅한 시간은 실제 기록이에요.' : ' 진화 Lv.1에서 과목 태깅을 열면 더 정확해져요.') + '</p>';
+    document.getElementById('spirit-map').innerHTML = rows + (acts ? `<p class="spirit-note">이번 주 활동 · ${acts}</p>` : '') + sw + '<p class="spirit-note spirit-note--muted">과목별 시간은 타이머·공부 기록에 남긴 실제 기록만 반영해요. 기록이 없으면 추정하지 않아요.</p>';
   }
 
   
@@ -9985,8 +10022,8 @@ function renderRpgQuests(){
   function hearts(id){ return Math.min(5, Math.floor((gs('affection')[id] || 0) / 100)); }
   function giftRowHTML(id){
     if(!GIFT_PREF[id]) return '';
-    const h = hearts(id), done = gs('giftedOn')[id] === formatDate(today);
-    return `<div class="npc-card__gift"><span class="npc-card__hearts" title="호감도">${'♥'.repeat(h)}${'♡'.repeat(5 - h)}</span>${h >= 5 && HEART_PERK[id] ? ` <small title="${HEART_PERK[id]}">★ ${HEART_PERK[id]}</small>` : ''}<button type="button" class="spell-btn" data-gift-open="${id}"${done ? ' disabled' : ''}>${done ? '🎁 오늘 완료' : '🎁 선물'}</button></div>`;
+    const h = hearts(id), pct = Math.round((gs('affection')[id] || 0) / 500 * 100), done = gs('giftedOn')[id] === formatDate(today);
+    return `<div class="npc-card__gift"><span class="heart-fill" style="--fill:${pct}%" title="호감도 ♥${h}/5${h >= 5 && HEART_PERK[id] ? ' · 특전: ' + HEART_PERK[id] : ''}">♥</span><button type="button" class="gift-btn" data-gift-open="${id}" title="${done ? '오늘 선물 완료' : '선물하기'}"${done ? ' disabled' : ''}>🎁</button></div>`;
   }
   function giftShelf(){
     return '<div class="shop-subhead">🎁 선물 진열대</div>' + GIFT_ITEMS.filter(it => (it.needShop || 0) <= townLevel('shop')).map(it => {
@@ -10160,29 +10197,30 @@ function renderRpgQuests(){
 
   
   // ===== 정령 진화 (골드로 기능 해금) =====
-  const SPIRIT_EVO = [{ name:'견습 정령' }, { name:'마법 정령', cost:120, unlock:'스탬프·집중 시간 과목 태깅' }, { name:'현자 정령', cost:300, unlock:'회독 리포트' }, { name:'대정령', cost:700, unlock:'약점 진단' }];
+  const SPIRIT_EVO = [{ name:'견습 정령' }, { name:'마법 정령', cost:120, unlock:'단원별 회독 리포트' }, { name:'현자 정령', cost:300, unlock:'약점 진단' }, { name:'대정령', cost:700, unlock:'오늘의 추천 공부' }];
   function spiritLv(){ return (state.spirit && state.spirit.lv) || 0; }
-  function curSubj(){ return (spiritLv() >= 1 && state.curSubject && state.curSubjectDate === formatDate(today)) ? state.curSubject : null; }
+  function curSubj(){ const t = state.timerTarget; return (t && t.date === formatDate(today) && t.subj) || null; }
   function firstRecordDate(){ return new Date((Object.keys(state.entries || {}).sort()[0] || formatDate(today)) + 'T00:00:00'); }
   function renderSpiritEvo(){
     const el = document.getElementById('spirit-evo');
     if(!el) return;
-    const lv = spiritLv(), nx = SPIRIT_EVO[lv + 1], cs = curSubj();
+    const lv = spiritLv(), nx = SPIRIT_EVO[lv + 1], rep = subjReport(), tm = logTodayMin();
     let h = `<div class="spirit-evo__head"><span>✨ ${SPIRIT_EVO[lv].name} · 진화 Lv.${lv}</span>${nx ? `<button type="button" class="spell-btn" data-spirit-evo="1">진화 ${coinHTML(evoCost(nx), 'coin-icon--button')}</button>` : '<span class="bounty-card__reward">최종 진화</span>'}</div>`;
     if(nx) h += `<div class="spirit-evo__sec spirit-evo__lock">🔒 다음 진화에서 열려요 · ${nx.unlock}</div>`;
-    if(lv >= 1) h += `<div class="spirit-evo__sec">📌 지금 공부 중인 과목 <small>(고르면 오늘 찍는 스탬프·집중 시간이 이 과목으로 기록돼요)</small><div class="spirit-chips">${MISSIONS.map(m => `<button type="button" class="spirit-chip${cs === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-subj="${m}">${m}</button>`).join('')}</div></div>`;
-const rep = subjReport();
-    h += `<div class="spirit-evo__sec">📒 오늘 기록 ${logTodayMin()}분 · 아직 기록 안 한 순공 ${unloggedMin()}분<br><button type="button" class="spell-btn" data-log-open="1" style="width:100%;margin-top:4px">공부 기록하기 · 기록 보기</button></div>`;
-    if(lv >= 2) h += '<div class="spirit-evo__sec">📖 단원별 회독 리포트<br><small>회독 = 모든 단원을 한 바퀴 마친 횟수예요.</small>' + rep.filter(r => r.n).map(r => `<details class="spirit-unit"><summary>${r.m} · ${r.done}회독 완료 · ${r.done + 1}회독 ${r.prog}/${r.n}단원 · 이해도 ${r.ease ? r.ease.toFixed(1) : '-'}</summary>${r.units.map(u => `<div class="spirit-round"><span>${u.name} · ${u.rounds}회독 · ${u.ease ? '★' + u.ease : '미평가'}</span><span>${u.last ? daysAgo(u.last) + '일 전' : '미학습'} · ${fmtMin(u.min)}</span></div>`).join('')}</details>`).join('') + '</div>';
-    if(lv >= 3){
-      const us = [];
-      rep.forEach(r => r.units.forEach(u => us.push({ m:r.m, u, score:(u.ease ? (5 - u.ease) * 2 : 4) + (u.last ? Math.min(daysAgo(u.last), 30) / 5 : 6) + (u.rounds === 0 ? 2 : 0) - u.rounds * 0.5 })));
-      const top = us.sort((a, b) => b.score - a.score).slice(0, 5).map((x, i) => `${i + 1}. ${x.m} ${x.u.name} — ${x.u.ease ? '이해도 ★' + x.u.ease : '미평가'} · ${x.u.last ? daysAgo(x.u.last) + '일 전' : '미학습'} · ${x.u.rounds}회독`);
+    h += `<div class="spirit-evo__sec">📒 오늘 기록 ${tm ? fmtMin(tm) : '아직 없어요'}<br><small>타이머로 공부하면 자동으로 남고, 휴식 때 카드에서 내용을 적을 수 있어요.</small><br><button type="button" class="spell-btn" data-log-open="1" style="width:100%;margin-top:4px">공부 기록 · 보기 · 수정</button></div>`;
+    const us = [];
+    rep.forEach(r => r.units.forEach(u => us.push({ m:r.m, u, score:(u.ease ? (5 - u.ease) * 2 : 4) + (u.last ? Math.min(daysAgo(u.last), 30) / 5 : 6) + (u.rounds === 0 ? 2 : 0) - u.rounds * 0.5 })));
+    us.sort((a, b) => b.score - a.score);
+    const gapTxt = u => u.last ? daysAgo(u.last) + '일 전' : '미학습';
+    if(lv >= 1) h += '<div class="spirit-evo__sec">📖 단원별 회독 리포트<br><small>회독 = 모든 단원을 한 바퀴 마친 횟수예요.</small>' + rep.filter(r => r.n).map(r => `<details class="spirit-unit"><summary>${r.m} · ${r.done}회독 완료 · ${r.done + 1}회독 ${r.prog}/${r.n}단원 · 이해도 ${r.ease ? r.ease.toFixed(1) : '-'}</summary>${r.units.map(u => `<div class="spirit-round"><span>${u.name} · ${u.rounds}회독 · ${u.ease ? '이해 ' + u.ease : '미평가'}</span><span>${gapTxt(u)} · ${u.min ? fmtMin(u.min) : '기록 없음'}</span></div>`).join('')}</details>`).join('') + '</div>';
+    if(lv >= 2){
+      const top = us.slice(0, 5).map((x, i) => `${i + 1}. ${x.m} ${x.u.name} — ${x.u.ease ? '이해 ' + x.u.ease : '미평가'} · ${gapTxt(x.u)} · ${x.u.rounds}회독`);
       const sc = rep.filter(r => r.n).map(r => ({ m:r.m, v:r.units.reduce((a, u) => a + u.rounds, 0) / r.n * 2 + r.ease }));
       const strong = sc.slice().sort((a, b) => b.v - a.v).slice(0, 2).filter(x => x.v > 0).map(x => x.m).join(', ') || '아직 없어요';
       const weak = sc.slice().sort((a, b) => a.v - b.v).slice(0, 2).map(x => x.m).join(', ') || '-';
       h += `<div class="spirit-evo__sec">💡 정령의 진단<br>🔁 복습 우선 단원<br>${top.length ? top.join('<br>') : '기록이 쌓이면 알려드릴게요.'}<br>💪 든든한 과목: ${strong}<br>🧭 살필 과목: ${weak}<br><small>우선순위 = 낮은 이해도 + 오래된 복습 + 적은 회독 (미평가·미학습은 높게 반영)</small></div>`;
     }
+    if(lv >= 3) h += `<div class="spirit-evo__sec">🎯 오늘의 추천 공부<br>${us.slice(0, 3).map(x => `<div class="spirit-round"><span>${x.m} · ${x.u.name}</span><button type="button" class="spell-btn" data-tgt-subj="${x.m}" data-tgt-unit="${x.u.id}">타이머 목표로</button></div>`).join('') || '단원 기록이 쌓이면 추천해 드려요.'}</div>`;
     el.innerHTML = h;
   }
   document.getElementById('spirit-evo').addEventListener('click', e => {
@@ -10209,95 +10247,220 @@ const rep = subjReport();
   });
 
   
-  // ===== 공부 기록부 (과목 → 단원 → 회독·이해도·시간) =====
-  const KINDS = ['강의','기본서','암기·복습','기출·문제','답안작성'];
+  // ===== 공부 기록부: 타이머 → 세션 기록 → 단원 통계 (모든 통계는 실제 기록에서만 계산) =====
+  const KINDS = ['미지정','기본서','강의','암기·복습','기출·문제','답안작성'];
   const DEFAULT_UNITS = {
     '헌법':['헌법총론','기본권총론','개별 기본권','통치구조','헌법재판'], '민법':['총칙','물권법','채권총론','채권각론','친족·상속'],
     '형법':['형법총론','각론: 개인적 법익','각론: 사회·국가적 법익'], '행정법':['행정법총론','행정작용법','행정절차·정보공개','행정쟁송','행정조직·특별행정법'],
     '상법':['상법총칙·상행위','회사법','어음·수표법','보험·해상'], '민사소송법':['소송의 주체·소','심리','증거','소송의 종료','상소·재심·특수절차'],
     '형사소송법':['수사','공소','공판·증거','재판·상소','특별절차'], '선택과목':[]
   };
-  let logDraft = {};
-  function unitsOf(subj){ const U = gs('units'); if(!Array.isArray(U[subj])) U[subj] = (DEFAULT_UNITS[subj] || []).map((n, i) => ({ id:'u' + i, name:n, rounds:0, ease:0, last:null, min:0 })); return U[subj]; }
+  const EASE_TXT = ['미평가','헷갈려요','아직 불안해요','절반쯤 알아요','거의 익혔어요','완벽해요'];
+  let logDraft = {}, ttAll = false;
+  function unitsOf(subj){ const U = gs('units'); if(!Array.isArray(U[subj])) U[subj] = (DEFAULT_UNITS[subj] || []).map((n, i) => ({ id:'u' + i, name:n })); return U[subj]; }
   function logList(){ if(!Array.isArray(state.studyLog)) state.studyLog = []; return state.studyLog; }
   function daysAgo(ds){ return Math.round((today - new Date(ds + 'T00:00:00')) / 86400000); }
   function logTodayMin(){ const ds = formatDate(today); return logList().filter(e => e.date === ds).reduce((a, e) => a + e.min, 0); }
-  function unloggedMin(){ return Math.max(0, Math.round(estimatedFocusMinutesForDate(formatDate(today)) - logTodayMin())); }
+  // 단원의 회독·이해도·마지막 공부일·시간은 기록에서 매번 계산 → 기록을 고치거나 지우면 통계도 함께 바뀐다
+  function unitStats(subj){
+    const us = unitsOf(subj), m = {};
+    us.forEach(u => { m[u.id] = { rounds:0, ease:0, last:null, min:0, _k:'' }; });
+    logList().forEach(e => {
+      const o = e.subject === subj && m[e.unit];
+      if(!o) return;
+      o.min += e.min; if(e.round) o.rounds++;
+      if(!o.last || e.date > o.last) o.last = e.date;
+      const k = e.date + (e.id || '');
+      if(e.ease && k >= o._k){ o.ease = e.ease; o._k = k; }
+    });
+    return us.map(u => Object.assign({}, u, m[u.id]));
+  }
   function subjReport(){
     return MISSIONS.map(m => {
-      const us = unitsOf(m), n = us.length, done = n ? Math.min(...us.map(u => u.rounds)) : 0, rated = us.filter(u => u.ease);
+      const us = unitStats(m), n = us.length, done = n ? Math.min(...us.map(u => u.rounds)) : 0, rated = us.filter(u => u.ease);
       return { m, n, done, prog:us.filter(u => u.rounds > done).length, ease:rated.length ? rated.reduce((a, u) => a + u.ease, 0) / rated.length : 0, units:us };
     });
   }
-  function logOpen(subj){
+  function easeHTML(id, v){ return `<div class="ease-wrap"><div class="ease-label"><span>이해도</span><b id="${id}-txt">${v} · ${EASE_TXT[v]}</b></div><input type="range" class="ease-slider" id="${id}" min="0" max="5" step="1" value="${v}"></div>`; }
+  document.addEventListener('input', e => {
+    if(e.target.classList && e.target.classList.contains('ease-slider')){ const t = document.getElementById(e.target.id + '-txt'); if(t) t.textContent = `${e.target.value} · ${EASE_TXT[e.target.value]}`; }
+  });
+  function unitOptions(subj, sel){ return '<option value="">(단원 미정)</option>' + (subj ? unitStats(subj) : []).map(u => `<option value="${u.id}"${u.id === sel ? ' selected' : ''}>${u.name} · ${u.rounds}회독</option>`).join(''); }
+  // ---- 타이머 시작 전 과목·단원 지정 (오늘의 핵심 미션과 연결) ----
+  function timerTarget(){
+    const t = state.timerTarget, ds = formatDate(today);
+    if(t && t.date === ds) return t;
+    const ms = ((state.missions || {})[ds] || []).filter(m => MISSIONS.includes(m));
+    state.timerTarget = { date:ds, subj:ms[0] || null, unit:null };
+    return state.timerTarget;
+  }
+  function setTimerTarget(subj, unit){ state.timerTarget = { date:formatDate(today), subj:subj || null, unit:unit || null }; saveState(); renderTimerTarget(); }
+  function renderTimerTarget(){
+    const el = document.getElementById('timer-target');
+    if(!el) return;
+    const p = state.pomodoro, t = timerTarget();
+    const sel = ['idle','breakReady','breakDone'].includes(p.phase), lbl = p.phase === 'focus' || (p.phase === 'paused' && p.pausedFrom === 'focus');
+    const ms = ((state.missions || {})[formatDate(today)] || []).filter(m => MISSIONS.includes(m));
+    const list = (ttAll || !ms.length) ? MISSIONS : Array.from(new Set(ms.concat(t.subj ? [t.subj] : [])));
+    const sig = `${sel ? 1 : lbl ? 2 : 0}|${t.subj}|${t.unit}|${list.join()}|${ttAll}`;
+    if(el.dataset.sig === sig) return;
+    el.dataset.sig = sig;
+    if(sel){
+      el.hidden = false;
+      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj && unitsOf(t.subj).length ? `<select id="tt-unit">${unitOptions(t.subj, t.unit)}</select>` : ''}`;
+    }else if(lbl){
+      const u = t.subj ? unitsOf(t.subj).find(x => x.id === t.unit) : null;
+      el.hidden = false; el.innerHTML = `<p class="chip-limit-note" style="text-align:center">🎯 ${t.subj ? t.subj + (u ? ' · ' + u.name : '') : '과목 미지정'}</p>`;
+    }else{ el.hidden = true; el.innerHTML = ''; }
+  }
+  document.getElementById('timer-target').addEventListener('click', e => {
+    const c = e.target.closest('[data-tt]'), a = e.target.closest('[data-tt-all]');
+    if(c){ const t = timerTarget(); setTimerTarget(t.subj === c.dataset.tt ? null : c.dataset.tt, null); }
+    else if(a){ ttAll = true; renderTimerTarget(); }
+  });
+  document.getElementById('timer-target').addEventListener('change', e => { if(e.target.id === 'tt-unit'){ const t = timerTarget(); setTimerTarget(t.subj, e.target.value || null); } });
+  // ---- 세션이 끝나면 시간은 자동 기록, 내용은 휴식 중 카드에서 (터치 전까지 유지) ----
+  function recordSession(min, mode){
+    const t = timerTarget(), un = t.subj ? (unitsOf(t.subj).find(u => u.id === t.unit) || {}) : {};
+    const id = 'l' + Date.now().toString(36);
+    logList().push({ id, date:formatDate(today), subject:t.subj || null, unit:t.unit || null, unitName:un.name || '', kind:'미지정', min:Math.round(min), ease:0, round:false, note:'', mode, src:'timer' });
+    if(state.studyLog.length > 800) state.studyLog = state.studyLog.slice(-800);
+    state.pendingSession = id; saveState(); renderSessionNote(); renderSpirit();
+  }
+  function renderSessionNote(){
+    const el = document.getElementById('session-note');
+    if(!el) return;
+    const p = state.pomodoro, e = logList().find(x => x.id === state.pendingSession);
+    const show = !!e && !(p.phase === 'focus' || (p.phase === 'paused' && p.pausedFrom === 'focus'));
+    el.hidden = !show;
+    const sig = show ? e.id : '';
+    if(el.dataset.sig === sig) return;
+    el.dataset.sig = sig;
+    if(!show){ el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="session-note__head"><span>📝 방금 ${e.min}분 · 무엇을 공부했나요?</span><button type="button" class="spell-btn" data-sn="close" style="flex:none;padding:4px 10px">닫기</button></div>
+      <select id="sn-subj"><option value="">(과목 미지정)</option>${MISSIONS.map(m => `<option${m === e.subject ? ' selected' : ''}>${m}</option>`).join('')}</select>
+      <select id="sn-unit">${unitOptions(e.subject, e.unit)}</select>
+      <select id="sn-kind">${KINDS.map(k => `<option${k === e.kind ? ' selected' : ''}>${k}</option>`).join('')}</select>
+      <input type="text" id="sn-note" maxlength="80" placeholder="메모 (예: 물권변동 판례 정리)" value="${escAttr(e.note || '')}">
+      ${easeHTML('sn-ease', e.ease || 0)}
+      <label style="display:block;font-size:.76rem;margin-bottom:8px"><input type="checkbox" id="sn-round"${e.round ? ' checked' : ''}> 이 단원 한 바퀴를 끝냈어요 (회독 +1)</label>
+      <button type="button" class="spell-btn spell-btn--main" data-sn="save" style="width:100%">기록에 반영하기</button>`;
+  }
+  function commitSessionNote(silent){
+    const e = logList().find(x => x.id === state.pendingSession), g = id => document.getElementById(id);
+    if(!e || !g('sn-note')){ state.pendingSession = null; return; }
+    e.subject = g('sn-subj').value || null; e.unit = g('sn-unit').value || null;
+    e.unitName = (e.subject && e.unit ? (unitsOf(e.subject).find(u => u.id === e.unit) || {}).name : '') || '';
+    e.kind = g('sn-kind').value; e.note = g('sn-note').value.trim(); e.ease = Number(g('sn-ease').value) || 0; e.round = g('sn-round').checked && !!e.unit;
+    state.pendingSession = null; saveState(); renderSessionNote(); renderSpirit();
+    if(!silent){ awardCoins(2); renderClassStats(); showToast(`📝 ${e.subject || '과목 미지정'}${e.unitName ? ' · ' + e.unitName : ''} 기록에 반영했어요. (${coinHTML(2)})`); }
+  }
+  document.getElementById('session-note').addEventListener('click', e => {
+    const b = e.target.closest('[data-sn]');
+    if(!b) return;
+    if(b.dataset.sn === 'save') commitSessionNote(false);
+    else{ state.pendingSession = null; saveState(); renderSessionNote(); }
+  });
+  document.getElementById('session-note').addEventListener('change', e => { if(e.target.id === 'sn-subj') document.getElementById('sn-unit').innerHTML = unitOptions(e.target.value, null); });
+  // ---- 직접 기록 · 수정 · 삭제 ----
+  function logNew(){ logDraft = {}; logOpen(); }
+  function logEdit(id){
+    const e = logList().find(x => x.id === id);
+    if(!e) return;
+    logDraft = { editId:id, subj:e.subject || MISSIONS[0], unit:e.unit, kind:e.kind, ease:e.ease || 0, min:e.min, note:e.note || '', round:!!e.round };
+    logOpen();
+  }
+  function captureLog(){
+    const g = id => document.getElementById(id), d = logDraft;
+    if(!g('log-min')) return;
+    d.min = g('log-min').value; d.kind = g('log-kind').value; d.note = g('log-note').value; d.ease = Number(g('log-ease').value) || 0; d.round = g('log-round').checked;
+    if(g('log-unit')) d.unit = g('log-unit').value;
+  }
+  function logOpen(){
     const d = logDraft;
-    if(subj) d.subj = subj;
-    d.subj = d.subj || curSubj() || ((state.missions || {})[formatDate(today)] || []).find(m => MISSIONS.includes(m)) || MISSIONS[0];
-    const us = unitsOf(d.subj);
+    d.subj = d.subj || curSubj() || MISSIONS[0];
+    const us = unitStats(d.subj);
     if(!us.find(u => u.id === d.unit)) d.unit = us.length ? us[0].id : null;
-    d.kind = d.kind || KINDS[0]; d.ease = d.ease || 0;
-    const sug = Math.round(unloggedMin() / 5) * 5;
+    d.kind = d.kind || '미지정'; d.ease = d.ease || 0;
     spellOpen(`<div class="spell-form">
       <select id="log-subj" data-log="subj">${MISSIONS.map(m => `<option${m === d.subj ? ' selected' : ''}>${m}</option>`).join('')}</select>
-      ${us.length ? `<select id="log-unit">${us.map(u => `<option value="${u.id}"${u.id === d.unit ? ' selected' : ''}>${u.name} · ${u.rounds}회독</option>`).join('')}</select>` : '<p class="modal-sub">아직 단원이 없어요. 아래에서 추가해 주세요.</p>'}
-      <div class="spell-row"><input type="text" id="log-newunit" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-log="addunit" style="flex:none;margin-bottom:8px">추가</button></div>
+      ${us.length ? `<select id="log-unit">${us.map(u => `<option value="${u.id}"${u.id === d.unit ? ' selected' : ''}>${u.name} · ${u.rounds}회독</option>`).join('')}</select><div class="spell-row"><button type="button" class="spell-btn" data-log="renunit">단원 이름 변경</button><button type="button" class="spell-btn" data-log="delunit">단원 삭제</button></div>` : '<p class="modal-sub">아직 단원이 없어요. 아래에서 추가해 주세요.</p>'}
+      <div class="spell-row" style="margin-top:8px"><input type="text" id="log-newunit" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-log="addunit" style="flex:none;margin-bottom:8px">추가</button></div>
       <select id="log-kind">${KINDS.map(k => `<option${k === d.kind ? ' selected' : ''}>${k}</option>`).join('')}</select>
-      <input type="number" id="log-min" min="5" max="600" step="5" value="${d.min != null ? d.min : (sug || 50)}">
-      <p class="modal-sub">공부한 시간(분) · 오늘 아직 기록 안 한 순공 ${unloggedMin()}분</p>
-      <div class="spirit-chips" style="margin-bottom:8px">이해도 ${[1,2,3,4,5].map(n => `<button type="button" class="spirit-chip${d.ease === n ? ' on' : ''}" data-log="ease" data-n="${n}">${'★'.repeat(n)}</button>`).join('')}</div>
-      <label style="display:block;font-size:.78rem;margin-bottom:8px"><input type="checkbox" id="log-round"> 이 단원 한 바퀴를 끝냈어요 (회독 +1)</label>
-      <input type="text" id="log-note" maxlength="80" placeholder="메모 (선택)">
-      <div class="spell-row"><button type="button" class="spell-btn spell-btn--main" data-log="save">기록하기</button><button type="button" class="spell-btn" data-log="view">📊 기록 보기</button></div></div>`, '📒 공부 기록');
+      <input type="number" id="log-min" min="5" max="600" step="5" value="${d.min != null && d.min !== '' ? d.min : 50}">
+      <p class="modal-sub">공부한 시간(분) · 타이머 없이 공부했을 때 직접 적어요</p>
+      <input type="text" id="log-note" maxlength="80" placeholder="메모 (선택)" value="${escAttr(d.note || '')}">
+      ${easeHTML('log-ease', d.ease)}
+      <label style="display:block;font-size:.78rem;margin-bottom:8px"><input type="checkbox" id="log-round"${d.round ? ' checked' : ''}> 이 단원 한 바퀴를 끝냈어요 (회독 +1)</label>
+      <div class="spell-row"><button type="button" class="spell-btn spell-btn--main" data-log="save">${d.editId ? '수정 저장' : '기록하기'}</button><button type="button" class="spell-btn" data-log="view">📊 기록 보기</button></div></div>`, d.editId ? '✎ 기록 수정' : '📒 공부 기록');
   }
   function logSave(){
-    const d = logDraft, us = unitsOf(d.subj), sel = document.getElementById('log-unit'), u = us.find(x => sel && x.id === sel.value);
-    const min = Math.round(Number(document.getElementById('log-min').value) || 0);
+    captureLog();
+    const d = logDraft, min = Math.round(Number(d.min) || 0), u = unitsOf(d.subj).find(x => x.id === d.unit);
     if(!u){ showToast('단원을 먼저 추가해 주세요.'); return; }
     if(min < 5){ showToast('시간을 5분 이상 입력해 주세요.'); return; }
-    const kind = document.getElementById('log-kind').value, round = document.getElementById('log-round').checked, note = document.getElementById('log-note').value.trim(), ds = formatDate(today);
-    u.min += min; u.last = ds; if(d.ease) u.ease = d.ease; if(round) u.rounds++;
-    logList().push({ date:ds, subject:d.subj, unit:u.id, unitName:u.name, kind, min, ease:d.ease || 0, round, note });
+    const f = { subject:d.subj, unit:u.id, unitName:u.name, kind:d.kind, min, ease:d.ease || 0, round:!!d.round, note:(d.note || '').trim() }, edit = !!d.editId;
+    if(edit){ const e = logList().find(x => x.id === d.editId); if(e) Object.assign(e, f); }
+    else{ logList().push(Object.assign({ id:'l' + Date.now().toString(36), date:formatDate(today), mode:'', src:'manual' }, f)); awardCoins(2); }
     if(state.studyLog.length > 800) state.studyLog = state.studyLog.slice(-800);
-    awardCoins(2); saveState(); d.ease = 0; d.min = null;
-    spellClose(); renderSpirit(); renderClassStats();
-    showToast(`📒 ${d.subj} · ${u.name} ${min}분 기록${round ? ` · ${u.rounds}회독 완료!` : ''} (${coinHTML(2)})`);
-    if(round) spiritReact(11, `${u.name} ${u.rounds}회독 완료! 대단해요!`);
+    saveState(); logDraft = {}; spellClose(); renderSpirit(); renderClassStats();
+    showToast(`📒 ${f.subject} · ${u.name} ${min}분 ${edit ? '수정' : '기록'}${f.round ? ' · 회독 완료!' : ''}`);
+    if(!edit && f.round) spiritReact(11, `${u.name} 회독 완료! 대단해요!`);
   }
+  let logRange = 'week';
   function logView(range){
-    const t = formatDate(today), from = range === 'day' ? t : range === 'month' ? formatDate(new Date(today.getFullYear(), today.getMonth(), 1)) : formatDate(sundayOf(today));
+    logRange = range || logRange;
+    const t = formatDate(today), from = logRange === 'day' ? t : logRange === 'month' ? formatDate(new Date(today.getFullYear(), today.getMonth(), 1)) : formatDate(sundayOf(today));
     const es = logList().filter(e => e.date >= from && e.date <= t), tot = es.reduce((a, e) => a + e.min, 0);
-    const by = k => { const o = {}; es.forEach(e => { o[e[k]] = (o[e[k]] || 0) + e.min; }); return Object.entries(o).sort((a, b) => b[1] - a[1]).map(([n, v]) => `<div class="spirit-round"><span>${n}</span><span>${fmtMin(v)} (${Math.round(v / tot * 100)}%)</span></div>`).join(''); };
-    const tab = (r, l) => `<button type="button" class="spirit-chip${range === r ? ' on' : ''}" data-log="view" data-range="${r}">${l}</button>`;
+    const by = fn => { const o = {}; es.forEach(e => { const k = fn(e); o[k] = (o[k] || 0) + e.min; }); return Object.entries(o).sort((a, b) => b[1] - a[1]); };
+    const rows = arr => arr.map(([n, v]) => `<div class="spirit-round"><span>${n}</span><span>${fmtMin(v)} (${Math.round(v / tot * 100)}%)</span></div>`).join('');
+    const tab = (r, l) => `<button type="button" class="spirit-chip${logRange === r ? ' on' : ''}" data-log="view" data-range="${r}">${l}</button>`;
     spellOpen(`<div class="spirit-chips" style="margin-bottom:8px">${tab('day', '오늘')}${tab('week', '이번 주')}${tab('month', '이번 달')}</div>
-      <div class="spell-card"><small>총 ${fmtMin(tot)} · ${es.length}건</small>${tot ? '과목별\n' : '이 기간에 기록이 없어요.'}</div>${tot ? `${by('subject')}<div class="spirit-evo__sec">활동별</div>${by('kind')}<div class="spirit-evo__sec">단원별 상위</div>${(() => { const o = {}; es.forEach(e => { const k = e.subject + ' ' + e.unitName; o[k] = (o[k] || 0) + e.min; }); return Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([n, v]) => `<div class="spirit-round"><span>${n}</span><span>${fmtMin(v)}</span></div>`).join(''); })()}<div class="spirit-evo__sec">최근 기록</div>${es.slice(-8).reverse().map(e => `<div class="spirit-round"><span>${e.date.slice(5)} ${e.subject} ${e.unitName}${e.round ? ' 🔁' : ''}</span><span>${e.kind} ${e.min}분${e.ease ? ' ★' + e.ease : ''}</span></div>${e.note ? `<div class="spirit-round"><small>“${escAttr(e.note)}”</small></div>` : ''}`).join('')}` : ''}
-      <button type="button" class="spell-btn spell-btn--main" data-log="form" style="width:100%;margin-top:8px">＋ 공부 기록하기</button>`, '📊 공부 기록 보기');
+      <div class="spell-card"><small>총 ${fmtMin(tot)} · ${es.length}건</small>${tot ? '기록된 시간만 집계해요.' : '이 기간에 기록이 없어요.'}</div>
+      ${tot ? `<div class="spirit-evo__sec">과목별</div>${rows(by(e => e.subject || '과목 미지정'))}<div class="spirit-evo__sec">활동별</div>${rows(by(e => e.kind))}<div class="spirit-evo__sec">단원별 상위</div>${rows(by(e => (e.subject || '미지정') + ' ' + (e.unitName || '단원 미정')).slice(0, 5))}` : ''}
+      ${es.length ? `<div class="spirit-evo__sec">기록 목록 (수정·삭제)</div>${es.slice().reverse().slice(0, 15).map(e => `<div class="spirit-round"><span>${e.date.slice(5)} ${e.subject || '미지정'} ${e.unitName || ''}${e.round ? ' 🔁' : ''}<br><small>${e.kind} ${e.min}분${e.ease ? ' · 이해 ' + e.ease : ''}</small></span><span><button type="button" class="spell-btn" data-log="edit" data-id="${e.id}" style="flex:none;padding:3px 9px">✎</button> <button type="button" class="spell-btn" data-log="del" data-id="${e.id}" style="flex:none;padding:3px 9px">🗑</button></span></div>${e.note ? `<div class="spirit-round"><small>“${escAttr(e.note)}”</small></div>` : ''}`).join('')}` : ''}
+      <button type="button" class="spell-btn spell-btn--main" data-log="form" style="width:100%;margin-top:8px">＋ 공부 직접 기록하기</button>`, '📊 공부 기록 보기');
   }
-  document.getElementById('spirit-evo').addEventListener('click', e => { if(e.target.closest('[data-log-open]')) logOpen(); });
+  document.getElementById('spirit-evo').addEventListener('click', e => {
+    if(e.target.closest('[data-log-open]')){ logNew(); return; }
+    const t = e.target.closest('[data-tgt-subj]');
+    if(t){ setTimerTarget(t.dataset.tgtSubj, t.dataset.tgtUnit); showToast('🎯 타이머 목표로 지정했어요.'); }
+  });
   document.getElementById('spell-modal-body').addEventListener('click', e => {
     const b = e.target.closest('[data-log]');
     if(!b) return;
-    const k = b.dataset.log, d = logDraft;
+    const k = b.dataset.log, d = logDraft, g = id => document.getElementById(id);
     if(k === 'save') logSave();
-    else if(k === 'view') logView(b.dataset.range || 'week');
-    else if(k === 'form') logOpen();
-    else if(k === 'ease'){
-      d.ease = (d.ease === Number(b.dataset.n)) ? 0 : Number(b.dataset.n);
-      document.querySelectorAll('#spell-modal-body [data-log="ease"]').forEach(x => x.classList.toggle('on', Number(x.dataset.n) === d.ease));
+    else if(k === 'view') logView(b.dataset.range);
+    else if(k === 'form') logNew();
+    else if(k === 'edit') logEdit(b.dataset.id);
+    else if(k === 'del'){
+      if(!confirm('이 기록을 삭제할까요?')) return;
+      state.studyLog = logList().filter(x => x.id !== b.dataset.id);
+      if(state.pendingSession === b.dataset.id) state.pendingSession = null;
+      saveState(); renderSessionNote(); renderSpirit(); logView();
     }else if(k === 'addunit'){
-      const inp = document.getElementById('log-newunit'), name = inp.value.trim();
+      const name = g('log-newunit').value.trim();
       if(!name) return;
-      const us = unitsOf(d.subj), id = 'u' + Date.now().toString(36);
-      us.push({ id, name, rounds:0, ease:0, last:null, min:0 }); d.unit = id;
-      const m = document.getElementById('log-min'); if(m) d.min = m.value;
+      captureLog(); const id = 'u' + Date.now().toString(36);
+      unitsOf(d.subj).push({ id, name }); d.unit = id; saveState(); logOpen();
+    }else if(k === 'renunit'){
+      const u = unitsOf(d.subj).find(x => x.id === (g('log-unit') || {}).value);
+      if(!u) return;
+      const n = (prompt('단원 이름을 바꿔요', u.name) || '').trim();
+      if(!n) return;
+      captureLog(); u.name = n; logList().forEach(e => { if(e.subject === d.subj && e.unit === u.id) e.unitName = n; });
       saveState(); logOpen();
+    }else if(k === 'delunit'){
+      const u = unitsOf(d.subj).find(x => x.id === (g('log-unit') || {}).value);
+      if(!u) return;
+      if(logList().some(e => e.subject === d.subj && e.unit === u.id)){ showToast('이 단원에 기록이 있어 삭제할 수 없어요. 이름을 바꾸거나 기록을 먼저 지워 주세요.'); return; }
+      if(!confirm(`'${u.name}' 단원을 삭제할까요?`)) return;
+      captureLog(); gs('units')[d.subj] = unitsOf(d.subj).filter(x => x.id !== u.id); d.unit = null; saveState(); logOpen();
     }
   });
   document.getElementById('spell-modal-body').addEventListener('change', e => {
-    if(e.target.dataset && e.target.dataset.log === 'subj'){
-      logDraft.subj = e.target.value; logDraft.unit = null;
-      const m = document.getElementById('log-min'); if(m) logDraft.min = m.value;
-      logOpen();
-    }
+    if(e.target.dataset && e.target.dataset.log === 'subj'){ captureLog(); logDraft.subj = e.target.value; logDraft.unit = null; logOpen(); }
   });
   // ===== 정령 표정 반응 · 호감도 보상 =====
   function spiritReact(idx, line, ms){
@@ -10317,6 +10480,30 @@ const rep = subjReport();
     const text = h === 5 ? `${HEART5[npc] || '당신이라서 믿을 수 있어요. 오래오래 곁에 있어 주세요.'}${HEART_PERK[npc] ? `\n\n🎁 특전 해금 · ${HEART_PERK[npc]}` : ''}` : HEART_LINES[h];
     state.letters.push({ id, dyn:true, npc, title:`${npcProfile(npc).name}의 마음 ♥${h}`, text, gift:h * 5, date:formatDate(today), read:false });
   }
+
+  
+  // ===== 이졸데 (선택과목 지역 정복 후 마을에 합류) =====
+  function unveiledTrust(){ return trustLevelFor(missionCountsAllTime()['선택과목'] || 0, [0, 30, 36, 44, 54, 66]); }
+  NPC_LINES.unveiled = {
+    5:['“이 길의 주인이라 했지만, 사실 오래 혼자였어요. 이제는 아니에요.”', '“선택은 대가를 치르는 일이지만, 함께 고르면 덜 무겁더군요.”', '“당신이 어떤 길을 고르든, 이 길은 열려 있을 거예요.”'],
+    3:['“요즘 자주 오네요. 나도 모르게 창가에 서게 돼요.”', '“다들 정답을 물어요. 나는 이유를 묻고 싶어요.”', '“당신이 남긴 발자국이 이 길의 새 표식이 됐어요.”', '“베일을 쓰던 시절이 그립진 않아요. 당신이 있으니까.”'],
+    0:['“이졸데예요. 이제 이름으로 불러줘요.”', '“비밀 길은 여전히 걸은 만큼만 보여요. 오늘은 몇 걸음이나 걸었나요?”', '“선택이 가벼워 보여도, 고른 사람의 무게가 실려 있어요.”', '“베일을 벗고도 알아봐 줘서 고마워요.”']
+  };
+  GIFT_PREF.unveiled = { love:['tea','crystal'], like:['book','ink'], hate:['drink','junk'] };
+
+  
+  document.getElementById('mail-nudge-go').addEventListener('click', () => {
+    const un = (state.letters || []).filter(x => !x.read);
+    if(!un.length) return;
+    let gold = 0;
+    const html = un.map(x => { const L = letterDef(x); if(!L) return ''; gold += L.gift || 0; return `<div class="spell-card"><small>${npcProfile(L.npc).name} · ${L.title}</small>${L.text}\n\n— ${npcProfile(L.npc).name}${L.gift ? `\n🎁 동봉 ${L.gift}골드` : ''}</div>`; }).join('');
+    un.forEach(x => { x.read = true; });
+    if(gold) awardCoins(gold);
+    saveState();
+    spellOpen(html + SPELL_CLOSE_BTN, '✉️ 새 편지');
+    const box = document.getElementById('mail-box'); if(box) box.dataset.sig = '';
+    renderMailbox(); renderClassStats();
+  });
 
   function renderPomodoro(){
     const p = state.pomodoro;
@@ -10409,6 +10596,7 @@ const rep = subjReport();
 
     if(['breakReady','break','breakDone'].includes(p.phase) && spellDue().length) addBtn('🔮 주문 영창 (' + spellDue().length + ')', 'pomodoro-spell-btn', 'pomodoro-btn-secondary');
     if(window.__spPhase !== p.phase){ window.__spPhase = p.phase; safeRun('renderSpirit', renderSpirit); }
+    renderTimerTarget(); renderSessionNote();
     const bs = document.getElementById('battle-strip');
     if(bs){
       const fighting = (p.phase === 'focus') || (p.phase === 'paused' && p.pausedFrom === 'focus');
@@ -11192,6 +11380,7 @@ const rep = subjReport();
     const id = e.target.id;
     const p = state.pomodoro;
     const isBell = (p.mode === 'bell');
+    if(['pomodoro-start-btn','pomodoro-continue-btn','pomodoro-restart-btn','pomodoro-skip-break-btn'].includes(id)) commitSessionNote(true);
     if(id === 'pomodoro-start-btn'){
       if(isBell) p.bellCycleIndex = 0;
       p.phase = 'focus';
