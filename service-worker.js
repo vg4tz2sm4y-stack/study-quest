@@ -1,17 +1,36 @@
 // index.html이나 이미지를 바꿔서 배포할 때마다 아래 숫자를 올려야, 이미 설치된 기기에서도 새 버전이 보입니다.
-const CACHE = 'study-quest-v5';
+const CACHE = 'study-quest-v12';
 
 // 없으면 앱이 동작하지 않는 핵심 파일
 const CORE = ['./index.html', './manifest.json'];
 
 // 오프라인에서도 바로 보이게 미리 받아 두는 지역 NPC 초상 (하나가 빠져 있어도 설치는 실패하지 않는다)
 const EXTRA = [
+  // 마을 NPC 초상
+  './study-quest-npc-innkeeper.png',
+  './study-quest-npc-merchant.png',
+  './study-quest-npc-knight.png',
+  './study-quest-npc-archivist.png',
+  './study-quest-npc-sage.png',
+  './study-quest-npc-guardian.png',
+  // 지역 NPC 초상
   './study-quest-npc-noa.png',
   './study-quest-npc-elian.png',
   './study-quest-npc-ian.png',
   './study-quest-npc-adel.png',
   './study-quest-npc-veiled.png',
-  './study-quest-npc-unveiled.png'
+  './study-quest-npc-unveiled.png',
+  // 골드, 여관 음식
+  './study-quest-gold-coin.png',
+  './study-quest-tomato-salad.png',
+  './study-quest-tomato-soup.png',
+  './study-quest-tomato-basil-bread.png',
+  './study-quest-pomodoro-pasta.png',
+  './study-quest-tomato-curry.png',
+  './hero-feast.png',
+  // 토마토 정령
+  './tomato-fairy-basic.png',
+  './tomato-fairy-sheet.png'
 ];
 
 self.addEventListener('install', event => {

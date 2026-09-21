@@ -3344,6 +3344,98 @@
   .rpg-track__chip.is-auto-now{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);}
   .rpg-track__chip.is-done{opacity:0.62;}
   .rpg-track__chip:disabled{opacity:0.4;cursor:not-allowed;}
+  /* 뽀모도로 전투 */
+  .battle-strip{display:flex;align-items:center;gap:10px;margin:0 auto 12px;max-width:340px;padding:8px 12px;border:1px solid var(--parch-edge);border-radius:12px;background:linear-gradient(180deg,var(--parch),var(--parch-2));text-align:left;}
+  .battle-strip[hidden]{display:none;}
+  .battle-strip__icon{font-size:1.7rem;animation:foeIdle 2.4s ease-in-out infinite;}
+  .battle-strip__body{flex:1;min-width:0;}
+  .battle-strip__name{display:block;font-size:.72rem;font-weight:700;color:var(--ink-soft);margin-bottom:4px;}
+  .battle-strip__bar{height:8px;border-radius:8px;background:rgba(0,0,0,.14);overflow:hidden;}
+  .battle-strip__fill{height:100%;background:linear-gradient(90deg,var(--c-c25a4f),var(--c-e08a3e));transition:width 1s linear;}
+  .battle-strip.low .battle-strip__icon{animation:foeWobble .5s ease-in-out infinite;}
+  @keyframes foeIdle{50%{transform:translateY(-3px);}}
+  @keyframes foeWobble{25%{transform:rotate(-9deg);}75%{transform:rotate(9deg);}}
+  /* 주문 영창 */
+  .spell-actions{display:flex;gap:8px;}
+  .spell-btn{flex:1;padding:10px;border:1px solid var(--gold);border-radius:10px;background:var(--paper-card);color:var(--ink-soft);font:inherit;font-weight:700;font-size:.8rem;cursor:pointer;}
+  .spell-btn--main{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .spell-card{padding:16px;border:1px solid var(--parch-edge);border-radius:12px;background:linear-gradient(180deg,var(--parch),var(--parch-2));margin-bottom:12px;white-space:pre-wrap;font-family:'Noto Serif KR',serif;line-height:1.7;font-size:.9rem;color:var(--ink);}
+  .spell-card small{display:block;color:var(--gold);font-family:'Noto Sans KR',sans-serif;font-size:.68rem;margin-bottom:6px;font-weight:700;}
+  .spell-form textarea,.spell-form select{width:100%;margin-bottom:8px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:.85rem;}
+  .spell-row{display:flex;gap:8px;}
+  /* 골드 연출 */
+  .gold-pop{position:fixed;z-index:999;pointer-events:none;font-family:'Noto Serif KR',serif;font-weight:900;font-size:.95rem;color:var(--gold);text-shadow:0 1px 2px rgba(0,0,0,.35);white-space:nowrap;animation:goldPop 1.1s ease-out forwards;}
+  @keyframes goldPop{0%{opacity:0;transform:translate(-50%,8px) scale(.7);}20%{opacity:1;transform:translate(-50%,-6px) scale(1.15);}100%{opacity:0;transform:translate(-50%,-64px) scale(1);}}
+  .coin-spark{position:fixed;width:16px;height:16px;z-index:999;pointer-events:none;animation:confettiBurst .8s ease-out forwards;}
+  /* 의뢰 게시판 · 편지함 */
+  .bounty-card{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--parch-edge);border-radius:12px;background:var(--paper-card);margin-bottom:8px;}
+  .bounty-card.accepted{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);}
+  .bounty-card.done{background:var(--sage-soft);}
+  .bounty-card__body{flex:1;min-width:0;}
+  .bounty-card__name{font-family:'Noto Serif KR',serif;font-weight:700;font-size:.82rem;color:var(--ink);}
+  .bounty-card__desc{font-size:.68rem;color:var(--muted);line-height:1.4;}
+  .bounty-card__reward{font-size:.68rem;color:var(--gold);font-weight:700;white-space:nowrap;}
+  .bounty-card .spell-btn{flex:none;padding:8px 12px;}
+  .letter{border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:var(--paper-card);}
+  .letter>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 10px;}
+  .letter>summary::-webkit-details-marker{display:none;}
+  .letter__title{flex:1;font-size:.76rem;font-weight:700;color:var(--ink);}
+  .letter.unread .letter__title::before{content:"● ";color:var(--seal);}
+  .letter__date{font-size:.6rem;color:var(--muted);}
+  .letter__body{padding:4px 14px 12px;font-family:'Noto Serif KR',serif;font-style:italic;font-size:.78rem;line-height:1.8;color:var(--ink-soft);white-space:pre-wrap;}
+  .letter__gift{display:block;margin-top:6px;font-style:normal;font-size:.68rem;color:var(--gold);font-weight:700;}
+  /* 토마토 정령 */
+  .spirit-head{display:flex;align-items:center;gap:12px;}
+  .spirit-face{flex:none;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-size:1.5rem;background:radial-gradient(circle at 40% 30%,var(--c-fdf1e0),var(--c-f3ede0));border:1px solid var(--gold);animation:spiritBob 3s ease-in-out infinite;}
+  @keyframes spiritBob{50%{transform:translateY(-3px);}}
+  .spirit-bubble{flex:1;margin:0;font-family:'Noto Serif KR',serif;font-style:italic;font-size:.8rem;line-height:1.6;color:var(--ink-soft);}
+  .spirit-name{display:block;font-family:'Noto Sans KR',sans-serif;font-style:normal;font-size:.68rem;font-weight:700;color:var(--gold);}
+  .spirit-map{margin-top:12px;}
+  .spirit-row{display:grid;grid-template-columns:62px 1fr auto;gap:8px;align-items:center;font-size:.72rem;color:var(--ink-soft);padding:3px 0;}
+  .spirit-row__bar{height:7px;border-radius:7px;background:var(--c-e9e2cf);overflow:hidden;}
+  .spirit-row__fill{height:100%;background:var(--m,var(--gold));}
+  .spirit-row small{color:var(--muted);font-size:.6rem;}
+  .spirit-note{margin:8px 0 0;font-size:.7rem;color:var(--ink-soft);line-height:1.6;}
+  .spirit-note--muted{color:var(--muted);font-size:.62rem;}
+  /* 선물 */
+  .npc-card__gift{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;}
+  .npc-card__hearts{color:var(--seal);letter-spacing:2px;font-size:.8rem;}
+  .npc-card__gift .spell-btn{flex:none;padding:5px 10px;font-size:.66rem;}
+  .spell-btn:disabled{opacity:.45;cursor:not-allowed;}
+  .spirit-face{width:88px;height:88px;border:0;border-radius:0;background:transparent no-repeat center;font-size:0;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  /* 마을 재건 */
+  .town-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;}
+  .town-card{border:1px solid var(--parch-edge);border-radius:12px;background:var(--paper-card);padding:10px;text-align:center;}
+  .town-card.done{background:var(--sage-soft);border-color:var(--sage);}
+  .town-card__icon{font-size:2.1rem;line-height:1.2;}
+  .town-card__name{font-family:'Noto Serif KR',serif;font-weight:700;font-size:.8rem;color:var(--ink);}
+  .town-card__lv{font-size:.62rem;color:var(--gold);font-weight:700;}
+  .town-card__fx{font-size:.62rem;color:var(--muted);line-height:1.35;margin:4px 0;}
+  .town-card__bar{height:6px;border-radius:6px;background:var(--c-e9e2cf);overflow:hidden;}
+  .town-card__fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--seal-soft));}
+  .town-card__btns{display:flex;gap:4px;}
+  .town-card__btns .spell-btn{padding:6px 2px;font-size:.6rem;}
+  /* 정령 진화 */
+  .spirit-evo{margin:10px 0 4px;padding:8px 10px;border:1px dashed rgba(163,130,63,.45);border-radius:12px;background:rgba(163,130,63,.07);}
+  .spirit-evo__head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.76rem;font-weight:700;color:var(--ink);}
+  .spirit-evo .spell-btn{flex:none;padding:6px 10px;font-size:.64rem;}
+  .spirit-evo__sec{margin-top:8px;font-size:.68rem;color:var(--ink-soft);line-height:1.6;}
+  .spirit-evo__lock{color:var(--muted);}
+  .spirit-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;}
+  .spirit-chip{padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:var(--paper-card);font-size:.66rem;cursor:pointer;color:var(--ink-soft);font-family:inherit;}
+  .spirit-chip.on{background:var(--m,var(--ink));color:#fff;border-color:transparent;}
+  .spirit-round{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:3px 0;font-size:.66rem;}
+  .spirit-unit{border-top:1px dashed var(--line);}
+  .spirit-unit summary{cursor:pointer;font-size:.68rem;padding:4px 0;}
+  .spell-form input[type=text],.spell-form input[type=number]{width:100%;box-sizing:border-box;margin-bottom:8px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
+
+
+
+
+
+
+
+
 
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css">
@@ -3520,6 +3612,7 @@
       <span>세트 <input type="number" id="bell-cycles-input" min="1" max="8" step="1" value="3">회</span>
     </div>
     <p class="chip-limit-note" id="pomodoro-mode-note" style="text-align:center;margin:-6px 0 14px;">최소 25분 원칙이에요. 그 이상은 자유롭게 늘려도 좋아요.</p>
+    <div class="battle-strip" id="battle-strip" hidden></div>
     <div class="pomodoro-ring-wrap">
       <div class="pomodoro-ring" id="pomodoro-ring" style="--pct:0;">
         <div class="pomodoro-ring__inner">
@@ -3545,6 +3638,7 @@
     <p class="motivation-reason" id="motivation-reason"></p>
     <p class="motivation-tip" id="motivation-tip"></p>
   </section>
+  <section class="quest-panel tab-content" data-tab-panel="study" id="spirit-panel"><div class="spirit-head"><div class="spirit-face" id="spirit-face" role="button" aria-label="토마토 정령"></div><p class="spirit-bubble"><span class="spirit-name" id="spirit-name">토마토 정령</span><span id="spirit-line"></span></p></div><div class="spirit-evo" id="spirit-evo"></div><details class="fold-panel spirit-map" open><summary class="quest-panel__header"><span class="quest-panel__header-icon">📊</span><span class="quest-panel__header-title">이번 주 공부 지도</span></summary><div class="fold-panel__body" id="spirit-map"></div></details></section>
 
   <section class="quest-panel tab-content" data-tab-panel="study" id="exam-finale" hidden>
     <div class="exam-finale">
@@ -3622,6 +3716,7 @@
     </div>
     <div class="utility-row no-print">
       <button class="print-btn" id="sound-toggle-btn">🔈 효과음 켜짐</button>
+      <button class="print-btn" id="bgm-toggle-btn">🎵 배경음악 켜짐</button>
       <button class="print-btn" id="vibration-toggle-btn">📳 진동 켜짐</button>
       <button class="print-btn" id="print-btn">🖨️ 인쇄용 보기</button>
       <button class="reset-link" id="export-btn">백업 파일 저장</button>
@@ -3801,6 +3896,7 @@
         <div id="inventory-panel"></div>
         <div class="tier2-grid" id="equipment-list" style="margin-top:10px;"></div>
       </section>
+      <section class="quest-panel" id="spell-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">🔮</span><span class="quest-panel__header-title">주문서</span><span class="quest-panel__header-sub" id="spell-count"></span></div><div class="panel-npc" data-panel-npc="sage" data-line="외운 것은 입에 올릴 때 비로소 내 것이 되오. 짧게, 자주 영창하시오."></div><div class="spell-actions"><button type="button" class="spell-btn spell-btn--main" id="spell-cast-btn">🔮 영창하기</button><button type="button" class="spell-btn" id="spell-add-btn">＋ 주문 새기기</button></div></section>
 
       <section class="quest-panel">
         <div class="quest-panel__header">
@@ -3870,6 +3966,10 @@
     </div>
 
     <div class="game-tabs__panel adventure-inn-panel" data-tab-panel="adventure" hidden>
+      <section class="quest-panel" id="town-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">🏘️</span><span class="quest-panel__header-title">마을 재건</span><span class="quest-panel__header-sub" id="town-sub"></span></div><p class="quest-panel__hint">골드를 나눠 투자해 마을을 키워요. 완공하면 새 메뉴·진열·게시판이 열려요.</p><div class="town-grid" id="town-grid"></div></section>
+      <section class="quest-panel" id="bounty-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">📌</span><span class="quest-panel__header-title">의뢰 게시판</span><span class="quest-panel__header-sub" id="bounty-sub"></span></div><div id="bounty-board"></div></section>
+      <section class="quest-panel" id="mail-panel"><div class="quest-panel__header"><span class="quest-panel__header-icon">✉️</span><span class="quest-panel__header-title">편지함</span><span class="quest-panel__header-sub" id="mail-sub"></span></div><div id="mail-box"></div></section>
+
       <section class="quest-panel">
         <div class="quest-panel__header">
           <span class="quest-panel__header-icon"></span>
@@ -3966,6 +4066,8 @@
     <button class="phase-save-btn" id="phase-save-btn">저장하고 닫기</button>
   </div>
 </div>
+
+<div class="modal-backdrop hidden" id="spell-modal-backdrop"><div class="modal"><button class="modal-close" id="spell-modal-close" aria-label="닫기">×</button><h3 id="spell-modal-title">🔮 주문 영창</h3><div id="spell-modal-body"></div></div></div>
 
 <div class="toast-container" id="toast-container"></div>
 
@@ -4630,10 +4732,12 @@
       const btnLabel = owned?'보유':(ready?'제작하기':`🔒 ${reqLabel}`);
       return `<div class="food-item${ok?'':' disabled'}"><span class="food-item__icon">${item.icon}</span><span class="food-item__body"><span class="food-item__name">${item.name}</span><span class="food-item__flavor">${item.slotLabel} · ${item.effect}</span></span><button type="button" class="food-item__btn" data-craft="${item.id}" ${ok?'':'disabled'}>${btnLabel}</button></div>`;
     }).join('') : '';
-    wrap.innerHTML=consumables+equipment+crafting;
+    wrap.innerHTML=consumables+equipment+crafting+giftShelf();
     // 상점은 매번 innerHTML을 다시 그리므로 개별 버튼에 리스너를 붙이는 대신
     // 컨테이너 하나에서 클릭을 위임한다. 소모품/장비/제작 모두 동일하게 동작한다.
     wrap.onclick = (e) => {
+      const gb = e.target.closest('[data-giftbuy]');
+      if(gb && !gb.disabled){ buyGiftItem(gb.dataset.giftbuy); return; }
       const craftBtn = e.target.closest('[data-craft]');
       if(craftBtn && !craftBtn.disabled){ craftMaterialItem(craftBtn.dataset.craft); return; }
       const btn = e.target.closest('[data-shop]');
@@ -4674,7 +4778,7 @@
   // "기본값 위에 병합"하는 안전망으로 쓴다 — 나중에 상태 필드가 늘어나도 그 두 곳에
   // 개별 복원 코드를 추가하는 걸 깜빡하면 조용히 사라지던 문제를 구조적으로 막기 위함.
   function createDefaultState(){
-    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, vibrationOn: true, mainTrack: 'auto', bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, merchantSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, marcoQuestClaimedDate: null, ianQuestClaimedDate: null, ianFavorCount: 0, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [], regionBossesDefeated: [],
+    return { dailyGoal: 6, entries: {}, phases: DEFAULT_PHASES.slice(), reason: '', missions: {}, identity: {}, soundOn: true, vibrationOn: true, mainTrack: 'auto', bgmOn: true, bgmVolume: 0.6, dailyGoalHistory: {}, calendarDense: true, lastBackupAt: null, examType: DEFAULT_EXAM_TYPE, examDate: formatDate(EXAM_DATE), coins: 0, bonusXp: 0, luckPoints: 0, spells: [], spellCasts: 0, spellDay: null, bounty: null, bountyDone: 0, letters: [], affection: {}, giftedOn: {}, giftKnown: {}, giftStock: {}, exercise: {}, seals: [], gachaPity: 0, sealCollectionComplete: false, sealLevels: {}, focusLog: [], weeklyGateClearedWeekKey: null, gateClearedKey: null, gateDurationDays: 7, gateType: 'phase', hasShiftedClass: false, tomatoSpent: 0, merchantSpent: 0, mealsEaten: [], innkeeperQuestClaimedDate: null, marcoQuestClaimedDate: null, ianQuestClaimedDate: null, ianFavorCount: 0, pendingEncounter: null, lastEncounterDate: null, encounterLog: [], questLog: [], hiddenQuestsClaimed: [], regionBossesDefeated: [],
     rpgQuests: {},
     rpgWorld: { flags: {}, history: [], investigations: {}, items: {}, dialogue: { activeNpc:null, step:0 } },
     rpgNpcTrust: {},
@@ -4861,6 +4965,7 @@
         Object.keys(growth).forEach(key => { counts[key] += growth[key]; });
       });
     });
+    counts.int += Math.floor((state.spellCasts||0)/3);
     return counts;
   }
   function growthProfile(counts){
@@ -4908,7 +5013,7 @@
   function logFocusMinutes(minutes){
     const m = Math.round(minutes);
     if(m <= 0) return;
-    state.focusLog.push({ date: formatDate(today), minutes: m + totalBonusFor('focusMinutes') });
+    state.focusLog.push({ date: formatDate(today), minutes: m + totalBonusFor('focusMinutes'), subject: curSubj() });
   }
   function totalFocusMinutesAllTime(){
     return state.focusLog.reduce((sum,e) => sum + (e.minutes||0), 0);
@@ -5190,6 +5295,7 @@
     osc.stop(now + 0.18);
   }
   function updateSoundToggleLabel(){
+    if(typeof updateBgmToggleLabel === 'function') updateBgmToggleLabel();
     const btn = document.getElementById('sound-toggle-btn');
     if(btn) btn.textContent = state.soundOn ? '🔈 효과음 켜짐' : '🔇 효과음 꺼짐';
   }
@@ -6684,7 +6790,7 @@ function renderRpgQuests(){
     const growthDot = document.getElementById('growth-tab-dot');
     const canEat = FOOD_MENU.some(f => tomatoBalance() >= f.cost);
     const canDraw = (state.coins||0) >= GACHA_COST;
-    if(adventureDot) adventureDot.hidden = !(canEat || choiceEncounterForPending());
+    if(adventureDot) adventureDot.hidden = !(canEat || choiceEncounterForPending() || bountyReady() || mailUnread());
     if(growthDot) growthDot.hidden = !canDraw;
   }
 
@@ -7455,6 +7561,7 @@ function renderRpgQuests(){
     `;
   }
   function celebrateLevelUp(prevLevelIdx){
+    spiritReact(5, '레벨업이에요! 깜짝 놀랐어요!');
     const wrap = document.getElementById('level-strip');
     if(!wrap) return;
     wrap.classList.remove('level-up');
@@ -7728,7 +7835,7 @@ function renderRpgQuests(){
     { id:'adel', icon:'⚖️', name:'아델', role:'추적로의 수사관 · 형사소송법', image:'study-quest-npc-adel.png', trustMax:5,
       trust:()=>adelTrust(),
       dialogue:t=>tierLine('adel',t,[5,3,0]),
-      unlock:t=>t>=5 ? '형사소송법 지역 정복 보상 골드 +10 해금' : '형소법 미션 30회 달성하면 보상 강화 해금' },
+      unlock:t=>t>=5 ? '형사소송법 지역 정복 보상 골드 +10 해금' : '형사소송법 미션 30회 달성하면 보상 강화 해금' },
   ];
   // ---------- NPC 신뢰도 ----------
   // 예전엔 NPC별로 기준이 제각각이라(마르타 식사 5회, 레온 스탬프 200개 등) 어떤 NPC는
@@ -8189,6 +8296,7 @@ function renderRpgQuests(){
         body.classList.add('world--sunbreak');
         setTimeout(() => body.classList.remove('world--sunbreak'), 2800);
       }
+      spiritReact(15, '안개가 걷혔어요… 휴, 다행이에요.');
       showNpcToast('archivist', '안개가 걷혔습니다. 오늘 남긴 한 줄이 길을 다시 이어 주었어요.');
     }
     worldFogPrev = fog;
@@ -8613,7 +8721,7 @@ function renderRpgQuests(){
         </div>
         <span class="npc-card__role">${n.role}</span>
         <p class="npc-card__dialogue">${n.dialogue(t)}</p>
-        <span class="npc-card__unlock">${n.unlock(t)}</span>
+        <span class="npc-card__unlock">${n.unlock(t)}</span>${giftRowHTML(n.id)}
       </div>
     </div>
   </div>`;
@@ -8859,7 +8967,7 @@ function renderRpgQuests(){
         : `오늘의 부탁: 뽀모도로 ${q.have}/${q.need}회 완주하면 마르타가 보상을 준대요. (${coinHTML(INNKEEPER_QUEST_REWARD)})`;
       questEl.classList.toggle('done', claimedToday);
     }
-    wrap.innerHTML = FOOD_MENU.map(f => {
+    wrap.innerHTML = allFoods().map(f => {
       const locked = f.unlockTrust && innkeeperTrust() < f.unlockTrust;
       const affordable = !locked && balance >= f.cost;
       return `
@@ -8885,7 +8993,7 @@ function renderRpgQuests(){
     }
   }
   function eatFood(id, originEl){
-    const food = FOOD_MENU.find(f => f.id === id);
+    const food = allFoods().find(f => f.id === id);
     if(!food) return;
     if(food.unlockTrust && innkeeperTrust() < food.unlockTrust){ showNpcToast('innkeeper', '이건 아직 안 돼. 나를 좀 더 믿어주면 그때 내줄게!'); return; }
     if(tomatoBalance() < food.cost){ showNpcToast('innkeeper', '토마토가 모자라네. 뽀모도로 한 판 더 돌리고 오면 내줄게!'); return; }
@@ -8893,7 +9001,7 @@ function renderRpgQuests(){
     if(!state.mealsEaten) state.mealsEaten = [];
     state.mealsEaten.push({ id, date: formatDate(today) });
     // 토마토를 골드로도 조금 환산해준다 — "잘 먹고 쉬었더니 힘이 난다"는 걸 보상으로 표현
-    const refund = Math.round(food.cost/2);
+    const refund = Math.round(food.cost * (heartPerk('innkeeper') ? 0.75 : 0.5));
     awardCoins(refund);
     if(food.buff) addBuff(food);
     saveState();
@@ -9429,6 +9537,7 @@ function renderRpgQuests(){
       updateAmbientAudioForContext();
       showSessionRecordToast(`🍅 뽀모도로 ${p.durationMin}분 완료 · 오늘 한 공부를 추가로 기록할까요?`);
     }
+    battleVictory(stampCount);
     renderPomodoro();
   }
   function pomodoroCompleteBreak(){
@@ -9466,6 +9575,749 @@ function renderRpgQuests(){
     updateAmbientAudioForContext();
     renderPomodoro();
   }
+  
+  // ===== 뽀모도로 전투 =====
+  function battleFoe(){
+    const ms = ((state.missions||{})[formatDate(today)] || []).filter(n => SUBJECT_BOSSES[n]);
+    if(ms.length) return { icon:(JOURNEY_REGIONS[ms[0]]||{}).icon || '👹', name:SUBJECT_BOSSES[ms[0]], tag:ms[0] };
+    const tl = townLevel('training');
+    return tl >= 3 ? { icon:'🐲', name:'결전의 시험관', tag:'훈련 결전' } : tl >= 2 ? { icon:'🗿', name:'정예 훈련 골렘', tag:'훈련' } : tl >= 1 ? { icon:'🎯', name:'훈련용 허수아비', tag:'훈련' } : { icon:'🗿', name:'게으름의 그림자', tag:'오늘의 적' };
+  }
+  function battleVictory(count){
+    const f = battleFoe(), bonus = (3 + townLevel('training') + (heartPerk('knight') ? 2 : 0)) * count;
+    awardCoins(bonus); saveState(); renderClassStats();
+    spawnConfetti(document.getElementById('pomodoro-ring'));
+    showNpcToast('knight', `${f.name} 격파. 집중한 만큼 쓰러졌다.`, { reward: coinHTML(bonus) });
+  }
+  // ===== 골드 연출 =====
+  function stampJuice(el, gold, first){
+    buzz(25);
+    if(!el || !gold || prefersReducedMotion()) return;
+    const r = el.getBoundingClientRect(), x = r.left + r.width/2, y = r.top + r.height/2;
+    const n = document.querySelectorAll('.gold-pop').length;
+    const pop = document.createElement('span');
+    pop.className = 'gold-pop'; pop.style.left = x + 'px'; pop.style.top = (y - 18*n) + 'px';
+    let label = `<img src="study-quest-gold-coin.png" class="coin-icon" alt="">+${gold}`;
+    if(first){ const st = computeStreak().streak; if(st >= 2) label += ` · 🔥${st}일째`; }
+    pop.innerHTML = label; document.body.appendChild(pop); setTimeout(() => pop.remove(), 1150);
+    for(let i=0; i<Math.min(6, gold+2); i++){
+      const c = document.createElement('img');
+      c.src = 'study-quest-gold-coin.png'; c.alt = ''; c.className = 'coin-spark';
+      c.style.left = x + 'px'; c.style.top = y + 'px';
+      c.style.setProperty('--dx', (Math.random()*120-60).toFixed(0) + 'px');
+      c.style.setProperty('--dy', (-(Math.random()*90+30)).toFixed(0) + 'px');
+      c.style.setProperty('--rot', (Math.random()*540).toFixed(0) + 'deg');
+      document.body.appendChild(c); setTimeout(() => c.remove(), 850);
+    }
+  }
+  // ===== 주문 영창 (암기카드 · 간격 반복) =====
+  const SPELL_BOX_DAYS = [0,1,3,7,14,30];
+  let spellQueue = [], spellShown = false, spellTotal = 0, spellOk = 0;
+  function spellList(){ if(!Array.isArray(state.spells)) state.spells = []; return state.spells; }
+  function spellDue(){ const t = formatDate(today); return spellList().filter(c => (c.due || '') <= t); }
+  function renderSpellPanel(){ if(typeof renderBounty === 'function') renderBounty();
+    const el = document.getElementById('spell-count');
+    if(el) el.textContent = `${spellDue().length}장 대기 · 총 ${spellList().length}장`;
+  }
+  function spellOpen(html, title){
+    document.getElementById('spell-modal-title').textContent = title || '🔮 주문 영창';
+    document.getElementById('spell-modal-body').innerHTML = html;
+    document.getElementById('spell-modal-backdrop').classList.remove('hidden');
+  }
+  function spellClose(){
+    document.getElementById('spell-modal-backdrop').classList.add('hidden');
+    renderSpellPanel();
+  }
+  const SPELL_CLOSE_BTN = '<button type="button" class="spell-btn spell-btn--main" data-spell="close" style="width:100%">닫기</button>';
+  function spellForm(){
+    spellOpen(`<div class="spell-form"><p class="modal-sub">앞면에 질문, 뒷면에 답을 새겨요. 짧을수록 오래 남아요.</p>
+      <select id="spell-subj">${MISSIONS.map(m => `<option>${m}</option>`).join('')}</select>
+      <textarea id="spell-q" rows="2" maxlength="200" placeholder="앞면 (예: 부작위범의 성립요건)"></textarea>
+      <textarea id="spell-a" rows="3" maxlength="400" placeholder="뒷면 (답)"></textarea>
+      <div class="spell-row"><button type="button" class="spell-btn spell-btn--main" data-spell="save">새기기</button><button type="button" class="spell-btn" data-spell="close">닫기</button></div></div>`);
+  }
+  function spellCast(){
+    const due = spellDue();
+    if(!due.length){
+      spellOpen(`<div class="spell-card">${spellList().length ? '오늘 영창할 주문이 없어요. 내일 다시 찾아올 거예요.' : '아직 새겨둔 주문이 없어요. "주문 새기기"로 첫 카드를 만들어 보세요.'}</div>${SPELL_CLOSE_BTN}`);
+      return;
+    }
+    spellQueue = due.slice().sort(() => Math.random() - .5).slice(0, 10);
+    spellTotal = spellQueue.length; spellOk = 0; spellShown = false;
+    spellStep();
+  }
+  function spellStep(){
+    const c = spellQueue[0];
+    if(!c){
+      const bonus = (spellTotal >= 3 && spellOk > 0) ? 3 : 0;
+      if(bonus) awardCoins(bonus);
+      saveState(); renderClassStats(); renderSpellPanel();
+      spellOpen(`<div class="spell-card"><small>영창 완료</small>${spellTotal}장 중 ${spellOk}장을 또렷이 기억해냈어요.\n${spellOk ? `골드 ${spellOk + bonus}개 · INT가 조금 자랐어요.` : '괜찮아요. 희미한 주문은 내일 다시 찾아와요.'}</div>${SPELL_CLOSE_BTN}`);
+      if(spellOk) showNpcToast('sage', '입에 올린 만큼 네 것이 되었소. 잘 영창했소.');
+      return;
+    }
+    let html = `<div class="spell-card"><small>${escAttr(c.subject || '주문')} · 남은 ${spellQueue.length}장</small>${escAttr(c.q)}</div>`;
+    html += spellShown
+      ? `<div class="spell-card">${escAttr(c.a)}</div><div class="spell-row"><button type="button" class="spell-btn" data-spell="miss">희미했다</button><button type="button" class="spell-btn spell-btn--main" data-spell="ok">기억났다</button></div>`
+      : '<button type="button" class="spell-btn spell-btn--main" data-spell="show" style="width:100%">주문 펼치기</button>';
+    spellOpen(html);
+  }
+  document.getElementById('spell-cast-btn').addEventListener('click', spellCast);
+  document.getElementById('spell-add-btn').addEventListener('click', spellForm);
+  document.getElementById('spell-modal-close').addEventListener('click', spellClose);
+  document.getElementById('spell-modal-backdrop').addEventListener('click', e => { if(e.target.id === 'spell-modal-backdrop') spellClose(); });
+  document.getElementById('pomodoro-controls').addEventListener('click', e => { if(e.target.id === 'pomodoro-spell-btn') spellCast(); });
+  document.getElementById('spell-modal-body').addEventListener('click', e => {
+    const b = e.target.closest('[data-spell]');
+    if(!b) return;
+    const k = b.dataset.spell;
+    if(k === 'close'){ spellClose(); return; }
+    if(k === 'show'){ spellShown = true; spellStep(); return; }
+    if(k === 'save'){
+      const q = document.getElementById('spell-q').value.trim(), a = document.getElementById('spell-a').value.trim();
+      if(!q || !a){ showToast('앞면과 뒷면을 모두 적어주세요.'); return; }
+      spellList().push({ id: Date.now().toString(36), q, a, subject: document.getElementById('spell-subj').value, box: 0, due: formatDate(today), seen: 0 });
+      saveState(); renderSpellPanel();
+      document.getElementById('spell-q').value = ''; document.getElementById('spell-a').value = '';
+      showToast('🔮 주문을 새겼어요. 오늘부터 영창할 수 있어요.');
+      return;
+    }
+    if(k === 'ok' || k === 'miss'){
+      const c = spellQueue.shift();
+      if(!c) return;
+      if(k === 'ok'){
+        c.box = Math.min(5, (c.box || 0) + 1); c.due = formatDate(addDays(today, SPELL_BOX_DAYS[c.box]));
+        state.spellCasts = (state.spellCasts || 0) + 1; spellOk++; { const dd = formatDate(today); if(!state.spellDay || state.spellDay.date !== dd) state.spellDay = { date:dd, n:0 }; state.spellDay.n++; } awardCoins(1);
+      }else{
+        c.box = 0; c.due = formatDate(addDays(today, 1));
+      }
+      c.seen = (c.seen || 0) + 1; spellShown = false;
+      saveState(); spellStep();
+    }
+  });
+
+  
+  // ===== 의뢰 게시판 =====
+  function stampToday(e){ return entriesFor(formatDate(today)).filter(x => x === e).length; }
+  const BOUNTIES = [
+    {id:'pomo', npc:'knight', icon:'⚔️', name:'관문 앞 순찰', desc:'뽀모도로 2개를 완주한다.', target:2, gold:12, metric:() => tomatoCountFor(formatDate(today))},
+    {id:'case', npc:'archivist', icon:'📖', name:'잊힌 판례 정리', desc:'암기·판례 스탬프 3개.', target:3, gold:14, metric:() => stampToday('📖')},
+    {id:'write', npc:'archivist', icon:'✍️', name:'답안 한 장', desc:'답안작성 스탬프 1개.', target:1, gold:12, metric:() => stampToday('✍️')},
+    {id:'mock', npc:'knight', icon:'⚖️', name:'모의 전장', desc:'모의고사 스탬프 1개.', target:1, gold:16, metric:() => stampToday('⚖️')},
+    {id:'flow', npc:'merchant', icon:'🔥', name:'몰입 거래', desc:'집중몰입 스탬프 1개.', target:1, gold:12, metric:() => stampToday('🔥')},
+    {id:'body', npc:'innkeeper', icon:'💪', name:'든든한 하루', desc:'운동 기록 1회.', target:1, gold:10, metric:() => ((state.exercise || {})[formatDate(today)] || []).length},
+    {id:'spell', npc:'sage', icon:'🔮', name:'주문 다섯 번', desc:'주문을 5장 기억해낸다.', target:5, gold:12, metric:() => (state.spellDay && state.spellDay.date === formatDate(today)) ? state.spellDay.n : 0},
+    {id:'six', npc:'merchant', icon:'📦', name:'하루치 짐 나르기', desc:'오늘 스탬프 6개.', target:6, gold:18, metric:() => scorableEntries(formatDate(today)).length},
+    {id:'plan', npc:'sage', icon:'🧭', name:'오늘의 길잡이', desc:'핵심 미션 2개 고르기.', target:2, gold:8, metric:() => ((state.missions || {})[formatDate(today)] || []).length}
+  ];
+  const BOUNTY_LINES = {
+    knight:['맡아주는 건가. 기대하지.', '훌륭했다. 약속한 보상이다.'],
+    archivist:['기록해 두겠습니다.', '확인했습니다. 약속한 보상입니다.'],
+    merchant:['거래 성립이야!', '깔끔한 거래였네. 자, 대가야.'],
+    innkeeper:['잘 부탁해! 무리는 하지 말고.', '고생했어! 이건 내 마음이야.'],
+    sage:['좋은 선택이오.', '잘 해냈소. 받으시오.']
+  };
+  function bountyState(){
+    const ds = formatDate(today);
+    if(!state.bounty || state.bounty.date !== ds){
+      let seed = (+ds.replace(/-/g, '')) % 9973; const pool = BOUNTIES.map(x => x.id), offers = [];
+      while(offers.length < 3){ seed = (seed * 31 + 7) % 9973; offers.push(pool.splice(seed % pool.length, 1)[0]); }
+      state.bounty = { date:ds, offers, accepted:null, claimed:false };
+    }
+    { const want = Math.min(BOUNTIES.length, 3 + townLevel('library')), b = state.bounty; while(b.offers.length < want){ const rest = BOUNTIES.map(x => x.id).filter(id => !b.offers.includes(id)); b.offers.push(rest[b.offers.length % rest.length]); } }
+    return state.bounty;
+  }
+  function bountyReady(){
+    const b = bountyState();
+    if(b.claimed) return false;
+    if(!b.accepted) return true;
+    const q = BOUNTIES.find(x => x.id === b.accepted);
+    return !!q && q.metric() >= q.target;
+  }
+  function renderBounty(){
+    const wrap = document.getElementById('bounty-board');
+    if(!wrap) return;
+    const b = bountyState();
+    const sub = document.getElementById('bounty-sub');
+    if(sub) sub.textContent = `완료 ${state.bountyDone || 0}건`;
+    const list = b.accepted ? [b.accepted] : b.offers;
+    wrap.innerHTML = list.map(id => {
+      const q = BOUNTIES.find(x => x.id === id);
+      const cur = Math.min(q.target, q.metric()), done = cur >= q.target;
+      let btn;
+      if(b.claimed) btn = '<span class="bounty-card__reward">✓ 오늘 완료</span>';
+      else if(b.accepted) btn = done ? '<button type="button" class="spell-btn spell-btn--main" data-bounty="claim">보상 받기</button>' : `<span class="bounty-card__reward">${cur}/${q.target}</span>`;
+      else btn = `<button type="button" class="spell-btn" data-bounty="accept" data-id="${id}">수락</button>`;
+      return `<div class="bounty-card${b.accepted ? ' accepted' : ''}${b.claimed ? ' done' : ''}">${npcFaceHTML(q.npc, 40)}<div class="bounty-card__body"><div class="bounty-card__name">${q.icon} ${q.name}</div><div class="bounty-card__desc">${npcProfile(q.npc).name}의 의뢰 · ${q.desc}</div><div class="bounty-card__reward">보상 · ${coinHTML(q.gold)}</div></div>${btn}</div>`;
+    }).join('') + ((!b.accepted) ? '<p class="chip-limit-note">하루에 한 건만 수락할 수 있어요. 마음 가는 의뢰를 골라 보세요.</p>' : '');
+    renderTabBadges();
+  }
+  document.getElementById('bounty-board').addEventListener('click', e => {
+    const btn = e.target.closest('[data-bounty]');
+    if(!btn) return;
+    const b = bountyState();
+    if(btn.dataset.bounty === 'accept' && !b.accepted){
+      b.accepted = btn.dataset.id; saveState(); renderBounty();
+      const q = BOUNTIES.find(x => x.id === b.accepted);
+      showNpcToast(q.npc, BOUNTY_LINES[q.npc][0]);
+    }else if(btn.dataset.bounty === 'claim' && b.accepted && !b.claimed){
+      const q = BOUNTIES.find(x => x.id === b.accepted);
+      if(q.metric() < q.target) return;
+      const gold = Math.round(q.gold * (heartPerk('merchant') ? 1.2 : 1)); b.claimed = true; awardCoins(gold);
+      state.bonusXp = (state.bonusXp || 0) + 5; state.bountyDone = (state.bountyDone || 0) + 1;
+      saveState(); persistAndRefresh();
+      showNpcToast(q.npc, BOUNTY_LINES[q.npc][1], { reward: coinHTML(gold) + ' · 경험치 +5' });
+    }
+  });
+  // ===== NPC 편지함 =====
+  const LETTERS = [
+    {id:'welcome', npc:'innkeeper', title:'여관에 온 걸 환영해', gift:5, when:() => true,
+     text:'어서 와. 이 여관은 언제든 문이 열려 있어.\n오늘 얼마나 했는지는 중요하지 않아. 앉았다는 것만으로 충분하니까.'},
+    {id:'streak3', npc:'archivist', title:'사흘째의 기록', gift:5, when:() => computeStreak().streak >= 3,
+     text:'사흘째 기록이 이어졌습니다. 빈칸 없는 달력은 생각보다 보기 좋더군요.\n완벽하지 않아도 괜찮습니다. 이어지고 있다는 게 중요합니다.'},
+    {id:'streak7', npc:'innkeeper', title:'일주일 단골님께', gift:10, when:() => computeStreak().streak >= 7,
+     text:'일주일 연속이라니! 장부에 별표를 쳐뒀어.\n오늘 식사는 내가 특별히 신경 써서 준비할게. 꼭 들러.'},
+    {id:'monster', npc:'noa', title:'첫 사냥을 축하하며', gift:5, when:() => (state.monsterCodex || []).length >= 1,
+     text:'도감에 첫 항목이 생겼다며. 잘했어.\n놈들이 언제 나타나는지 알게 되면 절반은 이긴 거야.'},
+    {id:'gate', npc:'knight', title:'첫 관문을 넘은 자에게', gift:10, when:() => !!state.weeklyGateClearedWeekKey,
+     text:'첫 관문을 넘었더군. 문은 두드린 만큼 열린다.\n다음 관문은 더 단단하겠지만, 그때도 두드리면 된다.'},
+    {id:'stamps100', npc:'merchant', title:'백 번째 거래에 부쳐', gift:15, when:() => totalStampsAllTime() >= 100,
+     text:'스탬프 백 개라. 장부로 치면 꽤 큰 거래액이야.\n자네, 장사 소질 있어. 이건 덤으로 얹는 마음이네.'},
+    {id:'spell10', npc:'sage', title:'입에 올린 말들', gift:8, when:() => (state.spellCasts || 0) >= 10,
+     text:'주문을 열 번 입에 올렸구려. 외운 것은 꺼내 쓸 때 힘이 된다오.\n오늘도 한 장만 영창해 보시오.'},
+    {id:'bounty5', npc:'ian', title:'게시판에서 자주 보이던데', gift:10, when:() => (state.bountyDone || 0) >= 5,
+     text:'의뢰를 다섯 건이나 해냈더군. 게시판에 네 이름이 자주 보여.\n소문 좋아. 수수료는 이번엔 안 받을게.'},
+    {id:'stamps500', npc:'knight', title:'오백 번의 발걸음', gift:20, when:() => totalStampsAllTime() >= 500,
+     text:'오백 번째 발걸음이다. 이제 명령이 없어도 움직이는 자로군.\n이 관문을 지켜온 건 다름 아닌 너다.'},
+    {id:'d100', npc:'sage', title:'백 일 앞에서', gift:10, when:d => d >= 0 && d <= 100,
+     text:'남은 날이 백 일 아래로 내려왔소. 숫자는 무겁지만, 하루씩 나누면 가볍소.\n오늘 몫만 생각하시오.'},
+    {id:'d30', npc:'guardian', title:'마지막 서른 날', gift:20, when:d => d >= 0 && d <= 30,
+     text:'성문 앞에서 오래 지켜보았다. 이제 마지막 서른 날이다.\n새로 쌓기보다, 쌓아둔 것을 꺼내는 데 힘을 써라.'}
+  ];
+  function letterDef(x){ return x.dyn ? x : LETTERS.find(l => l.id === x.id); }
+  function mailUnread(){ return (state.letters || []).filter(x => !x.read).length; }
+  function mailSig(){ return (state.letters || []).map(x => x.id + (x.read ? 1 : 0)).join(); }
+  function mailSub(){
+    const sub = document.getElementById('mail-sub'), n = mailUnread();
+    if(sub) sub.textContent = n ? `새 편지 ${n}통` : `${(state.letters || []).length}통`;
+  }
+  function renderMailbox(){
+    const box = document.getElementById('mail-box');
+    if(!box) return;
+    mailSub();
+    if(box.dataset.sig !== mailSig()){
+      box.dataset.sig = mailSig();
+      const ls = (state.letters || []).slice().reverse();
+      box.innerHTML = ls.length ? ls.map(x => {
+        const L = letterDef(x);
+        if(!L) return '';
+        return `<details class="letter${x.read ? '' : ' unread'}" data-letter="${x.id}"><summary>${npcFaceHTML(L.npc, 34)}<span class="letter__title">${L.title}</span><span class="letter__date">${x.date}</span></summary><div class="letter__body">${L.text}\n\n— ${npcProfile(L.npc).name}${(!x.read && L.gift) ? `<span class="letter__gift">동봉된 선물 · ${coinHTML(L.gift)}</span>` : ''}</div></details>`;
+      }).join('') : '<p class="tier2-empty">아직 도착한 편지가 없어요. 이야기가 쌓이면 마을 사람들이 편지를 보내와요.</p>';
+    }
+    renderTabBadges();
+  }
+  function checkLetters(){
+    if(!Array.isArray(state.letters)) state.letters = [];
+    const diff = Math.ceil((EXAM_DATE - today) / 86400000);
+    let n = 0;
+    LETTERS.forEach(L => {
+      if(state.letters.some(x => x.id === L.id)) return;
+      let ok = false;
+      try{ ok = L.when(diff); }catch(err){}
+      if(ok){ state.letters.push({ id:L.id, date:formatDate(today), read:false }); n++; }
+    });
+    n += checkWeeklyJournal();
+    Object.keys(GIFT_PREF).forEach(id => { for(let h = 1; h <= hearts(id); h++){ const c = state.letters.length; heartLetter(id, h); if(state.letters.length > c) n++; } });
+    if(n){ spiritReact(3, '편지가 왔어요! 얼른 열어봐요!'); saveState(); showToast(`✉️ 새 편지 ${n}통이 도착했어요. (모험 탭 편지함)`); }
+    renderMailbox();
+  }
+  document.getElementById('mail-box').addEventListener('toggle', e => {
+    const d = e.target;
+    if(!d.open || !d.dataset || !d.dataset.letter) return;
+    const rec = (state.letters || []).find(x => x.id === d.dataset.letter);
+    if(!rec || rec.read) return;
+    rec.read = true; d.classList.remove('unread');
+    const L = letterDef(rec);
+    if(L && L.gift){ awardCoins(L.gift); showNpcToast(L.npc, '편지, 잘 받았지? 작은 선물이야.', { reward: coinHTML(L.gift) }); }
+    saveState(); renderClassStats();
+    document.getElementById('mail-box').dataset.sig = mailSig(); mailSub(); renderTabBadges();
+  }, true);
+
+  
+  // ===== 공부 분석 (토마토 정령 · 주간 일지 공용) =====
+  function fmtMin(m){ m = Math.round(m); return m >= 60 ? `${Math.floor(m/60)}시간 ${m%60}분` : `${m}분`; }
+  function md(d){ return `${d.getMonth()+1}/${d.getDate()}`; }
+  // 과목별 공부량은 '그날의 순공 시간을 그날 고른 미션 과목들에 나눈 추정치'
+  function subjectStats(from, to){
+    const st = {}; MISSIONS.forEach(m => { st[m] = { days:0, min:0, stamps:0 }; });
+    const tg = {};
+    (state.focusLog || []).forEach(e => { if(e.subject && st[e.subject]){ tg[e.date] = tg[e.date] || {}; tg[e.date][e.subject] = (tg[e.date][e.subject] || 0) + (e.minutes || 0); } });
+    for(let d = new Date(from); d <= to; d = addDays(d, 1)){
+      const ds = formatDate(d), ms = [].concat((state.missions || {})[ds] || []).filter(m => st[m]);
+      const t = tg[ds] || {}, subj = ((state.entries || {})[ds] || {}).subj || {};
+      let tagged = 0; Object.keys(t).forEach(m => { st[m].min += t[m]; tagged += t[m]; });
+      const rest = Math.max(0, estimatedFocusMinutesForDate(ds) - tagged);
+      ms.forEach(m => { st[m].min += rest / ms.length; });
+      new Set(ms.concat(Object.keys(t), Object.keys(subj).filter(m => st[m]))).forEach(m => { st[m].days++; });
+      Object.keys(subj).forEach(m => { if(st[m]) st[m].stamps += subj[m]; });
+    }
+    return st;
+  }
+  function lastStudied(m){
+    const ds = Object.keys(state.missions || {}).filter(k => [].concat(state.missions[k] || []).includes(m)).sort().pop();
+    return ds ? Math.round((today - new Date(ds + 'T00:00:00')) / 86400000) : null;
+  }
+  function weekDigest(from, to){
+    let days = 0, stamps = 0, min = 0; const types = {};
+    for(let d = new Date(from); d <= to; d = addDays(d, 1)){
+      const ds = formatDate(d), list = entriesFor(ds);
+      if(list.length) days++;
+      stamps += scorableEntries(ds).length; min += estimatedFocusMinutesForDate(ds);
+      list.forEach(e => { types[e] = (types[e] || 0) + 1; });
+    }
+    return { days, stamps, min, types, subj: subjectStats(from, to) };
+  }
+  function subjLines(sd){
+    const rows = MISSIONS.filter(m => sd[m].days > 0).sort((a, b) => sd[b].days - sd[a].days || sd[b].min - sd[a].min);
+    return rows.length ? rows.map(m => `· ${m} ${sd[m].days}일${sd[m].min ? ` · 약 ${fmtMin(sd[m].min)}` : ''}`).join('\n') : '· 과목 미션이 기록되지 않았어요';
+  }
+  function neglectLine(sd){
+    const list = MISSIONS.filter(m => !sd[m].days).map(m => [m, lastStudied(m)]).sort((a, b) => (b[1] == null ? 999 : b[1]) - (a[1] == null ? 999 : a[1])).slice(0, 3);
+    return list.length ? list.map(([m, g]) => `${m}(${g == null ? '아직 기록 없음' : g + '일 전'})`).join(', ') : '모든 과목에 손길이 닿았어요';
+  }
+  // ===== 주간 여정 일지 (세라의 편지: 수요일 중간 점검 · 일요일 되돌아보기) =====
+  function pushJournal(id, title, text, gift){
+    state.letters.push({ id, dyn:true, npc:'archivist', title, text, gift:(heartPerk('archivist') ? gift * 2 : gift), date:formatDate(today), read:false });
+  }
+  function checkWeeklyJournal(){
+    const ws = sundayOf(today), wk = formatDate(ws), prevWs = addDays(ws, -7), pk = formatDate(prevWs);
+    const has = id => state.letters.some(x => x.id === id);
+    let n = 0;
+    if(Object.keys(state.entries || {}).some(ds => ds < wk && entriesFor(ds).length) && !has('wk-' + pk + '-end')){
+      const we = addDays(ws, -1), dg = weekDigest(prevWs, we), pv = weekDigest(addDays(prevWs, -7), addDays(prevWs, -1)), gap = dg.stamps - pv.stamps;
+      const cmp = (!dg.stamps && !pv.stamps) ? '' : gap > 0 ? `지난 주보다 스탬프가 ${gap}개 늘었어요.` : gap < 0 ? `지난 주보다 ${-gap}개 적었지만, 쉬어가는 주도 여정의 일부예요.` : '지난 주와 비슷한 걸음이었어요.';
+      const story = dg.days >= 6 ? '빈칸이 거의 없는 한 주였습니다. 이 꾸준함이 쌓이면 지도가 됩니다.' : dg.days >= 3 ? '고르게 걸은 한 주였습니다. 흔들린 날이 있어도 길은 이어졌어요.' : dg.days >= 1 ? '짧은 한 주였지만 지도는 비어 있지 않아요. 남긴 흔적이 있으니까요.' : '지난 한 주는 안개 속이었어요. 괜찮아요. 안개는 걷히기 마련이고, 기록은 거기서 다시 시작합니다.';
+      pushJournal('wk-' + pk + '-end', '지난 한 주 되돌아보기',
+        `지난 한 주(${md(prevWs)}~${md(we)})를 되돌아봤습니다.\n\n📅 ${dg.days}일 기록 · 스탬프 ${dg.stamps}개 · 순공 ${fmtMin(dg.min)}${cmp ? '\n' + cmp : ''}\n\n📚 과목별 발자취\n${subjLines(dg.subj)}\n\n🌫️ 손길이 뜸했던 과목: ${neglectLine(dg.subj)}\n\n${story}\n\n새 한 주가 시작됩니다. 지난주는 지난주의 몫이었어요. 이번 주는 가볍게, 한 줄부터 다시 적어 봅시다.`, 10);
+      n++;
+    }
+    if(today.getDay() >= 3 && !has('wk-' + wk + '-mid')){
+      const dg = weekDigest(ws, today);
+      const story = dg.days >= 3 ? '좋은 페이스예요. 남은 며칠은 부족했던 과목 하나만 얹어도 균형이 잡힙니다.' : dg.days >= 1 ? '아직 절반이 남았어요. 뜸했던 과목 하나만 먼저 골라 볼까요?' : '아직 이번 주 기록이 비어 있지만 늦지 않았어요. 오늘 한 줄이면 이번 주도 시작됩니다.';
+      pushJournal('wk-' + wk + '-mid', '이번 주 중간 점검',
+        `한 주의 절반쯤 왔습니다. (${md(ws)}~${md(today)})\n\n📅 지금까지 ${dg.days}일 기록 · 스탬프 ${dg.stamps}개 · 순공 ${fmtMin(dg.min)}\n\n📚 이번 주 과목별 발자취\n${subjLines(dg.subj)}\n\n🧭 남은 며칠 챙기면 좋을 과목: ${neglectLine(dg.subj)}\n\n${story}`, 5);
+      n++;
+    }
+    if(state.letters.length > 80) state.letters = state.letters.slice(-80);
+    return n;
+  }
+  // ===== 토마토 정령 =====
+  function renderSpirit(){
+    const face = document.getElementById('spirit-face');
+    if(!face) return;
+    const ws = sundayOf(today), dg = weekDigest(ws, today), sd = dg.subj, all = missionCountsAllTime();
+    const fog = computeFogLevel(), st = computeStreak().streak, n = scorableEntries(formatDate(today)).length;
+    const goal = goalForDate(formatDate(today)), ph = state.pomodoro.phase;
+    const tap = (window.__spiritTap && Date.now() < window.__spiritTap.until) ? window.__spiritTap : null;
+    const mood = tap ? [tap.idx, tap.line] : ph === 'focus' ? [4, '같이 집중해요. 잡음은 제가 지킬게요.'] : fog >= 2 ? [10, '…안개 때문에 눈이 감겨요. 한 걸음만 같이 걸어요.'] : (n > 0 && st >= 7) ? [11, `${st}일째 불꽃이 꺼지지 않아요!`] : (n > 0 && n >= goal) ? [3, '오늘 목표 달성! 정말 대단해요!'] : n > 0 ? [1, '오늘의 발자국, 잘 받아 적었어요.'] : fog === 1 ? [8, '어라, 요즘 조용하네요? 오늘 한 줄부터 다시 해봐요.'] : [null, '오늘 첫 스탬프를 기다리고 있어요.'];
+    const gaps = MISSIONS.filter(m => (all[m] || 0) > 0).map(m => [m, lastStudied(m)]).filter(r => r[1] != null && r[1] >= 7).sort((a, b) => b[1] - a[1]);
+    const hint = gaps.length ? ` ${withJosa(gaps[0][0], '이', '가')} ${gaps[0][1]}일째 조용해요. 오늘 한 번 들러볼까요?` : (!Object.keys(all).length ? ' 오늘의 핵심 미션에서 과목을 고르면 공부 지도를 그려 줄게요.' : '');
+    setSpiritFace(face, mood[0]);
+    face.style.filter = spiritLv() ? `drop-shadow(0 0 ${4 + spiritLv() * 3}px rgba(240,190,80,.8))` : '';
+    { const nm = document.getElementById('spirit-name'); if(nm) nm.textContent = SPIRIT_EVO[spiritLv()].name; }
+    document.getElementById('spirit-line').textContent = mood[1] + hint;
+    const rows = MISSIONS.map(m => {
+      const v = sd[m], g = lastStudied(m);
+      return `<div class="spirit-row"><span>${m}</span><div class="spirit-row__bar"><div class="spirit-row__fill" style="width:${Math.min(100, v.days / 7 * 100)}%;--m:${missionColor(m)}"></div></div><span>${v.days}일${v.min ? ` · ${(v.min/60).toFixed(1)}h` : ''}<br><small>누적 ${all[m] || 0}일 · ${g == null ? '기록 없음' : g === 0 ? '오늘' : g + '일 전'}</small></span></div>`;
+    }).join('');
+    const acts = ['📖','✍️','⚖️','🔥','🍅'].filter(e => dg.types[e]).map(e => `${e} ${dg.types[e]}`).join(' · ');
+    const strong = MISSIONS.slice().sort((a, b) => (all[b] || 0) - (all[a] || 0))[0];
+    const weak = MISSIONS.slice().sort((a, b) => ((all[a] || 0) - (all[b] || 0)) || ((lastStudied(b) ?? 999) - (lastStudied(a) ?? 999)))[0];
+    const sw = ((all[strong] || 0) > 0 && weak !== strong) ? `<p class="spirit-note">💪 지금까지 가장 많이 다진 과목은 <b>${strong}</b>, 더 살펴볼 과목은 <b>${weak}</b>이에요.</p>` : '';
+    renderSpiritEvo();
+    document.getElementById('spirit-map').innerHTML = rows + (acts ? `<p class="spirit-note">이번 주 활동 · ${acts}</p>` : '') + sw + '<p class="spirit-note spirit-note--muted">과목별 시간은 그날 순공 시간을 그날 고른 미션 과목에 나눈 추정치예요. 누적은 미션을 고른 날 수예요.' + (spiritLv() >= 1 ? ' 과목 태깅한 시간은 실제 기록이에요.' : ' 진화 Lv.1에서 과목 태깅을 열면 더 정확해져요.') + '</p>';
+  }
+
+  
+  // ===== NPC 선물 · 호감도 (신뢰 레벨과 별도) =====
+  const GIFT_CAT_LABEL = { tomato:'토마토', drink:'음료', food:'음식', book:'책·문서', ink:'잉크·필기', blade:'무기·연마', crystal:'수정·마법', map:'지도·항해', tea:'차', junk:'잡동사니' };
+  const GIFT_ITEMS = [
+    {id:'g-basket', icon:'🧺', name:'토마토 바구니', cost:18, cat:'tomato'},
+    {id:'g-ale', icon:'🍺', name:'시원한 에일', cost:20, cat:'drink'},
+    {id:'g-tea', icon:'🍵', name:'별빛 찻잎', cost:22, cat:'tea'},
+    {id:'g-ink', icon:'🖋️', name:'고급 잉크병', cost:25, cat:'ink'},
+    {id:'g-paper', icon:'📜', name:'고급 양피지', cost:22, cat:'book'},
+    {id:'g-stone', icon:'🪨', name:'명품 숫돌', cost:28, cat:'blade'},
+    {id:'g-glass', icon:'🔭', name:'황동 망원경', cost:30, cat:'map'},
+    {id:'g-crystal', icon:'🔮', name:'별빛 수정', cost:35, cat:'crystal'},
+    {id:'g-wine', icon:'🍷', name:'포도주 한 병', cost:34, cat:'drink', needShop:1},
+    {id:'g-atlas', icon:'🗺️', name:'항해 지도첩', cost:38, cat:'map', needShop:1},
+    {id:'g-quill', icon:'🪶', name:'깃털 펜', cost:36, cat:'ink', needShop:2},
+    {id:'g-tome', icon:'📚', name:'희귀 서적', cost:42, cat:'book', needShop:2},
+    {id:'g-dagger', icon:'🗡️', name:'장인의 단검', cost:46, cat:'blade', needShop:3},
+    {id:'g-teapot', icon:'🍶', name:'귀한 찻주전자', cost:44, cat:'tea', needShop:3}
+  ];
+  // 이미 있는 소모품·몬스터 소재·퀘스트 아이템도 선물 종류를 갖는다
+  const GIFT_CAT = {
+    'focus-potion':'drink', 'lucky-charm':'crystal', 'travelers-lunch':'food', 'memory-scroll':'book', 'rare-material':'crystal', 'secret-chart':'map', 'ians-contract':'book',
+    'mat-scroll':'book', 'mat-note':'book', 'mat-broken-gear':'blade', 'mat-badge':'blade', 'mat-key':'map', 'mat-riddle':'map', 'mat-candle':'crystal', 'mat-lotus':'tea', 'mat-bowl':'food',
+    'mat-drowsy-mist':'junk', 'mat-blanket':'junk', 'mat-fog':'junk', 'mat-shadow':'junk', '헌정의_파편':'crystal', '상법의_인장':'map'
+  };
+  // 초상에서 읽히는 성격대로: 마르타(토마토·맥주), 마르코(지도·망원경), 레온(검·갑옷), 세라(책), 에드윈(지팡이·수정)
+  const GIFT_PREF = {
+    innkeeper:{love:['tomato','drink'], like:['food'], hate:['junk','blade']},
+    merchant:{love:['map','crystal'], like:['drink','blade'], hate:['junk']},
+    knight:{love:['blade'], like:['drink','map'], hate:['crystal']},
+    archivist:{love:['ink','book'], like:['tea'], hate:['blade','junk']},
+    sage:{love:['tea','crystal'], like:['book','ink'], hate:['blade','junk']},
+    noa:{love:['blade','drink'], like:['map'], hate:['book']},
+    elian:{love:['book','ink'], like:['tea'], hate:['drink']},
+    adel:{love:['ink','map'], like:['book'], hate:['junk','drink']}
+  };
+  const GIFT_LINE = {
+    innkeeper:['어머, 내가 제일 좋아하는 거잖아! 고마워!', '…음, 이건 좀 곤란한데. 마음만 받을게.'],
+    merchant:['이야, 안목 있는데? 이건 값어치가 있어!', '이런 건 장사에도 못 쓰겠는걸…'],
+    knight:['…좋은 물건이다. 잘 쓰겠다.', '…내게는 필요 없는 물건이다.'],
+    archivist:['이렇게 마음에 드는 걸… 감사합니다.', '…죄송하지만, 제겐 어울리지 않네요.'],
+    sage:['허허, 이거 참 좋구려. 고맙소.', '흠… 마음은 고맙게 받겠소.']
+  };
+  function gs(k){ if(!state[k] || typeof state[k] !== 'object') state[k] = {}; return state[k]; }
+  function hearts(id){ return Math.min(5, Math.floor((gs('affection')[id] || 0) / 100)); }
+  function giftRowHTML(id){
+    if(!GIFT_PREF[id]) return '';
+    const h = hearts(id), done = gs('giftedOn')[id] === formatDate(today);
+    return `<div class="npc-card__gift"><span class="npc-card__hearts" title="호감도">${'♥'.repeat(h)}${'♡'.repeat(5 - h)}</span>${h >= 5 && HEART_PERK[id] ? ` <small title="${HEART_PERK[id]}">★ ${HEART_PERK[id]}</small>` : ''}<button type="button" class="spell-btn" data-gift-open="${id}"${done ? ' disabled' : ''}>${done ? '🎁 오늘 완료' : '🎁 선물'}</button></div>`;
+  }
+  function giftShelf(){
+    return '<div class="shop-subhead">🎁 선물 진열대</div>' + GIFT_ITEMS.filter(it => (it.needShop || 0) <= townLevel('shop')).map(it => {
+      const ok = (state.coins || 0) >= it.cost;
+      return `<div class="food-item${ok ? '' : ' disabled'}"><span class="food-item__icon">${it.icon}</span><span class="food-item__body"><span class="food-item__name">${it.name}</span><span class="food-item__flavor">종류 · ${GIFT_CAT_LABEL[it.cat]} · 보유 ${gs('giftStock')[it.id] || 0}</span></span><button type="button" class="food-item__btn" data-giftbuy="${it.id}" ${ok ? '' : 'disabled'}>${coinHTML(it.cost, 'coin-icon--button')}</button></div>`;
+    }).join('');
+  }
+  function buyGiftItem(id){
+    const it = GIFT_ITEMS.find(x => x.id === id);
+    if(!it) return;
+    if((state.coins || 0) < it.cost){ showNpcToast('merchant', '골드가 모자라는군. 조금 더 모아서 오게.'); return; }
+    state.coins -= it.cost; state.merchantSpent = (state.merchantSpent || 0) + it.cost;
+    gs('giftStock')[id] = (gs('giftStock')[id] || 0) + 1;
+    saveState(); renderShop(); renderClassStats(); renderNPCs();
+    showNpcToast('merchant', `${it.icon} ${it.name}, 누구에게 줄지는 자네 몫이야.`);
+  }
+  function giftEntries(){
+    const out = [], cons = {};
+    ((state.inventory || {}).consumables || []).forEach(id => { cons[id] = (cons[id] || 0) + 1; });
+    Object.keys(cons).forEach(id => { const it = SHOP_ITEMS.find(i => i.id === id); if(it && GIFT_CAT[id]) out.push({ kind:'c', id, icon:it.icon, name:it.name, n:cons[id], cat:GIFT_CAT[id] }); });
+    Object.entries((state.rpgWorld || {}).items || {}).forEach(([id, n]) => { if(n > 0 && GIFT_CAT[id]){ const m = miscItemInfo(id); out.push({ kind:'m', id, icon:m.icon, name:m.name, n, cat:GIFT_CAT[id] }); } });
+    Object.entries(gs('giftStock')).forEach(([id, n]) => { const it = GIFT_ITEMS.find(i => i.id === id); if(n > 0 && it) out.push({ kind:'g', id, icon:it.icon, name:it.name, n, cat:it.cat }); });
+    return out;
+  }
+  function giftOpen(npcId){
+    const n = npcProfile(npcId), given = gs('giftedOn')[npcId] === formatDate(today), known = gs('giftKnown')[npcId] || {};
+    const TAG = { love:'❤️ 아주 좋아해요', like:'🙂 좋아해요', neutral:'😐 무난해요', hate:'💢 싫어해요' };
+    const rows = giftEntries().map(e => `<div class="bounty-card"><span class="food-item__icon">${e.icon}</span><div class="bounty-card__body"><div class="bounty-card__name">${e.name} ×${e.n}</div><div class="bounty-card__desc">종류 · ${GIFT_CAT_LABEL[e.cat]} · ${known[e.cat] ? TAG[known[e.cat]] : '❔ 반응을 몰라요'}</div></div><button type="button" class="spell-btn" data-gift="give" data-npc="${npcId}" data-kind="${e.kind}" data-id="${e.id}"${given ? ' disabled' : ''}>주기</button></div>`).join('');
+    spellOpen(`<p class="modal-sub">${n.name} · ♥ ${hearts(npcId)}/5 · ${given ? '오늘은 이미 선물을 드렸어요.' : '하루에 한 번 선물할 수 있어요.'}</p>${rows || '<div class="spell-card">선물할 물건이 없어요. 잡화상 "선물 진열대"나 몬스터 소재를 확인해 보세요.</div>'}<button type="button" class="spell-btn" data-gift="gold" data-npc="${npcId}" style="width:100%"${given ? ' disabled' : ''}>${coinHTML(20)} 골드 선물 (호감 +5)</button>`, '🎁 선물하기');
+  }
+  function giveGift(npc, mode, kind, id){
+    const ds = formatDate(today);
+    if(gs('giftedOn')[npc] === ds) return;
+    let r = 'neutral', delta = 5, item = null;
+    if(mode === 'gold'){
+      if((state.coins || 0) < 20){ showToast('골드가 부족해요.'); return; }
+      state.coins -= 20;
+    }else{
+      item = giftEntries().find(e => e.kind === kind && e.id === id);
+      if(!item) return;
+      if(kind === 'c'){ const l = state.inventory.consumables; l.splice(l.indexOf(id), 1); }
+      else if(kind === 'm'){ state.rpgWorld.items[id]--; }
+      else{ state.giftStock[id]--; }
+      const P = GIFT_PREF[npc] || {};
+      r = (P.love || []).includes(item.cat) ? 'love' : (P.like || []).includes(item.cat) ? 'like' : (P.hate || []).includes(item.cat) ? 'hate' : 'neutral';
+      delta = { love:40, like:20, neutral:8, hate:-15 }[r];
+      if(!gs('giftKnown')[npc]) state.giftKnown[npc] = {};
+      state.giftKnown[npc][item.cat] = r;
+    }
+    const before = hearts(npc), A = gs('affection');
+    A[npc] = Math.max(0, Math.min(500, (A[npc] || 0) + delta)); gs('giftedOn')[npc] = ds;
+    saveState(); spellClose(); renderNPCs(); renderShop(); renderInventory(); renderClassStats(); renderTabBadges();
+    const L = GIFT_LINE[npc];
+    const line = mode === 'gold' ? '마음 써줘서 고마워요.' : r === 'love' ? (L ? L[0] : '정말 마음에 들어요!') : r === 'hate' ? (L ? L[1] : '…음, 이건 취향이 아니네요.') : '고마워요, 잘 받을게요.';
+    showNpcToast(npc, line, { reward: mode === 'gold' ? '호감 +5' : `${item.icon} ${item.name} · 호감 ${delta > 0 ? '+' : ''}${delta}` });
+    if(hearts(npc) > before){ for(let h = before + 1; h <= hearts(npc); h++) heartLetter(npc, h); saveState(); renderMailbox(); spiritReact(9, `${withJosa(npcProfile(npc).name, '과', '와')} 더 가까워졌어요!`); }
+    if(hearts(npc) > before) setTimeout(() => showToast(`💗 ${npcProfile(npc).name}의 호감도 ♥${hearts(npc)} 달성!`), 900);
+  }
+  document.getElementById('npc-list').addEventListener('click', e => {
+    const b = e.target.closest('[data-gift-open]');
+    if(b && !b.disabled) giftOpen(b.dataset.giftOpen);
+  });
+  document.getElementById('spell-modal-body').addEventListener('click', e => {
+    const b = e.target.closest('[data-gift]');
+    if(b && !b.disabled) giveGift(b.dataset.npc, b.dataset.gift, b.dataset.kind, b.dataset.id);
+  });
+
+  
+  // ===== 토마토 정령 표정 (4x4 스프라이트, 번호는 왼쪽 위부터 1~16) =====
+  function setSpiritFace(el, idx){
+    if(idx == null){
+      el.style.backgroundImage = "url('tomato-fairy-basic.png')"; el.style.backgroundSize = 'contain'; el.style.backgroundPosition = 'center';
+    }else{
+      const c = (idx - 1) % 4, r = Math.floor((idx - 1) / 4);
+      el.style.backgroundImage = "url('tomato-fairy-sheet.png')"; el.style.backgroundSize = '400% 400%';
+      el.style.backgroundPosition = `${c * 100 / 3}% ${r * 100 / 3}%`;
+    }
+  }
+  const SPIRIT_TAPS = [[2,'헤헤, 눈이 마주쳤네요!'], [9,'…부끄러워요. 그렇게 쓰다듬으면.'], [14,'어, 어디 갔지? 숨어 있어요~'], [15,'…가만히 있으면 마음이 편해져요.'], [5,'앗! 깜짝이야!'], [6,'♪ 콧노래 부르는 중이에요.'], [16,'흥, 잠깐 삐졌어요. (금방 풀려요)']];
+  document.getElementById('spirit-face').addEventListener('click', () => {
+    const t = SPIRIT_TAPS[Math.floor(Math.random() * SPIRIT_TAPS.length)];
+    window.__spiritTap = { idx:t[0], line:t[1], until:Date.now() + 3500 };
+    buzz(15); renderSpirit(); setTimeout(renderSpirit, 3600);
+  });
+  // ===== 배경음악 토글 · 카리지 BGM 일시정지/재개 =====
+  function updateBgmToggleLabel(){
+    const b = document.getElementById('bgm-toggle-btn');
+    if(b) b.textContent = state.bgmOn ? '🎵 배경음악 켜짐' : '🔇 배경음악 꺼짐';
+  }
+  function pauseTimerStartMusic(){ if(timerStartMusicAudio && !timerStartMusicAudio.paused) timerStartMusicAudio.pause(); }
+  function resumeTimerStartMusic(){
+    if(!state.soundOn || !state.bgmOn) return;
+    try{
+      const a = ensureTimerStartMusic();
+      a.volume = TIMER_START_MUSIC_VOLUME * bgmVolumeMultiplier();
+      const pr = a.play(); if(pr && pr.catch) pr.catch(() => {});
+    }catch(e){}
+  }
+  document.getElementById('bgm-toggle-btn').addEventListener('click', () => {
+    state.bgmOn = !state.bgmOn; saveState(); updateBgmToggleLabel();
+    if(state.bgmOn){ updateAmbientAudioForContext(); if(state.pomodoro.phase === 'focus') resumeTimerStartMusic(); }
+    else{ pauseTimerStartMusic(); stopAmbientAudio(); }
+  });
+
+  
+  // ===== 마을 재건 (골드를 나눠 투자 → 완공하면 마을이 달라진다) =====
+  const TOWN = [
+    {id:'inn', name:'여관 증축', npc:'innkeeper', icons:['🏚️','🛖','🏠','🏨'], costs:[150,400,900],
+     fx:['새 메뉴: 허브차 · 구운 마늘빵','새 메뉴: 뜨끈한 스튜','새 메뉴: 황금 잔치'],
+     say:['새 창문이 달렸어! 허브차부터 내올게, 앉아봐.','스튜 냄새 나지? 화덕을 새로 들였어. 오늘은 든든히 먹고 가.','이제 이 여관, 어엿한 명소야. 너 덕분이야, 정말로.']},
+    {id:'shop', name:'잡화상 확장', npc:'merchant', icons:['⛺','🏪','🏬','🏛️'], costs:[200,500,1000],
+     fx:['선물 진열: 포도주 · 항해 지도첩','선물 진열: 깃털 펜 · 희귀 서적','선물 진열: 장인의 단검 · 귀한 찻주전자'],
+     say:['간판을 새로 달았지! 이제 진열대가 좀 근사해졌네.','자네 덕에 창고까지 늘렸어. 귀한 물건도 들어오기 시작했다네.','이 항구에서 제일 큰 가게가 됐군. 첫 손님은 당연히 자네야.']},
+    {id:'library', name:'서고 건립', npc:'archivist', icons:['🪨','🧱','📚','🏛️'], costs:[200,500,1000],
+     fx:['의뢰 게시판 슬롯 +1','의뢰 게시판 슬롯 +1','의뢰 게시판 슬롯 +1'],
+     say:['서고의 첫 서가가 채워졌습니다. 게시판에 의뢰를 하나 더 붙일 수 있겠어요.','열람실이 생겼습니다. 기록이 쌓일수록 마을이 이야기를 갖게 되네요.','이제 이곳은 서고라 부를 만합니다. …당신의 발걸음이 이 서가를 채웠어요.']},
+    {id:'training', name:'훈련장', npc:'knight', icons:['🌾','🎯','⚔️','🏟️'], costs:[250,600,1200],
+     fx:['훈련 상대 등장 · 전투 보상 +1','정예 훈련 상대 · 전투 보상 +2','결전 훈련 · 전투 보상 +3'],
+     say:['훈련장 터를 다졌다. 허수아비가 첫 상대가 될 것이다.','정예 상대를 세웠다. 전보다 강한 놈이다. 각오해라.','결전 훈련장이 완성됐다. 여기서 버틴 자는 시험장에서도 흔들리지 않는다.']}
+  ];
+  const TOWN_FOODS = [
+    {id:'herb-tea', name:'허브차', icon:'🫖', cost:2, needInn:1, flavor:'창가에서 홀짝이는 따뜻한 한 잔.', buff:{kind:'luckFlat', value:0.03}, grantLabel:'오늘 행운 확률 소폭 상승'},
+    {id:'garlic-bread', name:'구운 마늘빵', icon:'🥖', cost:4, needInn:1, flavor:'고소한 향이 집중을 깨워요.', buff:{kind:'nextStampGold', value:3}, grantLabel:'다음 스탬프 골드+3개'},
+    {id:'hearty-stew', name:'뜨끈한 스튜', icon:'🥘', cost:10, needInn:2, flavor:'새 화덕에서 오래 끓인 스튜.', buff:{kind:'goldPct', value:0.08}, grantLabel:'오늘 남은 시간 골드 획득 +8%'},
+    {id:'golden-feast', name:'황금 잔치', icon:'🍽️', cost:22, needInn:3, flavor:'명소가 된 여관의 자랑, 잔치 한 상.', buff:{kind:'goldPct', value:0.18}, grantLabel:'오늘 남은 시간 골드 획득 +18%'}
+  ];
+  function townLevel(id){ return (((state.town || {})[id]) || {}).lv || 0; }
+  function allFoods(){ return FOOD_MENU.concat(TOWN_FOODS.filter(f => townLevel('inn') >= f.needInn)); }
+  function renderTown(){
+    const g = document.getElementById('town-grid');
+    if(!g) return;
+    const sub = document.getElementById('town-sub');
+    if(sub) sub.innerHTML = `${coinHTML(state.coins || 0)} 보유`;
+    g.innerHTML = TOWN.map(b => {
+      const t = (state.town || {})[b.id] || { lv:0, paid:0 }, lv = t.lv || 0, done = lv >= 3;
+      const cost = done ? 0 : b.costs[lv], paid = t.paid || 0;
+      return `<div class="town-card${done ? ' done' : ''}"><div class="town-card__icon">${b.icons[lv]}</div><div class="town-card__name">${b.name}</div><div class="town-card__lv">${done ? '✨ 완공' : `Lv.${lv} → ${lv + 1}`}</div><div class="town-card__fx">${done ? '모든 단계 완료' : b.fx[lv]}</div>${done ? '' : `<div class="town-card__bar"><div class="town-card__fill" style="width:${paid / cost * 100}%"></div></div><div class="town-card__fx">${paid}/${cost} 골드</div><div class="town-card__btns"><button type="button" class="spell-btn" data-town="${b.id}" data-amt="50">+50</button><button type="button" class="spell-btn" data-town="${b.id}" data-amt="200">+200</button><button type="button" class="spell-btn spell-btn--main" data-town="${b.id}" data-amt="${cost - paid}">남은 전액</button></div>`}</div>`;
+    }).join('');
+  }
+  function townInvest(id, amt){
+    const b = TOWN.find(x => x.id === id);
+    if(!b) return;
+    const town = gs('town');
+    if(!town[id] || typeof town[id] !== 'object') town[id] = { lv:0, paid:0 };
+    const t = town[id];
+    if(t.lv >= 3) return;
+    const cost = b.costs[t.lv], pay = Math.min(amt, cost - t.paid);
+    if(pay <= 0) return;
+    if((state.coins || 0) < pay){ showToast('골드가 부족해요. 조금 더 모아볼까요?'); return; }
+    state.coins -= pay; t.paid += pay;
+    let built = false;
+    if(t.paid >= cost){ t.lv++; t.paid = 0; built = true; }
+    saveState(); renderTown(); renderClassStats(); renderInn(); renderShop(); renderBounty();
+    if(built){
+      const lv = t.lv, line = b.say[lv - 1];
+      spiritReact(11, '마을이 멋있어졌어요!');
+      spawnConfetti(document.getElementById('town-panel'));
+      addChronicle(`${b.name} ${lv}단계 완공`, line);
+      state.letters = Array.isArray(state.letters) ? state.letters : [];
+      state.letters.push({ id:`town-${b.id}-${lv}`, dyn:true, npc:b.npc, title:`${b.name} ${lv}단계 완공`, text:`${line}\n${b.fx[lv - 1]}`, gift:0, date:formatDate(today), read:false });
+      saveState(); renderMailbox();
+      showNpcToast(b.npc, line, { reward:`🏗️ ${b.name} ${lv}단계 · ${b.fx[lv - 1]}` });
+    }else{
+      showToast(`🏗️ ${b.name}에 ${coinHTML(pay)} 투자했어요.`);
+    }
+  }
+  document.getElementById('town-grid').addEventListener('click', e => {
+    const b = e.target.closest('[data-town]');
+    if(b) townInvest(b.dataset.town, Number(b.dataset.amt));
+  });
+
+  
+  // ===== 정령 진화 (골드로 기능 해금) =====
+  const SPIRIT_EVO = [{ name:'견습 정령' }, { name:'마법 정령', cost:120, unlock:'스탬프·집중 시간 과목 태깅' }, { name:'현자 정령', cost:300, unlock:'회독 리포트' }, { name:'대정령', cost:700, unlock:'약점 진단' }];
+  function spiritLv(){ return (state.spirit && state.spirit.lv) || 0; }
+  function curSubj(){ return (spiritLv() >= 1 && state.curSubject && state.curSubjectDate === formatDate(today)) ? state.curSubject : null; }
+  function firstRecordDate(){ return new Date((Object.keys(state.entries || {}).sort()[0] || formatDate(today)) + 'T00:00:00'); }
+  function renderSpiritEvo(){
+    const el = document.getElementById('spirit-evo');
+    if(!el) return;
+    const lv = spiritLv(), nx = SPIRIT_EVO[lv + 1], cs = curSubj();
+    let h = `<div class="spirit-evo__head"><span>✨ ${SPIRIT_EVO[lv].name} · 진화 Lv.${lv}</span>${nx ? `<button type="button" class="spell-btn" data-spirit-evo="1">진화 ${coinHTML(evoCost(nx), 'coin-icon--button')}</button>` : '<span class="bounty-card__reward">최종 진화</span>'}</div>`;
+    if(nx) h += `<div class="spirit-evo__sec spirit-evo__lock">🔒 다음 진화에서 열려요 · ${nx.unlock}</div>`;
+    if(lv >= 1) h += `<div class="spirit-evo__sec">📌 지금 공부 중인 과목 <small>(고르면 오늘 찍는 스탬프·집중 시간이 이 과목으로 기록돼요)</small><div class="spirit-chips">${MISSIONS.map(m => `<button type="button" class="spirit-chip${cs === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-subj="${m}">${m}</button>`).join('')}</div></div>`;
+const rep = subjReport();
+    h += `<div class="spirit-evo__sec">📒 오늘 기록 ${logTodayMin()}분 · 아직 기록 안 한 순공 ${unloggedMin()}분<br><button type="button" class="spell-btn" data-log-open="1" style="width:100%;margin-top:4px">공부 기록하기 · 기록 보기</button></div>`;
+    if(lv >= 2) h += '<div class="spirit-evo__sec">📖 단원별 회독 리포트<br><small>회독 = 모든 단원을 한 바퀴 마친 횟수예요.</small>' + rep.filter(r => r.n).map(r => `<details class="spirit-unit"><summary>${r.m} · ${r.done}회독 완료 · ${r.done + 1}회독 ${r.prog}/${r.n}단원 · 이해도 ${r.ease ? r.ease.toFixed(1) : '-'}</summary>${r.units.map(u => `<div class="spirit-round"><span>${u.name} · ${u.rounds}회독 · ${u.ease ? '★' + u.ease : '미평가'}</span><span>${u.last ? daysAgo(u.last) + '일 전' : '미학습'} · ${fmtMin(u.min)}</span></div>`).join('')}</details>`).join('') + '</div>';
+    if(lv >= 3){
+      const us = [];
+      rep.forEach(r => r.units.forEach(u => us.push({ m:r.m, u, score:(u.ease ? (5 - u.ease) * 2 : 4) + (u.last ? Math.min(daysAgo(u.last), 30) / 5 : 6) + (u.rounds === 0 ? 2 : 0) - u.rounds * 0.5 })));
+      const top = us.sort((a, b) => b.score - a.score).slice(0, 5).map((x, i) => `${i + 1}. ${x.m} ${x.u.name} — ${x.u.ease ? '이해도 ★' + x.u.ease : '미평가'} · ${x.u.last ? daysAgo(x.u.last) + '일 전' : '미학습'} · ${x.u.rounds}회독`);
+      const sc = rep.filter(r => r.n).map(r => ({ m:r.m, v:r.units.reduce((a, u) => a + u.rounds, 0) / r.n * 2 + r.ease }));
+      const strong = sc.slice().sort((a, b) => b.v - a.v).slice(0, 2).filter(x => x.v > 0).map(x => x.m).join(', ') || '아직 없어요';
+      const weak = sc.slice().sort((a, b) => a.v - b.v).slice(0, 2).map(x => x.m).join(', ') || '-';
+      h += `<div class="spirit-evo__sec">💡 정령의 진단<br>🔁 복습 우선 단원<br>${top.length ? top.join('<br>') : '기록이 쌓이면 알려드릴게요.'}<br>💪 든든한 과목: ${strong}<br>🧭 살필 과목: ${weak}<br><small>우선순위 = 낮은 이해도 + 오래된 복습 + 적은 회독 (미평가·미학습은 높게 반영)</small></div>`;
+    }
+    el.innerHTML = h;
+  }
+  document.getElementById('spirit-evo').addEventListener('click', e => {
+    const ev = e.target.closest('[data-spirit-evo]'), sj = e.target.closest('[data-subj]'), rd = e.target.closest('[data-round]');
+    if(ev){
+      const nx = SPIRIT_EVO[spiritLv() + 1];
+      if(!nx) return;
+      if((state.coins || 0) < evoCost(nx)){ showToast('골드가 부족해요. 조금 더 모아볼까요?'); return; }
+      state.coins -= evoCost(nx); gs('spirit').lv = spiritLv() + 1;
+      window.__spiritTap = { idx:11, line:'진화했어요! 새로운 힘이 느껴져요!', until:Date.now() + 4000 };
+      saveState(); spawnConfetti(document.getElementById('spirit-face'));
+      showNpcToast('sage', `정령이 힘을 얻었소. ${withJosa(nx.unlock, '이', '가')} 열렸소.`);
+      renderClassStats(); renderSpirit(); setTimeout(renderSpirit, 4100);
+    }else if(sj){
+      const m = sj.dataset.subj;
+      state.curSubject = (curSubj() === m) ? null : m; state.curSubjectDate = formatDate(today);
+      saveState(); renderSpiritEvo();
+    }else if(rd){
+      const m = rd.dataset.round;
+      if(!confirm(`${m} 회독을 완료로 기록할까요?`)) return;
+      const r = gs('rounds'); r[m] = { n:((r[m] || {}).n || 0) + 1, start:formatDate(today) };
+      saveState(); renderSpirit(); showToast(`📖 ${m} ${r[m].n}회독 완료!`);
+    }
+  });
+
+  
+  // ===== 공부 기록부 (과목 → 단원 → 회독·이해도·시간) =====
+  const KINDS = ['강의','기본서','암기·복습','기출·문제','답안작성'];
+  const DEFAULT_UNITS = {
+    '헌법':['헌법총론','기본권총론','개별 기본권','통치구조','헌법재판'], '민법':['총칙','물권법','채권총론','채권각론','친족·상속'],
+    '형법':['형법총론','각론: 개인적 법익','각론: 사회·국가적 법익'], '행정법':['행정법총론','행정작용법','행정절차·정보공개','행정쟁송','행정조직·특별행정법'],
+    '상법':['상법총칙·상행위','회사법','어음·수표법','보험·해상'], '민사소송법':['소송의 주체·소','심리','증거','소송의 종료','상소·재심·특수절차'],
+    '형사소송법':['수사','공소','공판·증거','재판·상소','특별절차'], '선택과목':[]
+  };
+  let logDraft = {};
+  function unitsOf(subj){ const U = gs('units'); if(!Array.isArray(U[subj])) U[subj] = (DEFAULT_UNITS[subj] || []).map((n, i) => ({ id:'u' + i, name:n, rounds:0, ease:0, last:null, min:0 })); return U[subj]; }
+  function logList(){ if(!Array.isArray(state.studyLog)) state.studyLog = []; return state.studyLog; }
+  function daysAgo(ds){ return Math.round((today - new Date(ds + 'T00:00:00')) / 86400000); }
+  function logTodayMin(){ const ds = formatDate(today); return logList().filter(e => e.date === ds).reduce((a, e) => a + e.min, 0); }
+  function unloggedMin(){ return Math.max(0, Math.round(estimatedFocusMinutesForDate(formatDate(today)) - logTodayMin())); }
+  function subjReport(){
+    return MISSIONS.map(m => {
+      const us = unitsOf(m), n = us.length, done = n ? Math.min(...us.map(u => u.rounds)) : 0, rated = us.filter(u => u.ease);
+      return { m, n, done, prog:us.filter(u => u.rounds > done).length, ease:rated.length ? rated.reduce((a, u) => a + u.ease, 0) / rated.length : 0, units:us };
+    });
+  }
+  function logOpen(subj){
+    const d = logDraft;
+    if(subj) d.subj = subj;
+    d.subj = d.subj || curSubj() || ((state.missions || {})[formatDate(today)] || []).find(m => MISSIONS.includes(m)) || MISSIONS[0];
+    const us = unitsOf(d.subj);
+    if(!us.find(u => u.id === d.unit)) d.unit = us.length ? us[0].id : null;
+    d.kind = d.kind || KINDS[0]; d.ease = d.ease || 0;
+    const sug = Math.round(unloggedMin() / 5) * 5;
+    spellOpen(`<div class="spell-form">
+      <select id="log-subj" data-log="subj">${MISSIONS.map(m => `<option${m === d.subj ? ' selected' : ''}>${m}</option>`).join('')}</select>
+      ${us.length ? `<select id="log-unit">${us.map(u => `<option value="${u.id}"${u.id === d.unit ? ' selected' : ''}>${u.name} · ${u.rounds}회독</option>`).join('')}</select>` : '<p class="modal-sub">아직 단원이 없어요. 아래에서 추가해 주세요.</p>'}
+      <div class="spell-row"><input type="text" id="log-newunit" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-log="addunit" style="flex:none;margin-bottom:8px">추가</button></div>
+      <select id="log-kind">${KINDS.map(k => `<option${k === d.kind ? ' selected' : ''}>${k}</option>`).join('')}</select>
+      <input type="number" id="log-min" min="5" max="600" step="5" value="${d.min != null ? d.min : (sug || 50)}">
+      <p class="modal-sub">공부한 시간(분) · 오늘 아직 기록 안 한 순공 ${unloggedMin()}분</p>
+      <div class="spirit-chips" style="margin-bottom:8px">이해도 ${[1,2,3,4,5].map(n => `<button type="button" class="spirit-chip${d.ease === n ? ' on' : ''}" data-log="ease" data-n="${n}">${'★'.repeat(n)}</button>`).join('')}</div>
+      <label style="display:block;font-size:.78rem;margin-bottom:8px"><input type="checkbox" id="log-round"> 이 단원 한 바퀴를 끝냈어요 (회독 +1)</label>
+      <input type="text" id="log-note" maxlength="80" placeholder="메모 (선택)">
+      <div class="spell-row"><button type="button" class="spell-btn spell-btn--main" data-log="save">기록하기</button><button type="button" class="spell-btn" data-log="view">📊 기록 보기</button></div></div>`, '📒 공부 기록');
+  }
+  function logSave(){
+    const d = logDraft, us = unitsOf(d.subj), sel = document.getElementById('log-unit'), u = us.find(x => sel && x.id === sel.value);
+    const min = Math.round(Number(document.getElementById('log-min').value) || 0);
+    if(!u){ showToast('단원을 먼저 추가해 주세요.'); return; }
+    if(min < 5){ showToast('시간을 5분 이상 입력해 주세요.'); return; }
+    const kind = document.getElementById('log-kind').value, round = document.getElementById('log-round').checked, note = document.getElementById('log-note').value.trim(), ds = formatDate(today);
+    u.min += min; u.last = ds; if(d.ease) u.ease = d.ease; if(round) u.rounds++;
+    logList().push({ date:ds, subject:d.subj, unit:u.id, unitName:u.name, kind, min, ease:d.ease || 0, round, note });
+    if(state.studyLog.length > 800) state.studyLog = state.studyLog.slice(-800);
+    awardCoins(2); saveState(); d.ease = 0; d.min = null;
+    spellClose(); renderSpirit(); renderClassStats();
+    showToast(`📒 ${d.subj} · ${u.name} ${min}분 기록${round ? ` · ${u.rounds}회독 완료!` : ''} (${coinHTML(2)})`);
+    if(round) spiritReact(11, `${u.name} ${u.rounds}회독 완료! 대단해요!`);
+  }
+  function logView(range){
+    const t = formatDate(today), from = range === 'day' ? t : range === 'month' ? formatDate(new Date(today.getFullYear(), today.getMonth(), 1)) : formatDate(sundayOf(today));
+    const es = logList().filter(e => e.date >= from && e.date <= t), tot = es.reduce((a, e) => a + e.min, 0);
+    const by = k => { const o = {}; es.forEach(e => { o[e[k]] = (o[e[k]] || 0) + e.min; }); return Object.entries(o).sort((a, b) => b[1] - a[1]).map(([n, v]) => `<div class="spirit-round"><span>${n}</span><span>${fmtMin(v)} (${Math.round(v / tot * 100)}%)</span></div>`).join(''); };
+    const tab = (r, l) => `<button type="button" class="spirit-chip${range === r ? ' on' : ''}" data-log="view" data-range="${r}">${l}</button>`;
+    spellOpen(`<div class="spirit-chips" style="margin-bottom:8px">${tab('day', '오늘')}${tab('week', '이번 주')}${tab('month', '이번 달')}</div>
+      <div class="spell-card"><small>총 ${fmtMin(tot)} · ${es.length}건</small>${tot ? '과목별\n' : '이 기간에 기록이 없어요.'}</div>${tot ? `${by('subject')}<div class="spirit-evo__sec">활동별</div>${by('kind')}<div class="spirit-evo__sec">단원별 상위</div>${(() => { const o = {}; es.forEach(e => { const k = e.subject + ' ' + e.unitName; o[k] = (o[k] || 0) + e.min; }); return Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([n, v]) => `<div class="spirit-round"><span>${n}</span><span>${fmtMin(v)}</span></div>`).join(''); })()}<div class="spirit-evo__sec">최근 기록</div>${es.slice(-8).reverse().map(e => `<div class="spirit-round"><span>${e.date.slice(5)} ${e.subject} ${e.unitName}${e.round ? ' 🔁' : ''}</span><span>${e.kind} ${e.min}분${e.ease ? ' ★' + e.ease : ''}</span></div>${e.note ? `<div class="spirit-round"><small>“${escAttr(e.note)}”</small></div>` : ''}`).join('')}` : ''}
+      <button type="button" class="spell-btn spell-btn--main" data-log="form" style="width:100%;margin-top:8px">＋ 공부 기록하기</button>`, '📊 공부 기록 보기');
+  }
+  document.getElementById('spirit-evo').addEventListener('click', e => { if(e.target.closest('[data-log-open]')) logOpen(); });
+  document.getElementById('spell-modal-body').addEventListener('click', e => {
+    const b = e.target.closest('[data-log]');
+    if(!b) return;
+    const k = b.dataset.log, d = logDraft;
+    if(k === 'save') logSave();
+    else if(k === 'view') logView(b.dataset.range || 'week');
+    else if(k === 'form') logOpen();
+    else if(k === 'ease'){
+      d.ease = (d.ease === Number(b.dataset.n)) ? 0 : Number(b.dataset.n);
+      document.querySelectorAll('#spell-modal-body [data-log="ease"]').forEach(x => x.classList.toggle('on', Number(x.dataset.n) === d.ease));
+    }else if(k === 'addunit'){
+      const inp = document.getElementById('log-newunit'), name = inp.value.trim();
+      if(!name) return;
+      const us = unitsOf(d.subj), id = 'u' + Date.now().toString(36);
+      us.push({ id, name, rounds:0, ease:0, last:null, min:0 }); d.unit = id;
+      const m = document.getElementById('log-min'); if(m) d.min = m.value;
+      saveState(); logOpen();
+    }
+  });
+  document.getElementById('spell-modal-body').addEventListener('change', e => {
+    if(e.target.dataset && e.target.dataset.log === 'subj'){
+      logDraft.subj = e.target.value; logDraft.unit = null;
+      const m = document.getElementById('log-min'); if(m) logDraft.min = m.value;
+      logOpen();
+    }
+  });
+  // ===== 정령 표정 반응 · 호감도 보상 =====
+  function spiritReact(idx, line, ms){
+    ms = ms || 6000; window.__spiritTap = { idx, line, until:Date.now() + ms };
+    try{ renderSpirit(); }catch(e){}
+    setTimeout(() => { try{ renderSpirit(); }catch(e){} }, ms + 100);
+  }
+  const HEART_LINES = { 1:'선물 고마워요. 처음엔 낯설었는데, 이제 얼굴을 보면 반가워요.', 2:'요즘 자주 와 주셔서 든든해요. 내 얘기를 들어줘서 고마워요.', 3:'이제 당신 앞에서는 조금 편하게 웃게 돼요.', 4:'당신에게는 숨기는 게 별로 없네요. 이건 꽤 큰 일이에요.' };
+  const HEART_PERK = { innkeeper:'여관 식사 환급 골드 ×1.5', merchant:'의뢰 보상 골드 +20%', knight:'뽀모도로 전투 보상 +2', archivist:'주간 일지 선물 골드 ×2', sage:'정령 진화 비용 20% 할인' };
+  const HEART5 = { innkeeper:'…이 여관에서 제일 좋은 자리는 이제 네 자리야. 언제든 와.', merchant:'자네는 내 장부에서 제일 믿을 만한 이름이야. 이 마르코가 보증하지.', knight:'네 곁에서라면 칼을 내려놓아도 되겠군. 고맙다.', archivist:'기록되지 않아도 남는 게 있다는 걸, 당신이 가르쳐 줬어요.', sage:'허허, 늙은 현자가 이 나이에 벗을 얻었구려.' };
+  function heartPerk(id){ return hearts(id) >= 5 && !!HEART_PERK[id]; }
+  function evoCost(nx){ return Math.round(nx.cost * (heartPerk('sage') ? 0.8 : 1)); }
+  function heartLetter(npc, h){
+    state.letters = Array.isArray(state.letters) ? state.letters : [];
+    const id = `heart-${npc}-${h}`;
+    if(state.letters.some(x => x.id === id)) return;
+    const text = h === 5 ? `${HEART5[npc] || '당신이라서 믿을 수 있어요. 오래오래 곁에 있어 주세요.'}${HEART_PERK[npc] ? `\n\n🎁 특전 해금 · ${HEART_PERK[npc]}` : ''}` : HEART_LINES[h];
+    state.letters.push({ id, dyn:true, npc, title:`${npcProfile(npc).name}의 마음 ♥${h}`, text, gift:h * 5, date:formatDate(today), read:false });
+  }
+
   function renderPomodoro(){
     const p = state.pomodoro;
     const ring = document.getElementById('pomodoro-ring');
@@ -9555,6 +10407,22 @@ function renderRpgQuests(){
       addBtn('초기화', 'pomodoro-reset-btn', 'pomodoro-btn-secondary');
     }
 
+    if(['breakReady','break','breakDone'].includes(p.phase) && spellDue().length) addBtn('🔮 주문 영창 (' + spellDue().length + ')', 'pomodoro-spell-btn', 'pomodoro-btn-secondary');
+    if(window.__spPhase !== p.phase){ window.__spPhase = p.phase; safeRun('renderSpirit', renderSpirit); }
+    const bs = document.getElementById('battle-strip');
+    if(bs){
+      const fighting = (p.phase === 'focus') || (p.phase === 'paused' && p.pausedFrom === 'focus');
+      bs.hidden = !fighting;
+      if(fighting){
+        const f = battleFoe();
+        if(bs.dataset.foe !== f.name){
+          bs.dataset.foe = f.name;
+          bs.innerHTML = `<span class="battle-strip__icon">${f.icon}</span><div class="battle-strip__body"><span class="battle-strip__name">${f.name} · ${f.tag}</span><div class="battle-strip__bar"><div class="battle-strip__fill"></div></div></div>`;
+        }
+        bs.querySelector('.battle-strip__fill').style.width = (100 - pct).toFixed(1) + '%';
+        bs.classList.toggle('low', pct >= 80);
+      }
+    }
     document.title = (p.phase === 'focus' || p.phase === 'break')
       ? `${formatMMSS(remaining)} · ${phaseLabelEl.textContent} — ${ORIGINAL_DOC_TITLE}`
       : ORIGINAL_DOC_TITLE;
@@ -10075,6 +10943,11 @@ function renderRpgQuests(){
     safeRun('renderBuffStrip', renderBuffStrip);
     safeRun('renderExercisePanel', renderExercisePanel);
     safeRun('renderTier2', renderTier2);
+    safeRun('renderSpellPanel', renderSpellPanel);
+    safeRun('renderBounty', renderBounty);
+    safeRun('checkLetters', checkLetters);
+    safeRun('renderSpirit', renderSpirit);
+    safeRun('renderTown', renderTown);
     // 예전엔 스탬프를 찍어도 모험 퀘스트 카드가 갱신되지 않고 탭을 전환하거나
     // 새로고침해야만 진행 상황이 보였다 — 매번 즉시 갱신되도록 추가.
     safeRun('renderRpgQuests', typeof renderRpgQuests==='function' ? renderRpgQuests : null);
@@ -10126,6 +10999,7 @@ function renderRpgQuests(){
     if(!Array.isArray(rec.stampTimes)) rec.stampTimes = [];
     rec.stampTimes.push(nowLabel);
     rec.stampTimes = rec.stampTimes.slice(-200);
+    { const cs = curSubj(); if(cs){ rec.subj = rec.subj || {}; rec.subj[cs] = (rec.subj[cs] || 0) + 1; } }
     if(!rec.startTime) rec.startTime = nowLabel;
     rec.endTime = nowLabel;
     playStampSound();
@@ -10183,6 +11057,7 @@ function renderRpgQuests(){
     persistAndRefresh();
 
     if(luckProced) showToast(randomLuckMessage());
+    stampJuice(originEl || document.getElementById('stamp-btn'), stampGold, isFirstOfDay);
     if(didTomatoEvolve) celebrateTomatoEvolution();
     if(didClassShift) showNpcToast('sage', `🌟 클래스가 바뀌었소: ${prevClass.title} → ${newClass.icon} ${newClass.title}`);
     if(didLevelUp){
@@ -10337,11 +11212,13 @@ function renderRpgQuests(){
     }else if(id === 'pomodoro-pause-btn'){
       p.remainingMs = Math.max(0, p.endAt - Date.now());
       p.pausedFrom = p.phase; // 집중 또는 아카데미 세션 휴식에서 멈춘 상태를 기억했다가 재개한다
+      if(p.pausedFrom === 'focus') pauseTimerStartMusic();
       p.phase = 'paused';
       p.endAt = null;
       stopPomodoroTicking();
     }else if(id === 'pomodoro-resume-btn'){
       const resumeTo = p.pausedFrom || 'focus';
+      if(resumeTo === 'focus') resumeTimerStartMusic();
       const fallbackMs = (resumeTo === 'break') ? pomodoroBreakMs() : pomodoroDurationMs();
       p.endAt = Date.now() + (p.remainingMs != null ? p.remainingMs : fallbackMs);
       p.remainingMs = null;
@@ -10810,8 +11687,8 @@ function renderRpgQuests(){
     state.soundOn = !state.soundOn;
     updateSoundToggleLabel();
     saveState();
-    if(state.soundOn){ playStampSound(); updateAmbientAudioForContext(); }
-    else stopAmbientAudio();
+    if(state.soundOn){ playStampSound(); updateAmbientAudioForContext(); if(state.pomodoro.phase === 'focus') resumeTimerStartMusic(); }
+    else { stopAmbientAudio(); pauseTimerStartMusic(); }
   });
 
   document.getElementById('gate-duration-select').addEventListener('change', (e) => {
@@ -11163,6 +12040,11 @@ if(journeyMap){
     safeRun('renderShop', renderShop);
     safeRun('renderBuffStrip', renderBuffStrip);
     safeRun('renderTier2', renderTier2);
+    safeRun('renderSpellPanel', renderSpellPanel);
+    safeRun('renderBounty', renderBounty);
+    safeRun('checkLetters', checkLetters);
+    safeRun('renderSpirit', renderSpirit);
+    safeRun('renderTown', renderTown);
     safeRun('renderJourneyRegion', renderJourneyRegion);
     safeRun('renderChoiceEncounter', renderChoiceEncounter);
     safeRun('renderEncounterMemory', renderEncounterMemory);
