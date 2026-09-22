@@ -316,6 +316,33 @@
     cursor:pointer;
   }
   .pomodoro-btn-secondary:hover{border-color:var(--gold);}
+  .bgm-control-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:12px;
+    padding-top:10px;
+    border-top:1px dashed var(--line);
+    font-size:0.74rem;
+    color:var(--muted);
+  }
+  .bgm-control-row #bgm-track-label{font-weight:700;color:var(--ink-soft);white-space:nowrap;}
+  .bgm-volume-wrap{display:flex;align-items:center;gap:5px;}
+  #bgm-volume-slider{
+    -webkit-appearance:none; appearance:none;
+    width:110px; height:22px; /* 히트 영역을 넉넉히 키워 모바일에서 잡기 쉽게 */
+    background:transparent; outline:none; touch-action:none;
+  }
+  #bgm-volume-slider::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:var(--c-e9e2cf);}
+  #bgm-volume-slider::-webkit-slider-thumb{
+    -webkit-appearance:none; width:20px; height:20px; margin-top:-7px;
+    border-radius:50%; background:var(--paper-card); border:2px solid var(--gold); cursor:pointer;
+  }
+  #bgm-volume-slider::-moz-range-track{height:6px;border-radius:6px;background:var(--c-e9e2cf);}
+  #bgm-volume-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--paper-card);border:2px solid var(--gold);cursor:pointer;}
+  @media(max-width:420px){ .bgm-control-row{font-size:0.7rem;} #bgm-volume-slider{width:90px;} }
   .seal{
     flex:none;
     width:118px;
@@ -3665,6 +3692,11 @@
     </div>
     <p class="pomodoro-message" id="pomodoro-message">25분, 스스로 정한 시간만큼 몰입해보세요.</p>
     <div class="pomodoro-controls" id="pomodoro-controls"></div>
+    <div class="bgm-control-row no-print" id="bgm-control-row">
+      <span id="bgm-track-label">🎵 -</span>
+      <button type="button" id="bgm-next-btn" class="pomodoro-btn-secondary" style="padding:5px 10px;min-height:0;flex:none;">다음 곡</button>
+      <span class="bgm-volume-wrap"><span aria-hidden="true">🔈</span><input type="range" id="bgm-volume-slider" min="0" max="100" step="5" value="60" aria-label="배경음악 음량"></span>
+    </div>
     <div class="session-note" id="session-note" hidden></div>
   </section>
 
@@ -9265,31 +9297,73 @@ function renderRpgQuests(){
   // 일반 모드와 아카데미(학교 종) 모드 모두 시작 버튼을 누른 순간 재생한다.
   // 파일은 index.html과 같은 폴더에 두고, iOS Safari의 자동재생 제한을 피하기 위해
   // 실제 사용자 탭 이벤트 안에서만 play()가 호출되도록 한다.
+  // 여러 곡 중 매 집중 세션마다 랜덤으로 하나가 나오고, 도중에 버튼으로 바꿀 수도 있다.
+  const TIMER_START_MUSIC_TRACKS = [
+    { id:'carriage', label:'빗속 마차', src:'./carriage-in-rainy-forest.mp3' },
+    { id:'windyforest', label:'바람 부는 숲', src:'./rainy-forest-with-wind.mp3' }
+  ];
   let timerStartMusicAudio = null;
-  const TIMER_START_MUSIC_SRC = './carriage-in-rainy-forest.mp3';
   const TIMER_START_MUSIC_VOLUME = 0.16;
 
+  function currentTimerTrack(){
+    if(!state.bgmTrackId || !TIMER_START_MUSIC_TRACKS.some(t => t.id === state.bgmTrackId)){
+      state.bgmTrackId = TIMER_START_MUSIC_TRACKS[Math.floor(Math.random() * TIMER_START_MUSIC_TRACKS.length)].id;
+    }
+    return TIMER_START_MUSIC_TRACKS.find(t => t.id === state.bgmTrackId) || TIMER_START_MUSIC_TRACKS[0];
+  }
+  function renderBgmTrackLabel(){
+    const el = document.getElementById('bgm-track-label');
+    if(el) el.textContent = `🎵 ${currentTimerTrack().label}`;
+  }
   function ensureTimerStartMusic(){
     if(!timerStartMusicAudio){
-      timerStartMusicAudio = new Audio(TIMER_START_MUSIC_SRC);
+      timerStartMusicAudio = new Audio(currentTimerTrack().src);
       timerStartMusicAudio.preload = 'auto';
       timerStartMusicAudio.loop = true;
       timerStartMusicAudio.volume = TIMER_START_MUSIC_VOLUME * bgmVolumeMultiplier();
       timerStartMusicAudio.addEventListener('error', () => {
-        showToast('🎵 시작 음악 파일(carriage-in-rainy-forest.mp3)을 찾지 못했어요. HTML과 같은 폴더에 넣어주세요.');
+        showToast(`🎵 시작 음악 파일(${currentTimerTrack().src.replace('./', '')})을 찾지 못했어요. HTML과 같은 폴더에 넣어주세요.`);
       }, { once:true });
     }
     return timerStartMusicAudio;
   }
-
-  function playTimerStartMusic(){
+  // 도중에 다른 곡으로 바꾼다. 재생 중이면 새 곡으로 이어서 바로 틀어준다.
+  function switchTimerTrack(){
+    const list = TIMER_START_MUSIC_TRACKS;
+    const idx = list.findIndex(t => t.id === currentTimerTrack().id);
+    const next = list[(idx + 1) % list.length];
+    state.bgmTrackId = next.id;
+    saveState();
+    const audio = ensureTimerStartMusic();
+    const wasPlaying = !audio.paused;
+    audio.src = next.src;
+    audio.load();
+    audio.volume = TIMER_START_MUSIC_VOLUME * bgmVolumeMultiplier();
+    if(wasPlaying){
+      audio.currentTime = 0;
+      const p = audio.play();
+      if(p && p.catch) p.catch(() => {});
+    }
+    renderBgmTrackLabel();
+    showToast(`🎵 ${next.label}(으)로 바꿨어요.`);
+  }
+  // pickNew=true면 매 세션 시작마다 곡을 새로 뽑는다(사용자가 직접 바꾼 경우는 재개 시 유지).
+  function playTimerStartMusic(pickNew){
     if(!state.soundOn || !state.bgmOn) return;
     try{
+      if(pickNew){
+        const list = TIMER_START_MUSIC_TRACKS;
+        state.bgmTrackId = list[Math.floor(Math.random() * list.length)].id;
+        saveState();
+      }
       const audio = ensureTimerStartMusic();
+      const wantSrc = currentTimerTrack().src;
+      if(!audio.src || audio.src.indexOf(wantSrc.replace('./', '')) === -1){ audio.src = wantSrc; audio.load(); }
       audio.volume = TIMER_START_MUSIC_VOLUME * bgmVolumeMultiplier();
       audio.currentTime = 0;
       const promise = audio.play();
       if(promise && typeof promise.catch === 'function') promise.catch(() => {});
+      renderBgmTrackLabel();
     }catch(e){}
   }
 
@@ -9616,7 +9690,7 @@ function renderRpgQuests(){
         // [버그 수정] 종만 울리고 카리지 브금은 다시 안 켜지던 문제 — 시작 버튼을 누를 때만
         // 이 음악을 틀고 있었는데, 휴식 끝나고 다음 세션으로 자동으로 넘어갈 때는
         // 이 호출이 빠져 있었다. 수동 시작과 동일하게 여기서도 다시 틀어준다.
-        playTimerStartMusic();
+        playTimerStartMusic(true);
         startPomodoroTicking();
         showToast(`🔔 ${p.bellCycleIndex+1}세션 시작!`);
         buzz('breakEnd');
@@ -9746,7 +9820,9 @@ function renderRpgQuests(){
   document.getElementById('spell-cast-btn').addEventListener('click', spellCast);
   document.getElementById('spell-add-btn').addEventListener('click', spellForm);
   document.getElementById('spell-modal-close').addEventListener('click', spellClose);
-  document.getElementById('spell-modal-backdrop').addEventListener('click', e => { if(e.target.id === 'spell-modal-backdrop') spellClose(); });
+  // [버그 수정] 예전엔 배경(바깥)을 탭하면 바로 닫혀서, 주문/기록을 적다가 살짝 옆을 스치기만
+  // 해도 입력하던 내용이 통째로 사라졌다. 이 모달은 주문·공부기록처럼 입력이 오래 걸리는
+  // 화면에도 쓰이므로, 바깥 탭으로는 닫히지 않고 우측 상단 × 버튼으로만 닫히게 한다.
   document.getElementById('pomodoro-controls').addEventListener('click', e => { if(e.target.id === 'pomodoro-spell-btn') spellCast(); });
   document.getElementById('spell-modal-body').addEventListener('click', e => {
     const b = e.target.closest('[data-spell]');
@@ -10229,6 +10305,12 @@ function renderRpgQuests(){
     if(state.bgmOn){ updateAmbientAudioForContext(); if(state.pomodoro.phase === 'focus') resumeTimerStartMusic(); }
     else{ pauseTimerStartMusic(); stopAmbientAudio(); }
   });
+  document.getElementById('bgm-next-btn').addEventListener('click', switchTimerTrack);
+  document.getElementById('bgm-volume-slider').addEventListener('input', function(){
+    state.bgmVolume = Math.max(0, Math.min(1, Number(this.value) / 100));
+    applyBgmVolumeToPlayingAudio();
+    saveState();
+  });
 
   
   // ===== 마을 재건 (골드를 나눠 투자 → 완공하면 마을이 달라진다) =====
@@ -10303,28 +10385,36 @@ function renderRpgQuests(){
   function spiritLv(){ return (state.spirit && state.spirit.lv) || 0; }
   function curSubj(){ const t = state.timerTarget; return (t && t.date === formatDate(today) && t.subj) || null; }
   function firstRecordDate(){ return new Date((Object.keys(state.entries || {}).sort()[0] || formatDate(today)) + 'T00:00:00'); }
+  // 정령 패널이 길어지는 게 불편하다는 피드백 — 섹션별로 접고 펼 수 있게 하고,
+  // 매 렌더마다 innerHTML을 통째로 새로 그려도 열림/닫힘 상태는 유지되게 별도 저장한다.
+  let spiritFoldOpen = { today:true, report:true, diag:false, plan:false };
   function renderSpiritEvo(){
     const el = document.getElementById('spirit-evo');
     if(!el) return;
     const lv = spiritLv(), nx = SPIRIT_EVO[lv + 1], rep = subjReport(), tm = logTodayMin();
+    const fold = (key, icon, title, body) => `<details class="spirit-evo-fold" data-fold="${key}"${spiritFoldOpen[key] ? ' open' : ''}><summary>${icon} ${title}</summary><div class="spirit-evo__sec spirit-evo-fold__body">${body}</div></details>`;
     let h = `<div class="spirit-evo__head"><span>✨ ${SPIRIT_EVO[lv].name} · 진화 Lv.${lv}</span>${nx ? `<button type="button" class="spell-btn" data-spirit-evo="1">진화 ${coinHTML(evoCost(nx), 'coin-icon--button')}</button>` : '<span class="bounty-card__reward">최종 진화</span>'}</div>`;
     if(nx) h += `<div class="spirit-evo__sec spirit-evo__lock">🔒 다음 진화에서 열려요 · ${nx.unlock}</div>`;
-    h += `<div class="spirit-evo__sec">📒 오늘 기록 ${tm ? fmtMin(tm) : '아직 없어요'}<br><small>타이머로 공부하면 자동으로 남고, 휴식 때 카드에서 내용을 적을 수 있어요.</small><br><button type="button" class="spell-btn" data-log-open="1" style="width:100%;margin-top:4px">공부 기록 · 보기 · 수정</button></div>`;
+    h += fold('today', '📒', '오늘 기록', `${tm ? fmtMin(tm) : '아직 없어요'}<br><small>타이머로 공부하면 자동으로 남고, 휴식 때 카드에서 내용을 적을 수 있어요.</small><br><button type="button" class="spell-btn" data-log-open="1" style="width:100%;margin-top:4px">공부 기록 · 보기 · 수정</button>`);
     const us = [];
     rep.forEach(r => r.units.forEach(u => us.push({ m:r.m, u, score:(u.ease ? (5 - u.ease) * 2 : 4) + (u.last ? Math.min(daysAgo(u.last), 30) / 5 : 6) + (u.rounds === 0 ? 2 : 0) - u.rounds * 0.5 })));
     us.sort((a, b) => b.score - a.score);
     const gapTxt = u => u.last ? daysAgo(u.last) + '일 전' : '미학습';
-    if(lv >= 1) h += '<div class="spirit-evo__sec">📖 단원별 회독 리포트<br><small>회독 = 모든 단원을 한 바퀴 마친 횟수예요.</small>' + rep.filter(r => r.n).map(r => `<details class="spirit-unit"><summary>${r.m} · ${r.done}회독 완료 · ${r.done + 1}회독 ${r.prog}/${r.n}단원 · 이해도 ${r.ease ? r.ease.toFixed(1) : '-'}</summary>${r.units.map(u => `<div class="spirit-round"><span>${u.name} · ${u.rounds}회독 · ${u.ease ? '이해 ' + u.ease : '미평가'}</span><span>${gapTxt(u)} · ${u.min ? fmtMin(u.min) : '기록 없음'}</span></div>`).join('')}</details>`).join('') + '</div>';
+    if(lv >= 1) h += fold('report', '📖', '단원별 회독 리포트', '<small>회독 = 모든 단원을 한 바퀴 마친 횟수예요.</small>' + rep.filter(r => r.n).map(r => `<details class="spirit-unit"><summary>${r.m} · ${r.done}회독 완료 · ${r.done + 1}회독 ${r.prog}/${r.n}단원 · 이해도 ${r.ease ? r.ease.toFixed(1) : '-'}</summary>${r.units.map(u => `<div class="spirit-round"><span>${u.name} · ${u.rounds}회독 · ${u.ease ? '이해 ' + u.ease : '미평가'}</span><span>${gapTxt(u)} · ${u.min ? fmtMin(u.min) : '기록 없음'}</span></div>`).join('')}</details>`).join(''));
     if(lv >= 2){
       const top = us.slice(0, 5).map((x, i) => `${i + 1}. ${x.m} ${x.u.name} — ${x.u.ease ? '이해 ' + x.u.ease : '미평가'} · ${gapTxt(x.u)} · ${x.u.rounds}회독`);
       const sc = rep.filter(r => r.n).map(r => ({ m:r.m, v:r.units.reduce((a, u) => a + u.rounds, 0) / r.n * 2 + r.ease }));
       const strong = sc.slice().sort((a, b) => b.v - a.v).slice(0, 2).filter(x => x.v > 0).map(x => x.m).join(', ') || '아직 없어요';
       const weak = sc.slice().sort((a, b) => a.v - b.v).slice(0, 2).map(x => x.m).join(', ') || '-';
-      h += `<div class="spirit-evo__sec">💡 정령의 진단<br>🔁 복습 우선 단원<br>${top.length ? top.join('<br>') : '기록이 쌓이면 알려드릴게요.'}<br>💪 든든한 과목: ${strong}<br>🧭 살필 과목: ${weak}<br><small>우선순위 = 낮은 이해도 + 오래된 복습 + 적은 회독 (미평가·미학습은 높게 반영)</small></div>`;
+      h += fold('diag', '💡', '정령의 진단', `🔁 복습 우선 단원<br>${top.length ? top.join('<br>') : '기록이 쌓이면 알려드릴게요.'}<br>💪 든든한 과목: ${strong}<br>🧭 살필 과목: ${weak}<br><small>우선순위 = 낮은 이해도 + 오래된 복습 + 적은 회독 (미평가·미학습은 높게 반영)</small>`);
     }
-    if(lv >= 3) h += `<div class="spirit-evo__sec">🎯 오늘의 추천 공부<br>${us.slice(0, 3).map(x => `<div class="spirit-round"><span>${x.m} · ${x.u.name}</span><button type="button" class="spell-btn" data-tgt-subj="${x.m}" data-tgt-unit="${x.u.id}">타이머 목표로</button></div>`).join('') || '단원 기록이 쌓이면 추천해 드려요.'}</div>`;
+    if(lv >= 3) h += fold('plan', '🎯', '오늘의 추천 공부', us.slice(0, 3).map(x => `<div class="spirit-round"><span>${x.m} · ${x.u.name}</span><button type="button" class="spell-btn" data-tgt-subj="${x.m}" data-tgt-unit="${x.u.id}">타이머 목표로</button></div>`).join('') || '단원 기록이 쌓이면 추천해 드려요.');
     el.innerHTML = h;
   }
+  document.getElementById('spirit-evo').addEventListener('toggle', e => {
+    const key = e.target && e.target.dataset && e.target.dataset.fold;
+    if(key) spiritFoldOpen[key] = e.target.open;
+  }, true);
   document.getElementById('spirit-evo').addEventListener('click', e => {
     const ev = e.target.closest('[data-spirit-evo]'), sj = e.target.closest('[data-subj]'), rd = e.target.closest('[data-round]');
     if(ev){
@@ -11571,7 +11661,7 @@ function renderRpgQuests(){
       // 학교 종 모드에서는 기존 학교 종 + carriage 음악이다.
       // carriage를 먼저 호출해 첫 재생이 clear-bell에 가려지거나 play() 정책에 의해
       // 뒤의 음악이 누락되는 현상을 피한다.
-      playTimerStartMusic();
+      playTimerStartMusic(true);
       if(isBell) playSchoolBellSound();
       else playNormalTimerStartChime();
 
@@ -11613,7 +11703,7 @@ function renderRpgQuests(){
       p.phase = 'focus';
       p.endAt = Date.now() + pomodoroDurationMs();
       // [버그 수정] 여기도 같은 이유로 카리지 브금이 안 켜지고 있었다 — 새 세션이니 다시 틀어준다.
-      playTimerStartMusic();
+      playTimerStartMusic(true);
       startPomodoroTicking();
     }else if(id === 'pomodoro-skip-break-btn'){
       // 아카데미 세션에서는 '건너뛰기'가 다음 세션으로 이어지는 것 — 완료 처리와 같은 진행 로직을 탄다
@@ -11632,7 +11722,7 @@ function renderRpgQuests(){
         p.endAt = Date.now() + pomodoroDurationMs();
       }
       // [버그 수정] 건너뛰기로 새 세션을 시작할 때도 카리지 브금이 안 켜지고 있었다.
-      if(p.phase === 'focus') playTimerStartMusic();
+      if(p.phase === 'focus') playTimerStartMusic(true);
       updateAmbientAudioForContext();
       startPomodoroTicking();
     }else{
@@ -12420,6 +12510,12 @@ if(journeyMap){
     safeRun('renderTabBadges', renderTabBadges);
     safeRun('renderStudyTrend', renderStudyTrend);
     safeRun('updateSoundToggleLabel', updateSoundToggleLabel);
+    safeRun('updateBgmControls', () => {
+      updateBgmToggleLabel();
+      const slider = document.getElementById('bgm-volume-slider');
+      if(slider) slider.value = String(Math.round(bgmVolumeMultiplier() * 100));
+      renderBgmTrackLabel();
+    });
     safeRun('updateVibrationToggleLabel', updateVibrationToggleLabel);
     safeRun('updateDensityToggleLabel', updateDensityToggleLabel);
     safeRun('updateThemeToggleLabel', updateThemeToggleLabel);
