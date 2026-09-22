@@ -3456,6 +3456,24 @@
   .spirit-round{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:3px 0;font-size:.66rem;}
   .spirit-unit{border-top:1px dashed var(--line);}
   .spirit-unit summary{cursor:pointer;font-size:.68rem;padding:4px 0;}
+  .spirit-evo-fold{border-top:1px dashed rgba(163,130,63,.35);margin-top:6px;padding-top:2px;}
+  .spirit-evo-fold:first-of-type{border-top:none;margin-top:2px;padding-top:0;}
+  .spirit-evo-fold > summary{
+    cursor:pointer;
+    list-style:none;
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:.72rem;
+    font-weight:700;
+    color:var(--ink-soft);
+    padding:6px 2px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .spirit-evo-fold > summary::-webkit-details-marker{display:none;}
+  .spirit-evo-fold > summary::before{content:'▸';color:var(--gold);font-size:.6rem;transition:transform .2s ease;}
+  .spirit-evo-fold[open] > summary::before{transform:rotate(90deg);}
+  .spirit-evo-fold__body{margin-top:2px;}
   .spell-form input[type=text],.spell-form input[type=number]{width:100%;box-sizing:border-box;margin-bottom:8px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
   /* 타이머 목표 · 세션 기록 카드 · 이해도 바 */
   .timer-target{margin:0 0 12px;}
@@ -10426,15 +10444,6 @@ function renderRpgQuests(){
       saveState(); spawnConfetti(document.getElementById('spirit-face'));
       showNpcToast('sage', `정령이 힘을 얻었소. ${withJosa(nx.unlock, '이', '가')} 열렸소.`);
       renderClassStats(); renderSpirit(); setTimeout(renderSpirit, 4100);
-    }else if(sj){
-      const m = sj.dataset.subj;
-      state.curSubject = (curSubj() === m) ? null : m; state.curSubjectDate = formatDate(today);
-      saveState(); renderSpiritEvo();
-    }else if(rd){
-      const m = rd.dataset.round;
-      if(!confirm(`${m} 회독을 완료로 기록할까요?`)) return;
-      const r = gs('rounds'); r[m] = { n:((r[m] || {}).n || 0) + 1, start:formatDate(today) };
-      saveState(); renderSpirit(); showToast(`📖 ${m} ${r[m].n}회독 완료!`);
     }
   });
 
