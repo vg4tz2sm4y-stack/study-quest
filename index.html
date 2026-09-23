@@ -2924,20 +2924,26 @@
   }
   .day-cell.goal-met .cell-count{background:var(--sage);color:var(--paper-card);border-color:transparent;}
 
-  /* ---------- 테마 전환 버튼 ---------- */
+  /* ---------- 테마 전환 버튼 (뽀모도로 타이머 카드 우측 상단) ---------- */
+  .pomodoro-card__head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    text-align:left;
+    margin-bottom:16px;
+  }
+  .pomodoro-card__head h2{margin-bottom:0;}
   .theme-toggle{
-    position:absolute;
-    top:14px;
-    right:16px;
-    z-index:5;
+    flex:none;
     display:inline-flex;
     align-items:center;
     gap:6px;
     padding:6px 11px;
     border-radius:999px;
-    border:1px solid rgba(255,255,255,0.28);
-    background:rgba(255,255,255,0.10);
-    color:#f0ece0;
+    border:1px solid var(--line);
+    background:var(--c-ece4cf);
+    color:var(--ink-soft);
     font-family:'Noto Sans KR', sans-serif;
     font-size:0.7rem;
     font-weight:600;
@@ -2947,11 +2953,10 @@
     transition:background 0.18s ease, transform 0.12s ease;
   }
   .theme-toggle:active{transform:scale(0.95);}
-  .theme-toggle:hover{background:rgba(255,255,255,0.2);}
-  html[data-theme="dark"] .theme-toggle{color:#ece7da;}
+  .theme-toggle:hover{background:var(--line);}
   @media(max-width:500px){
-    .theme-toggle{top:10px;right:10px;padding:5px 9px;font-size:0.66rem;}
-    .doc-header{padding-top:46px;}
+    .theme-toggle{padding:5px 9px;font-size:0.64rem;}
+    .pomodoro-card__head{gap:6px;}
   }
 
   /* 인쇄는 언제나 밝게 */
@@ -3418,13 +3423,21 @@
   .spirit-bubble{flex:1;margin:0;font-family:'Noto Serif KR',serif;font-style:italic;font-size:.8rem;line-height:1.6;color:var(--ink-soft);}
   .spirit-name{display:block;font-family:'Noto Sans KR',sans-serif;font-style:normal;font-size:.68rem;font-weight:700;color:var(--gold);}
   .spirit-map{margin-top:12px;}
-  .spirit-row{display:grid;grid-template-columns:78px 1fr auto;gap:8px;align-items:center;font-size:.72rem;color:var(--ink-soft);padding:3px 0;}
+  /* 8개 과목 줄을 하나의 grid로 묶어 과목명·막대·기록 칸이 줄마다 같은 폭으로 줄맞춤되게 한다.
+     (개별 .spirit-row가 각자 grid였을 때는 줄마다 셋째 칸 폭이 달라져 막대가 삐뚤빼뚤해 보였다) */
+  .spirit-map__rows{display:grid;grid-template-columns:78px 1fr auto;column-gap:8px;row-gap:6px;align-items:center;}
+  .spirit-row{display:contents;font-size:.72rem;color:var(--ink-soft);}
   .spirit-row__subj{display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap;}
   .spirit-row__dot{flex:none;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 2px var(--paper-card);}
-  .spirit-row__bar{height:7px;border-radius:7px;background:var(--c-e9e2cf);overflow:hidden;}
+  .spirit-row__bar{min-width:0;height:7px;border-radius:7px;background:var(--c-e9e2cf);overflow:hidden;}
   .spirit-row__fill{height:100%;background:var(--m,var(--gold));}
   .spirit-row__stat{text-align:right;white-space:nowrap;}
   .spirit-row small{color:var(--muted);font-size:.6rem;}
+  @media(max-width:420px){
+    /* 아주 좁은 화면에서는 78px 고정 칸이 셋째 칸을 지나치게 눌러 기록 텍스트가 줄바꿈되기 쉬워
+       과목명 칸을 살짝 줄인다. */
+    .spirit-map__rows{grid-template-columns:64px 1fr auto;column-gap:6px;}
+  }
   .spirit-note{margin:8px 0 0;font-size:.7rem;color:var(--ink-soft);line-height:1.6;}
   .spirit-note--muted{color:var(--muted);font-size:.62rem;}
   /* 선물 */
@@ -3649,9 +3662,6 @@
         <input type="text" id="reason-input" class="reason-input" placeholder="왜 이 시험을 준비하나요? 적어두면 매일 보여드릴게요" maxlength="120">
       </div>
     </div>
-    <button type="button" id="theme-toggle-btn" class="theme-toggle no-print" aria-label="화면 테마 바꾸기" title="화면 테마 바꾸기">
-      <span id="theme-toggle-icon">🌗</span><span id="theme-toggle-text">시스템</span>
-    </button>
     <div class="seal" id="seal-box">
       <span class="seal__label">D-DAY</span>
       <span class="seal__value" id="dday-value">D-000</span>
@@ -3685,7 +3695,12 @@
   </div>
 
   <section class="card pomodoro-card no-print">
-    <h2>🍅 뽀모도로 타이머</h2>
+    <div class="pomodoro-card__head">
+      <h2>🍅 뽀모도로 타이머</h2>
+      <button type="button" id="theme-toggle-btn" class="theme-toggle no-print" aria-label="화면 테마 바꾸기" title="화면 테마 바꾸기">
+        <span id="theme-toggle-icon">🌗</span><span id="theme-toggle-text">시스템</span>
+      </button>
+    </div>
     <div class="view-tabs pomodoro-mode-tabs" id="pomodoro-mode-tabs">
       <button type="button" class="tab active" id="pomodoro-mode-normal" data-mode="normal">일반</button>
       <button type="button" class="tab" id="pomodoro-mode-bell" data-mode="bell">🔔 아카데미 세션</button>
@@ -9753,6 +9768,11 @@ function renderRpgQuests(){
   
   // ===== 뽀모도로 전투 =====
   function battleFoe(){
+    // [버그 수정] 예전엔 오늘의 미션 목록 중 첫 번째(ms[0])를 무조건 보스로 띄워서,
+    // 타이머 시작 전 고른 과목(curSubj)과 실제로 싸우는 보스가 서로 다르게 보이는 문제가 있었다.
+    // 타이머 목표로 지정한 과목을 최우선으로 삼고, 지정한 게 없을 때만 오늘의 미션으로 되돌아간다.
+    const subj = curSubj();
+    if(subj && SUBJECT_BOSSES[subj]) return { icon:(JOURNEY_REGIONS[subj]||{}).icon || '👹', name:SUBJECT_BOSSES[subj], tag:subj };
     const ms = ((state.missions||{})[formatDate(today)] || []).filter(n => SUBJECT_BOSSES[n]);
     if(ms.length) return { icon:(JOURNEY_REGIONS[ms[0]]||{}).icon || '👹', name:SUBJECT_BOSSES[ms[0]], tag:ms[0] };
     const tl = townLevel('training');
@@ -10181,14 +10201,18 @@ function renderRpgQuests(){
     document.getElementById('spirit-line').textContent = mood[1] + hint;
     const rows = MISSIONS.map(m => {
       const v = sd[m], g = lastStudied(m);
-      return `<div class="spirit-row"><span class="spirit-row__subj"><span class="spirit-row__dot" style="background:${missionColor(m)}"></span><span style="color:${missionColor(m)};font-weight:700">${m}</span></span><div class="spirit-row__bar"><div class="spirit-row__fill" style="width:${Math.min(100, v.days / 7 * 100)}%;--m:${missionColor(m)}"></div></div><span>${v.days ? `${v.days}일 · ${fmtMin(v.min)}` : '기록 없음'}<br><small>누적 ${tot[m].min ? fmtMin(tot[m].min) : '-'} · ${g == null ? '마지막 -' : g === 0 ? '오늘' : g + '일 전'}</small></span></div>`;
+      return `<div class="spirit-row"><span class="spirit-row__subj"><span class="spirit-row__dot" style="background:${missionColor(m)}"></span><span style="color:${missionColor(m)};font-weight:700">${m}</span></span><div class="spirit-row__bar"><div class="spirit-row__fill" style="width:${Math.min(100, v.days / 7 * 100)}%;--m:${missionColor(m)}"></div></div><span class="spirit-row__stat">${v.days ? `${v.days}일 · ${fmtMin(v.min)}` : '기록 없음'}<br><small>누적 ${tot[m].min ? fmtMin(tot[m].min) : '-'} · ${g == null ? '마지막 -' : g === 0 ? '오늘' : g + '일 전'}</small></span></div>`;
     }).join('');
     const acts = ['📖','✍️','⚖️','🔥','🍅'].filter(e => dg.types[e]).map(e => `${e} ${dg.types[e]}`).join(' · ');
     const strong = MISSIONS.slice().sort((a, b) => (all[b] || 0) - (all[a] || 0))[0];
     const weak = MISSIONS.slice().sort((a, b) => ((all[a] || 0) - (all[b] || 0)) || ((lastStudied(b) ?? 999) - (lastStudied(a) ?? 999)))[0];
     const sw = '';
     renderSpiritEvo();
-    document.getElementById('spirit-map').innerHTML = rows + (acts ? `<p class="spirit-note">이번 주 활동 · ${acts}</p>` : '') + sw + '<p class="spirit-note spirit-note--muted">과목별 시간은 타이머·공부 기록에 남긴 실제 기록만 반영해요. 기록이 없으면 추정하지 않아요.</p>';
+    // [버그 수정] 과목 8줄이 각자 따로 grid를 이루던 구조라, 줄마다 셋째 칸(기록 텍스트) 길이가
+    // 달라지면서 막대 시작/끝 위치가 줄마다 어긋나 보였다(막대 길이가 실제 값과 무관하게 들쭉날쭉).
+    // .spirit-map__rows 하나를 공용 grid로 두고 각 줄은 display:contents로 그 grid에 바로 합류시켜,
+    // 과목명·막대·기록 세 칸이 모든 줄에서 같은 폭으로 줄맞춤되도록 한다.
+    document.getElementById('spirit-map').innerHTML = `<div class="spirit-map__rows">${rows}</div>` + (acts ? `<p class="spirit-note">이번 주 활동 · ${acts}</p>` : '') + sw + '<p class="spirit-note spirit-note--muted">과목별 시간은 타이머·공부 기록에 남긴 실제 기록만 반영해요. 기록이 없으면 추정하지 않아요.</p>';
   }
 
   
