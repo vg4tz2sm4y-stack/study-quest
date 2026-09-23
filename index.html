@@ -3478,7 +3478,26 @@
   /* 타이머 목표 · 세션 기록 카드 · 이해도 바 */
   .timer-target{margin:0 0 12px;}
   .timer-target .spirit-chips{justify-content:center;align-items:center;}
-  .timer-target select,.session-note select,.session-note input[type=text]{width:100%;box-sizing:border-box;margin:8px 0 0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
+  .timer-unit-row{display:flex;align-items:center;gap:8px;width:100%;margin-top:8px;}
+  .timer-unit-select-wrap{position:relative;flex:1;min-width:0;}
+  .timer-unit-select-wrap::after{content:'⌄';position:absolute;right:14px;top:50%;transform:translateY(-53%);pointer-events:none;color:var(--ink-soft);font-size:.95rem;}
+  .timer-unit-row select{width:100%;height:48px;box-sizing:border-box;margin:0;padding:8px 38px 8px 14px;border:1px solid var(--line);border-radius:12px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;appearance:none;-webkit-appearance:none;}
+  .timer-unit-settings{width:48px;height:48px;flex:none;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--c-fbf8f1);color:var(--ink-soft);font-size:1.08rem;cursor:pointer;box-sizing:border-box;transition:background .15s,border-color .15s,transform .1s;}
+  .timer-unit-settings:hover{background:var(--paper-card);border-color:var(--gold);}
+  .timer-unit-settings:active{transform:translateY(1px);}
+  .session-note select,.session-note input[type=text]{width:100%;box-sizing:border-box;margin:8px 0 0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
+  .unit-manager__intro{margin-bottom:12px;}
+  .unit-manager__list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+  .unit-manager__item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--c-fbf8f1);min-width:0;}
+  .unit-manager__name{flex:1;min-width:0;font-size:.84rem;color:var(--ink);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .unit-manager__meta{font-size:.68rem;color:var(--muted);font-weight:400;margin-left:4px;}
+  .unit-manager__actions{display:flex;gap:5px;flex:none;}
+  .unit-manager__actions .spell-btn{flex:none;padding:6px 9px;font-size:.7rem;}
+  .unit-manager__rename{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+  .unit-manager__rename input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--paper-card);color:var(--ink);font:inherit;font-size:.82rem;}
+  .unit-manager__add{display:flex;gap:7px;margin-top:4px;}
+  .unit-manager__add input{flex:1;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:.82rem;}
+  .unit-manager__add .spell-btn{flex:none;padding:8px 12px;}
   .session-note{margin-top:14px;padding:12px;border:1px solid var(--parch-edge);border-radius:12px;background:linear-gradient(180deg,var(--parch),var(--parch-2));text-align:left;}
   .session-note[hidden],.timer-target[hidden]{display:none;}
   .session-note__head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:var(--ink);}
@@ -3522,6 +3541,10 @@
 
 
 
+  .timer-unit-row{display:flex;align-items:center;gap:6px;width:100%;margin-top:6px;}
+  .timer-unit-row #tt-unit{flex:1;min-width:0;}
+  .timer-unit-settings{width:42px;height:42px;flex:0 0 42px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--paper-card);color:var(--ink);font-size:1.05rem;line-height:1;cursor:pointer;}
+  .timer-unit-settings:active{transform:translateY(1px);}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css">
 <link rel="manifest" href="./manifest.json">
@@ -9781,6 +9804,9 @@ function renderRpgQuests(){
     document.getElementById('spell-modal-backdrop').classList.remove('hidden');
   }
   function spellClose(){
+    const body = document.getElementById('spell-modal-body');
+    if(body) delete body.dataset.unitManagerSubject;
+    unitManagerSubject = null;
     document.getElementById('spell-modal-backdrop').classList.add('hidden');
     renderSpellPanel();
   }
@@ -9843,14 +9869,6 @@ function renderRpgQuests(){
   // 해도 입력하던 내용이 통째로 사라졌다. 이 모달은 주문·공부기록처럼 입력이 오래 걸리는
   // 화면에도 쓰이므로, 바깥 탭으로는 닫히지 않고 우측 상단 × 버튼으로만 닫히게 한다.
   document.getElementById('pomodoro-controls').addEventListener('click', e => { if(e.target.id === 'pomodoro-spell-btn') spellCast(); });
-  function unitManagerOpen(subj, renameId){
-    subj = subj || timerTarget().subj || MISSIONS[0];
-    const us = unitsOf(subj);
-    const rows = us.map((u, i) => renameId === u.id
-      ? `<div class="spirit-round"><span><input type="text" id="unitmgr-rename" maxlength="30" value="${escAttr(u.name)}" style="width:100%"></span><span><button type="button" class="spell-btn" data-unitmgr="rename-save" data-unit-id="${u.id}">저장</button> <button type="button" class="spell-btn" data-unitmgr="rename-cancel">취소</button></span></div>`
-      : `<div class="spirit-round"><span><strong>${escAttr(u.name)}</strong><br><small>${unitStats(subj).find(x => x.id === u.id)?.rounds || 0}회독 · ${logList().some(e => e.subject === subj && e.unit === u.id) ? '기록 있음' : '기록 없음'}</small></span><span><button type="button" class="spell-btn" data-unitmgr="rename" data-unit-id="${u.id}">이름 변경</button> <button type="button" class="spell-btn" data-unitmgr="delete" data-unit-id="${u.id}">삭제</button></span></div>`).join('');
-    spellOpen(`<div class="spell-form"><select id="unitmgr-subj">${MISSIONS.map(m => `<option${m === subj ? ' selected' : ''}>${m}</option>`).join('')}</select><div class="spirit-evo__sec">단원 목록</div>${rows || '<p class="modal-sub">아직 단원이 없어요.</p>'}<div class="spell-row" style="margin-top:8px"><input type="text" id="unitmgr-new" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-unitmgr="add">추가</button></div><p class="modal-sub">단원 이름은 언제든 바꿀 수 있어요. 이미 공부 기록이 있는 단원은 기록을 보존하기 위해 삭제할 수 없어요.</p></div>`, '⚙️ 단원 관리');
-  }
   document.getElementById('spell-modal-body').addEventListener('click', e => {
     const b = e.target.closest('[data-spell]');
     if(!b) return;
@@ -9907,12 +9925,6 @@ function renderRpgQuests(){
       }
       c.seen = (c.seen || 0) + 1; spellShown = false;
       saveState(); spellStep();
-    }
-  });
-  document.getElementById('spell-modal-body').addEventListener('keydown', e => {
-    if(e.target.id === 'unitmgr-rename' && e.key === 'Enter'){
-      e.preventDefault();
-      e.target.closest('.spell-form')?.querySelector('[data-unitmgr="rename-save"]')?.click();
     }
   });
   document.getElementById('spell-modal-body').addEventListener('change', e => {
@@ -10428,7 +10440,7 @@ function renderRpgQuests(){
     const fold = (key, icon, title, body) => `<details class="spirit-evo-fold" data-fold="${key}"${spiritFoldOpen[key] ? ' open' : ''}><summary>${icon} ${title}</summary><div class="spirit-evo__sec spirit-evo-fold__body">${body}</div></details>`;
     let h = `<div class="spirit-evo__head"><span>✨ ${SPIRIT_EVO[lv].name} · 진화 Lv.${lv}</span>${nx ? `<button type="button" class="spell-btn" data-spirit-evo="1">진화 ${coinHTML(evoCost(nx), 'coin-icon--button')}</button>` : '<span class="bounty-card__reward">최종 진화</span>'}</div>`;
     if(nx) h += `<div class="spirit-evo__sec spirit-evo__lock">🔒 다음 진화에서 열려요 · ${nx.unlock}</div>`;
-    h += fold('today', '📒', '오늘 기록', `${tm ? fmtMin(tm) : '아직 없어요'}<br><small>타이머로 공부하면 선택한 과목·단원이 자동으로 기록돼요.</small><br><div class="spell-row" style="margin-top:4px"><button type="button" class="spell-btn" data-log-open="1" style="flex:1">공부 기록 · 보기 · 수정</button><button type="button" class="spell-btn" data-unit-manager="1" data-unit-manager-subj="${timerTarget().subj || MISSIONS[0]}" style="flex:0 0 auto">단원 관리</button></div>`);
+    h += fold('today', '📒', '오늘 기록', `${tm ? fmtMin(tm) : '아직 없어요'}<br><small>타이머로 공부하면 자동으로 남고, 휴식 때 카드에서 내용을 적을 수 있어요.</small><br><button type="button" class="spell-btn" data-log-open="1" style="width:100%;margin-top:4px">공부 기록 · 보기 · 수정</button>`);
     const us = [];
     rep.forEach(r => r.units.forEach(u => us.push({ m:r.m, u, score:(u.ease ? (5 - u.ease) * 2 : 4) + (u.last ? Math.min(daysAgo(u.last), 30) / 5 : 6) + (u.rounds === 0 ? 2 : 0) - u.rounds * 0.5 })));
     us.sort((a, b) => b.score - a.score);
@@ -10441,14 +10453,7 @@ function renderRpgQuests(){
       const weak = sc.slice().sort((a, b) => a.v - b.v).slice(0, 2).map(x => x.m).join(', ') || '-';
       h += fold('diag', '💡', '정령의 진단', `🔁 복습 우선 단원<br>${top.length ? top.join('<br>') : '기록이 쌓이면 알려드릴게요.'}<br>💪 든든한 과목: ${strong}<br>🧭 살필 과목: ${weak}<br><small>우선순위 = 낮은 이해도 + 오래된 복습 + 적은 회독 (미평가·미학습은 높게 반영)</small>`);
     }
-    if(lv >= 3){
-      const recommendations = us.slice(0, 3);
-      h += fold('plan', '🎯', '오늘의 추천 공부', recommendations.length ? recommendations.map(x => {
-        const gap = x.u.last ? daysAgo(x.u.last) : null;
-        const reason = !x.u.last ? '아직 공부 기록이 없어요' : gap >= 7 ? `${gap}일째 공부하지 않았어요` : x.u.ease ? `이해도 ${x.u.ease}/5` : '아직 이해도를 평가하지 않았어요';
-        return `<div class="spirit-round"><span><strong>${x.m} · ${x.u.name}</strong><br><small>${reason} · ${x.u.rounds}회독</small></span><button type="button" class="spell-btn" data-tgt-subj="${x.m}" data-tgt-unit="${x.u.id}">이 단원으로 시작</button></div>`;
-      }).join('') + `<button type="button" class="spell-btn" data-unit-manager="1" data-unit-manager-subj="${timerTarget().subj || recommendations[0].m}" style="width:100%;margin-top:6px">⚙️ 단원 관리</button>` : '단원 기록이 쌓이면 추천해 드려요.');
-    }
+    if(lv >= 3) h += fold('plan', '🎯', '오늘의 추천 공부', us.slice(0, 3).map(x => `<div class="spirit-round"><span>${x.m} · ${x.u.name}</span><button type="button" class="spell-btn" data-tgt-subj="${x.m}" data-tgt-unit="${x.u.id}">타이머 목표로</button></div>`).join('') || '단원 기록이 쌓이면 추천해 드려요.');
     el.innerHTML = h;
   }
   document.getElementById('spirit-evo').addEventListener('toggle', e => {
@@ -10480,6 +10485,7 @@ function renderRpgQuests(){
   };
   const EASE_TXT = ['미평가','헷갈려요','아직 불안해요','절반쯤 알아요','거의 익혔어요','완벽해요'];
   let logDraft = {}, ttAll = false;
+  let unitManagerSubject = null;
   function unitsOf(subj){ const U = gs('units'); if(!Array.isArray(U[subj])) U[subj] = (DEFAULT_UNITS[subj] || []).map((n, i) => ({ id:'u' + i, name:n })); return U[subj]; }
   // 단원 아래 세부목차(소단원) — 사용자가 직접 추가한 목록을 기억해서 계속 재사용한다.
   function subsOf(subj, unitId){
@@ -10543,6 +10549,43 @@ function renderRpgQuests(){
     return state.timerTarget;
   }
   function setTimerTarget(subj, unit){ state.timerTarget = { date:formatDate(today), subj:subj || null, unit:unit || null }; saveState(); renderTimerTarget(); }
+  function unitManagerOpen(subj, renameId){
+    if(!subj) return;
+    unitManagerSubject = subj;
+    const body = document.getElementById('spell-modal-body');
+    if(body) body.dataset.unitManagerSubject = subj;
+    const units = unitsOf(subj);
+    const renaming = renameId || null;
+    const rows = units.length ? units.map((u, i) => {
+      if(renaming === u.id){
+        return `<div class="unit-manager__item">
+          <div class="unit-manager__rename">
+            <input type="text" id="unitmgr-rename-input" maxlength=30 value="${escAttr(u.name)}" aria-label="단원 이름">
+            <button type="button" class="spell-btn spell-btn--main" data-unitmgr="rename-save" data-id="${u.id}">저장</button>
+            <button type="button" class="spell-btn" data-unitmgr="rename-cancel">취소</button>
+          </div>
+        </div>`;
+      }
+      const rounds = unitStats(subj).find(x => x.id === u.id)?.rounds || 0;
+      return `<div class="unit-manager__item">
+        <span class="unit-manager__name">${escAttr(u.name)} <span class="unit-manager__meta">${rounds}회독</span></span>
+        <div class="unit-manager__actions">
+          <button type="button" class="spell-btn" data-unitmgr="rename" data-id="${u.id}">이름 변경</button>
+          <button type="button" class="spell-btn" data-unitmgr="delete" data-id="${u.id}">삭제</button>
+        </div>
+      </div>`;
+    }).join('') : '<p class="modal-empty">아직 등록된 단원이 없어요. 아래에서 첫 단원을 추가해보세요.</p>';
+    spellOpen(`<div class="unit-manager__intro">
+        <p class="modal-sub" style="margin-bottom:4px">${subj}</p>
+        <small class="modal-sub" style="display:block;margin:0">타이머에서 바로 선택할 단원을 관리해요.</small>
+      </div>
+      <div class="unit-manager__list">${rows}</div>
+      <div class="unit-manager__add">
+        <input type="text" id="unitmgr-new" maxlength=30 placeholder="새 단원 이름">
+        <button type="button" class="spell-btn spell-btn--main" data-unitmgr="add">추가</button>
+      </div>`, `⚙️ ${subj} · 단원 관리`);
+    setTimeout(() => { const i = document.getElementById(renaming ? 'unitmgr-rename-input' : 'unitmgr-new'); if(i) i.focus(); }, 0);
+  }
   function renderTimerTarget(){
     const el = document.getElementById('timer-target');
     if(!el) return;
@@ -10555,13 +10598,19 @@ function renderRpgQuests(){
     el.dataset.sig = sig;
     if(sel){
       el.hidden = false;
-      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj && unitsOf(t.subj).length ? `<select id="tt-unit">${unitOptions(t.subj, t.unit)}</select>` : ''}<button type="button" class="spell-btn" data-unit-manager="1" data-unit-manager-subj="${t.subj || list[0] || MISSIONS[0]}" style="width:100%;margin-top:6px">⚙️ 단원 관리</button>`;
+      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj ? `<div class="timer-unit-row"><div class="timer-unit-select-wrap"><select id="tt-unit" aria-label="단원 선택">${unitOptions(t.subj, t.unit)}</select></div><button type="button" class="timer-unit-settings" data-unit-manager="1" data-unit-manager-subj="${t.subj}" aria-label="단원 관리" title="단원 관리">⚙</button></div>` : ''}`;
     }else if(lbl){
       const u = t.subj ? unitsOf(t.subj).find(x => x.id === t.unit) : null;
       el.hidden = false; el.innerHTML = `<p class="chip-limit-note" style="text-align:center">🎯 ${t.subj ? t.subj + (u ? ' · ' + u.name : '') : '과목 미지정'}</p>`;
     }else{ el.hidden = true; el.innerHTML = ''; }
   }
   document.getElementById('timer-target').addEventListener('click', e => {
+    const manager = e.target.closest('[data-unit-manager]');
+    if(manager){
+      const subj = manager.dataset.unitManagerSubj || timerTarget().subj;
+      if(subj) unitManagerOpen(subj);
+      return;
+    }
     const c = e.target.closest('[data-tt]'), a = e.target.closest('[data-tt-all]');
     if(c){ const t = timerTarget(); setTimerTarget(t.subj === c.dataset.tt ? null : c.dataset.tt, null); }
     else if(a){ ttAll = true; renderTimerTarget(); }
@@ -10585,8 +10634,9 @@ function renderRpgQuests(){
     if(el.dataset.sig === sig) return;
     el.dataset.sig = sig;
     if(!show){ el.innerHTML = ''; return; }
-    el.innerHTML = `<div class="session-note__head"><span>📝 방금 ${e.min}분 공부했어요</span><button type="button" class="spell-btn" data-sn="close" style="flex:none;padding:4px 10px">닫기</button></div>
-      <div class="spell-card" style="margin-bottom:8px"><strong>🎯 ${e.subject || '과목 미지정'}${e.unitName ? ' · ' + e.unitName : ''}</strong><br><small>타이머 시작 때 선택한 과목·단원이 자동으로 연결됐어요. 바꾸려면 ‘자세히’에서 수정할 수 있어요.</small></div>
+    el.innerHTML = `<div class="session-note__head"><span>📝 방금 ${e.min}분 · 무엇을 공부했나요?</span><button type="button" class="spell-btn" data-sn="close" style="flex:none;padding:4px 10px">닫기</button></div>
+      <select id="sn-subj"><option value="">(과목 미지정)</option>${MISSIONS.map(m => `<option${m === e.subject ? ' selected' : ''}>${m}</option>`).join('')}</select>
+      <select id="sn-unit">${unitOptions(e.subject, e.unit)}</select>
       <select id="sn-kind">${KINDS.map(k => `<option${k === e.kind ? ' selected' : ''}>${k}</option>`).join('')}</select>
       <input type="text" id="sn-note" maxlength="80" placeholder="메모 (예: 물권변동 판례 정리)" value="${escAttr(e.note || '')}">
       <div class="spell-row">
@@ -10600,9 +10650,8 @@ function renderRpgQuests(){
   function commitSessionNote(silent){
     const e = logList().find(x => x.id === state.pendingSession), g = id => document.getElementById(id);
     if(!e || !g('sn-note')){ state.pendingSession = null; return; }
-    // 과목·단원은 타이머 시작 시 선택한 값을 그대로 유지한다.
-    // 변경이 필요하면 '자세히'에서 공부 기록 수정 화면으로 들어간다.
-    e.unitName = (e.subject && e.unit ? (unitsOf(e.subject).find(u => u.id === e.unit) || {}).name : '') || e.unitName || '';
+    e.subject = g('sn-subj').value || null; e.unit = g('sn-unit').value || null;
+    e.unitName = (e.subject && e.unit ? (unitsOf(e.subject).find(u => u.id === e.unit) || {}).name : '') || '';
     e.kind = g('sn-kind').value; e.note = g('sn-note').value.trim(); e.ease = Number(g('sn-ease').value) || 0; e.round = g('sn-round').checked && !!e.unit;
     e.problems = Math.max(0, Math.round(Number(g('sn-problems').value) || 0)); e.wrongRetry = Math.max(0, Math.round(Number(g('sn-wrong').value) || 0));
     state.pendingSession = null; saveState(); renderSessionNote(); renderSpirit();
@@ -10619,7 +10668,7 @@ function renderRpgQuests(){
     }
     else{ state.pendingSession = null; saveState(); renderSessionNote(); }
   });
-  document.getElementById('session-note').addEventListener('change', e => { });
+  document.getElementById('session-note').addEventListener('change', e => { if(e.target.id === 'sn-subj') document.getElementById('sn-unit').innerHTML = unitOptions(e.target.value, null); });
   // ---- 직접 기록 · 수정 · 삭제 ----
   function logNew(){ logDraft = {}; logOpen(); }
   function logEdit(id){
@@ -10709,12 +10758,50 @@ function renderRpgQuests(){
   }
   document.getElementById('spirit-evo').addEventListener('click', e => {
     if(e.target.closest('[data-log-open]')){ logNew(); return; }
-    const um = e.target.closest('[data-unit-manager]');
-    if(um){ unitManagerOpen(um.dataset.unitManagerSubj || timerTarget().subj || MISSIONS[0]); return; }
     const t = e.target.closest('[data-tgt-subj]');
-    if(t){ setTimerTarget(t.dataset.tgtSubj, t.dataset.tgtUnit); showToast(`🎯 ${t.dataset.tgtSubj} · ${unitsOf(t.dataset.tgtSubj).find(u => u.id === t.dataset.tgtUnit)?.name || '단원'} 공부를 준비했어요.`); }
+    if(t){ setTimerTarget(t.dataset.tgtSubj, t.dataset.tgtUnit); showToast('🎯 타이머 목표로 지정했어요.'); }
   });
   document.getElementById('spell-modal-body').addEventListener('click', e => {
+    const um = e.target.closest('[data-unitmgr]');
+    if(um){
+      const body = document.getElementById('spell-modal-body');
+      const subj = (body && body.dataset.unitManagerSubject) || unitManagerSubject;
+      if(!subj) return;
+      const k = um.dataset.unitmgr;
+      if(k === 'add'){
+        const input = document.getElementById('unitmgr-new');
+        const name = input ? input.value.trim() : '';
+        if(!name){ showToast('단원 이름을 입력해주세요.'); return; }
+        const id = 'u' + Date.now().toString(36);
+        unitsOf(subj).push({ id, name, subs:[] });
+        saveState(); renderTimerTarget(); renderSpirit(); unitManagerOpen(subj);
+        return;
+      }
+      if(k === 'rename'){ unitManagerOpen(subj, um.dataset.id); return; }
+      if(k === 'rename-cancel'){ unitManagerOpen(subj); return; }
+      if(k === 'rename-save'){
+        const input = document.getElementById('unitmgr-rename-input');
+        const name = input ? input.value.trim() : '';
+        const u = unitsOf(subj).find(x => x.id === um.dataset.id);
+        if(!u) return;
+        if(!name){ showToast('단원 이름을 입력해주세요.'); return; }
+        u.name = name;
+        logList().forEach(e => { if(e.subject === subj && e.unit === u.id) e.unitName = name; });
+        saveState(); renderTimerTarget(); renderSpirit(); unitManagerOpen(subj);
+        showToast('단원 이름을 바꿨어요.');
+        return;
+      }
+      if(k === 'delete'){
+        const u = unitsOf(subj).find(x => x.id === um.dataset.id);
+        if(!u) return;
+        if(logList().some(e => e.subject === subj && e.unit === u.id)){ showToast('이 단원에 기록이 있어 삭제할 수 없어요. 이름을 바꾸거나 기록을 먼저 지워 주세요.'); return; }
+        if(!armOrConfirm(um, 'unitmgr-del-' + u.id)) return;
+        gs('units')[subj] = unitsOf(subj).filter(x => x.id !== u.id);
+        const t = timerTarget(); if(t.subj === subj && t.unit === u.id) state.timerTarget.unit = null;
+        saveState(); renderTimerTarget(); renderSpirit(); unitManagerOpen(subj);
+        return;
+      }
+    }
     const delSub = e.target.closest('[data-subtopic-del]');
     if(delSub){
       captureLog();
@@ -10722,46 +10809,6 @@ function renderRpgQuests(){
       const idx = subs.findIndex(s => s.id === delSub.dataset.subtopicDel);
       if(idx >= 0) subs.splice(idx, 1);
       saveState(); logOpen();
-      return;
-    }
-    const um = e.target.closest('[data-unitmgr]');
-    if(um){
-      const subjEl = document.getElementById('unitmgr-subj');
-      const subj = subjEl ? subjEl.value : (timerTarget().subj || MISSIONS[0]);
-      const id = um.dataset.unitId;
-      if(um.dataset.unitmgr === 'add'){
-        const inp = document.getElementById('unitmgr-new');
-        const name = inp ? inp.value.trim() : '';
-        if(!name){ showToast('단원 이름을 입력해주세요.'); return; }
-        unitsOf(subj).push({ id:'u' + Date.now().toString(36), name, subs:[] });
-        saveState(); unitManagerOpen(subj); renderTimerTarget(); renderSpirit(); showToast(`📚 ${name} 단원을 추가했어요.`); return;
-      }
-      const u = unitsOf(subj).find(x => x.id === id);
-      if(!u) return;
-      if(um.dataset.unitmgr === 'rename'){
-        unitManagerOpen(subj, u.id);
-        setTimeout(() => document.getElementById('unitmgr-rename')?.focus(), 0);
-        return;
-      }
-      if(um.dataset.unitmgr === 'rename-save'){
-        const inp = document.getElementById('unitmgr-rename');
-        const n = inp ? inp.value.trim() : '';
-        if(!n){ showToast('이름을 입력해주세요.'); return; }
-        u.name = n;
-        logList().forEach(e => { if(e.subject === subj && e.unit === u.id) e.unitName = u.name; });
-        saveState(); unitManagerOpen(subj); renderTimerTarget(); renderSpirit(); showToast('단원 이름을 바꿨어요.');
-        return;
-      }
-      if(um.dataset.unitmgr === 'rename-cancel'){
-        unitManagerOpen(subj);
-        return;
-      }
-      if(um.dataset.unitmgr === 'delete'){
-        if(!window.confirm('삭제하시겠습니까?')) return;
-        gs('units')[subj] = unitsOf(subj).filter(x => x.id !== u.id);
-        const t = timerTarget(); if(t.subj === subj && t.unit === u.id) setTimerTarget(subj, null); else saveState();
-        unitManagerOpen(subj); renderTimerTarget(); renderSpirit(); return;
-      }
       return;
     }
     const b = e.target.closest('[data-log]');
@@ -10799,7 +10846,8 @@ function renderRpgQuests(){
     }else if(k === 'delunit'){
       const u = unitsOf(d.subj).find(x => x.id === (g('log-unit') || {}).value);
       if(!u) return;
-      if(!window.confirm('삭제하시겠습니까?')) return;
+      if(logList().some(e => e.subject === d.subj && e.unit === u.id)){ showToast('이 단원에 기록이 있어 삭제할 수 없어요. 이름을 바꾸거나 기록을 먼저 지워 주세요.'); return; }
+      if(!armOrConfirm(b, 'delunit-' + u.id)) return;
       captureLog(); gs('units')[d.subj] = unitsOf(d.subj).filter(x => x.id !== u.id); d.unit = null; saveState(); logOpen();
     }else if(k === 'addsub'){
       const name = (g('log-newsub') || {}).value ? g('log-newsub').value.trim() : '';
