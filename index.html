@@ -3478,26 +3478,7 @@
   /* 타이머 목표 · 세션 기록 카드 · 이해도 바 */
   .timer-target{margin:0 0 12px;}
   .timer-target .spirit-chips{justify-content:center;align-items:center;}
-  .timer-unit-row{display:flex;align-items:center;gap:8px;width:100%;margin-top:8px;}
-  .timer-unit-select-wrap{position:relative;flex:1;min-width:0;}
-  .timer-unit-select-wrap::after{content:'⌄';position:absolute;right:14px;top:50%;transform:translateY(-53%);pointer-events:none;color:var(--ink-soft);font-size:.95rem;}
-  .timer-unit-row select{width:100%;height:48px;box-sizing:border-box;margin:0;padding:8px 38px 8px 14px;border:1px solid var(--line);border-radius:12px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;appearance:none;-webkit-appearance:none;}
-  .timer-unit-settings{width:48px;height:48px;flex:none;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--c-fbf8f1);color:var(--ink-soft);font-size:1.08rem;cursor:pointer;box-sizing:border-box;transition:background .15s,border-color .15s,transform .1s;}
-  .timer-unit-settings:hover{background:var(--paper-card);border-color:var(--gold);}
-  .timer-unit-settings:active{transform:translateY(1px);}
-  .session-note select,.session-note input[type=text]{width:100%;box-sizing:border-box;margin:8px 0 0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
-  .unit-manager__intro{margin-bottom:12px;}
-  .unit-manager__list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
-  .unit-manager__item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--c-fbf8f1);min-width:0;}
-  .unit-manager__name{flex:1;min-width:0;font-size:.84rem;color:var(--ink);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .unit-manager__meta{font-size:.68rem;color:var(--muted);font-weight:400;margin-left:4px;}
-  .unit-manager__actions{display:flex;gap:5px;flex:none;}
-  .unit-manager__actions .spell-btn{flex:none;padding:6px 9px;font-size:.7rem;}
-  .unit-manager__rename{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
-  .unit-manager__rename input{flex:1;min-width:0;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--paper-card);color:var(--ink);font:inherit;font-size:.82rem;}
-  .unit-manager__add{display:flex;gap:7px;margin-top:4px;}
-  .unit-manager__add input{flex:1;min-width:0;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:.82rem;}
-  .unit-manager__add .spell-btn{flex:none;padding:8px 12px;}
+  .timer-target select,.session-note select,.session-note input[type=text]{width:100%;box-sizing:border-box;margin:8px 0 0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
   .session-note{margin-top:14px;padding:12px;border:1px solid var(--parch-edge);border-radius:12px;background:linear-gradient(180deg,var(--parch),var(--parch-2));text-align:left;}
   .session-note[hidden],.timer-target[hidden]{display:none;}
   .session-note__head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:var(--ink);}
@@ -3541,10 +3522,6 @@
 
 
 
-  .timer-unit-row{display:flex;align-items:center;gap:6px;width:100%;margin-top:6px;}
-  .timer-unit-row #tt-unit{flex:1;min-width:0;}
-  .timer-unit-settings{width:42px;height:42px;flex:0 0 42px;padding:0;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--paper-card);color:var(--ink);font-size:1.05rem;line-height:1;cursor:pointer;}
-  .timer-unit-settings:active{transform:translateY(1px);}
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css">
 <link rel="manifest" href="./manifest.json">
@@ -7021,71 +6998,80 @@ function renderRpgQuests(){
     el.textContent = MARCO_SHOP_LINES[Math.floor(Math.random() * MARCO_SHOP_LINES.length)];
   }
 
-  // 오늘 뽀모도로 2회를 채우면 여관 주인이 몰래 챙겨주는 보너스 — 하루 한 번, 자동 지급
+  // ===== 오늘의 부탁 (여관 마르타 · 마르코 · 이안) =====
+  // 셋 다 "오늘 활동량이 기준을 넘으면 하루 한 번 자동으로 보상을 준다"는 같은 구조라
+  // 예전엔 거의 똑같은 코드가 세 벌 복붙돼 있었다. 여기 데이터 테이블 하나로 모으고
+  // 실제 체크/축하 로직은 공용 함수 두 개(dailyQuestInfo/checkDailyQuest/celebrateDailyQuest)로만 처리한다.
+  // 화면에 보여주는 문구·보상은 예전과 완전히 동일 — 코드만 한 곳에 모았다.
   const INNKEEPER_QUEST_NEED = 2;
   const INNKEEPER_QUEST_REWARD = 15;
-  function innkeeperQuestInfo(){
-    const have = Math.min(INNKEEPER_QUEST_NEED, tomatoCountFor(formatDate(today)));
-    return { need: INNKEEPER_QUEST_NEED, have, done: have >= INNKEEPER_QUEST_NEED };
-  }
-  function checkInnkeeperQuest(){
-    const info = innkeeperQuestInfo();
-    const todayStr = formatDate(today);
-    if(info.done && state.innkeeperQuestClaimedDate !== todayStr){
-      state.innkeeperQuestClaimedDate = todayStr;
-      awardCoins(INNKEEPER_QUEST_REWARD);
-      return true;
-    }
-    return false;
-  }
-  function celebrateInnkeeperQuest(){
-    showNpcToast('innkeeper', '오늘 정말 열심히 했네! 이건 내 마음이야.', { reward: coinHTML(INNKEEPER_QUEST_REWARD) });
-  }
-
-  // 오늘 운동 기록 1회를 남기면 마르코가 챙겨주는 무료 소모품 — 하루 한 번, 자동 지급
   const MARCO_QUEST_NEED = 1;
   const MARCO_QUEST_GIFT_ID = 'travelers-lunch'; // 🥪 여행자의 도시락 — 몸을 챙긴 것에 대한 보답이라 컨셉이 맞다
-  function marcoQuestInfo(){
-    const have = Math.min(MARCO_QUEST_NEED, ((state.exercise && state.exercise[formatDate(today)]) || []).length);
-    return { need: MARCO_QUEST_NEED, have, done: have >= MARCO_QUEST_NEED };
-  }
-  function checkMarcoQuest(){
-    const info = marcoQuestInfo();
-    const todayStr = formatDate(today);
-    if(info.done && state.marcoQuestClaimedDate !== todayStr){
-      state.marcoQuestClaimedDate = todayStr;
-      if(!state.inventory) state.inventory = { equipment:[], consumables:[] };
-      state.inventory.consumables.push(MARCO_QUEST_GIFT_ID);
-      return true;
-    }
-    return false;
-  }
-  function celebrateMarcoQuest(){
-    const gift = SHOP_ITEMS.find(i => i.id === MARCO_QUEST_GIFT_ID);
-    showNpcToast('merchant', '오늘 몸도 좀 챙겼군! 이건 내가 그냥 얹어주는 거야.', { reward: gift ? `${gift.icon} ${gift.name}` : '' });
-  }
-
-  // 오늘 미션을 2개 이상 고르면 이안이 대신 흥정해서 골드를 돌려준다 — 하루 한 번, 자동 지급
   const IAN_QUEST_NEED = 2;
   const IAN_QUEST_REWARD = 10;
-  function ianQuestInfo(){
-    const have = Math.min(IAN_QUEST_NEED, (state.missions[formatDate(today)] || []).length);
-    return { need: IAN_QUEST_NEED, have, done: have >= IAN_QUEST_NEED };
+  const DAILY_NPC_QUESTS = {
+    innkeeper: {
+      need: INNKEEPER_QUEST_NEED,
+      have: () => tomatoCountFor(formatDate(today)),
+      claimedKey: 'innkeeperQuestClaimedDate',
+      grant: () => awardCoins(INNKEEPER_QUEST_REWARD),
+      npc: 'innkeeper',
+      line: '오늘 정말 열심히 했네! 이건 내 마음이야.',
+      reward: () => coinHTML(INNKEEPER_QUEST_REWARD)
+    },
+    marco: {
+      need: MARCO_QUEST_NEED,
+      have: () => ((state.exercise && state.exercise[formatDate(today)]) || []).length,
+      claimedKey: 'marcoQuestClaimedDate',
+      grant: () => {
+        if(!state.inventory) state.inventory = { equipment:[], consumables:[] };
+        state.inventory.consumables.push(MARCO_QUEST_GIFT_ID);
+      },
+      npc: 'merchant',
+      line: '오늘 몸도 좀 챙겼군! 이건 내가 그냥 얹어주는 거야.',
+      reward: () => { const gift = SHOP_ITEMS.find(i => i.id === MARCO_QUEST_GIFT_ID); return gift ? `${gift.icon} ${gift.name}` : ''; }
+    },
+    ian: {
+      need: IAN_QUEST_NEED,
+      have: () => (state.missions[formatDate(today)] || []).length,
+      claimedKey: 'ianQuestClaimedDate',
+      grant: () => { state.ianFavorCount = (state.ianFavorCount || 0) + 1; awardCoins(IAN_QUEST_REWARD); },
+      npc: 'ian',
+      line: '오늘 계획, 내가 대신 흥정해서 좀 깎아왔어.',
+      reward: () => coinHTML(IAN_QUEST_REWARD)
+    }
+  };
+  function dailyQuestInfo(id){
+    const q = DAILY_NPC_QUESTS[id];
+    const have = Math.min(q.need, q.have());
+    return { need: q.need, have, done: have >= q.need };
   }
-  function checkIanQuest(){
-    const info = ianQuestInfo();
+  function checkDailyQuest(id){
+    const q = DAILY_NPC_QUESTS[id];
+    const info = dailyQuestInfo(id);
     const todayStr = formatDate(today);
-    if(info.done && state.ianQuestClaimedDate !== todayStr){
-      state.ianQuestClaimedDate = todayStr;
-      state.ianFavorCount = (state.ianFavorCount || 0) + 1;
-      awardCoins(IAN_QUEST_REWARD);
+    if(info.done && state[q.claimedKey] !== todayStr){
+      state[q.claimedKey] = todayStr;
+      q.grant();
       return true;
     }
     return false;
   }
-  function celebrateIanQuest(){
-    showNpcToast('ian', '오늘 계획, 내가 대신 흥정해서 좀 깎아왔어.', { reward: coinHTML(IAN_QUEST_REWARD) });
+  function celebrateDailyQuest(id){
+    const q = DAILY_NPC_QUESTS[id];
+    showNpcToast(q.npc, q.line, { reward: q.reward() });
   }
+  // 기존 함수 이름들은 그대로 남겨둔다 — renderInn·renderShopFavors·addTodayStamp 등
+  // 호출부를 하나도 안 건드리고, 안쪽 구현만 공용 로직으로 바꿨다.
+  function innkeeperQuestInfo(){ return dailyQuestInfo('innkeeper'); }
+  function checkInnkeeperQuest(){ return checkDailyQuest('innkeeper'); }
+  function celebrateInnkeeperQuest(){ celebrateDailyQuest('innkeeper'); }
+  function marcoQuestInfo(){ return dailyQuestInfo('marco'); }
+  function checkMarcoQuest(){ return checkDailyQuest('marco'); }
+  function celebrateMarcoQuest(){ celebrateDailyQuest('marco'); }
+  function ianQuestInfo(){ return dailyQuestInfo('ian'); }
+  function checkIanQuest(){ return checkDailyQuest('ian'); }
+  function celebrateIanQuest(){ celebrateDailyQuest('ian'); }
   // 이안의 신뢰도는 트러스트 시스템(마을 허브 NPC)과 달리, "오늘의 부탁"을 완료한 누적 횟수로만 쌓인다.
   function ianTrust(){ return trustLevelFor(state.ianFavorCount || 0, NPC_TRUST_THRESHOLDS.ian); }
 
@@ -7839,7 +7825,16 @@ function renderRpgQuests(){
     const info = weeklyGateInfo();
     const knightBonus = knightTrust()>=5 ? 0.5 : 0;
     const gateCoins = Math.round(COIN_REWARD.gateClear * info.type.multiplier * (1+knightBonus)) + totalBonusFor('gateClear');
-    showNpcToast('knight', `${info.type.icon} ${info.type.label} 관문 돌파. 두드린 만큼 열렸다.`, { reward: `${coinHTML(gateCoins)} · 경험치 +${Math.round(20 * info.type.multiplier)}` });
+    const xp = Math.round(20 * info.type.multiplier);
+    // 스탬프 하나하나의 작은 피해 토스트와 달리, HP가 다 깎인 순간은 편지 열 때와 같은
+    // 큰 모달(spellOpen)로 확실하게 보여준다 — 격파 포즈 이미지가 생기면 아이콘 자리에 넣으면 된다.
+    spellOpen(`<div class="spell-card" style="text-align:center">
+        <div style="font-size:2.6rem;line-height:1.3">${info.type.icon}💥</div>
+        <p class="modal-sub" style="margin-top:8px">${info.type.icon} ${info.label} 관문지기를 완전히 쓰러뜨렸어요!</p>
+        <p style="font-size:.76rem;color:var(--ink-soft);line-height:1.6;margin-top:4px">${info.days}일 동안 HP ${info.hpMax}을(를) 전부 깎아냈어요.<br>${coinHTML(gateCoins)} · 경험치 +${xp}</p>
+      </div>
+      ${SPELL_CLOSE_BTN}`, `${info.type.icon} 관문 격파!`);
+    showNpcToast('knight', `${info.type.icon} ${info.type.label} 관문 돌파. 두드린 만큼 열렸다.`, { reward: `${coinHTML(gateCoins)} · 경험치 +${xp}` });
   }
 
   // ---------- 업적 (영구 마일스톤 — 이미 쌓인 데이터에서 매번 다시 계산, 별도 저장 없음) ----------
@@ -9804,9 +9799,6 @@ function renderRpgQuests(){
     document.getElementById('spell-modal-backdrop').classList.remove('hidden');
   }
   function spellClose(){
-    const body = document.getElementById('spell-modal-body');
-    if(body) delete body.dataset.unitManagerSubject;
-    unitManagerSubject = null;
     document.getElementById('spell-modal-backdrop').classList.add('hidden');
     renderSpellPanel();
   }
@@ -10485,7 +10477,6 @@ function renderRpgQuests(){
   };
   const EASE_TXT = ['미평가','헷갈려요','아직 불안해요','절반쯤 알아요','거의 익혔어요','완벽해요'];
   let logDraft = {}, ttAll = false;
-  let unitManagerSubject = null;
   function unitsOf(subj){ const U = gs('units'); if(!Array.isArray(U[subj])) U[subj] = (DEFAULT_UNITS[subj] || []).map((n, i) => ({ id:'u' + i, name:n })); return U[subj]; }
   // 단원 아래 세부목차(소단원) — 사용자가 직접 추가한 목록을 기억해서 계속 재사용한다.
   function subsOf(subj, unitId){
@@ -10549,43 +10540,6 @@ function renderRpgQuests(){
     return state.timerTarget;
   }
   function setTimerTarget(subj, unit){ state.timerTarget = { date:formatDate(today), subj:subj || null, unit:unit || null }; saveState(); renderTimerTarget(); }
-  function unitManagerOpen(subj, renameId){
-    if(!subj) return;
-    unitManagerSubject = subj;
-    const body = document.getElementById('spell-modal-body');
-    if(body) body.dataset.unitManagerSubject = subj;
-    const units = unitsOf(subj);
-    const renaming = renameId || null;
-    const rows = units.length ? units.map((u, i) => {
-      if(renaming === u.id){
-        return `<div class="unit-manager__item">
-          <div class="unit-manager__rename">
-            <input type="text" id="unitmgr-rename-input" maxlength=30 value="${escAttr(u.name)}" aria-label="단원 이름">
-            <button type="button" class="spell-btn spell-btn--main" data-unitmgr="rename-save" data-id="${u.id}">저장</button>
-            <button type="button" class="spell-btn" data-unitmgr="rename-cancel">취소</button>
-          </div>
-        </div>`;
-      }
-      const rounds = unitStats(subj).find(x => x.id === u.id)?.rounds || 0;
-      return `<div class="unit-manager__item">
-        <span class="unit-manager__name">${escAttr(u.name)} <span class="unit-manager__meta">${rounds}회독</span></span>
-        <div class="unit-manager__actions">
-          <button type="button" class="spell-btn" data-unitmgr="rename" data-id="${u.id}">이름 변경</button>
-          <button type="button" class="spell-btn" data-unitmgr="delete" data-id="${u.id}">삭제</button>
-        </div>
-      </div>`;
-    }).join('') : '<p class="modal-empty">아직 등록된 단원이 없어요. 아래에서 첫 단원을 추가해보세요.</p>';
-    spellOpen(`<div class="unit-manager__intro">
-        <p class="modal-sub" style="margin-bottom:4px">${subj}</p>
-        <small class="modal-sub" style="display:block;margin:0">타이머에서 바로 선택할 단원을 관리해요.</small>
-      </div>
-      <div class="unit-manager__list">${rows}</div>
-      <div class="unit-manager__add">
-        <input type="text" id="unitmgr-new" maxlength=30 placeholder="새 단원 이름">
-        <button type="button" class="spell-btn spell-btn--main" data-unitmgr="add">추가</button>
-      </div>`, `⚙️ ${subj} · 단원 관리`);
-    setTimeout(() => { const i = document.getElementById(renaming ? 'unitmgr-rename-input' : 'unitmgr-new'); if(i) i.focus(); }, 0);
-  }
   function renderTimerTarget(){
     const el = document.getElementById('timer-target');
     if(!el) return;
@@ -10598,19 +10552,13 @@ function renderRpgQuests(){
     el.dataset.sig = sig;
     if(sel){
       el.hidden = false;
-      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj ? `<div class="timer-unit-row"><div class="timer-unit-select-wrap"><select id="tt-unit" aria-label="단원 선택">${unitOptions(t.subj, t.unit)}</select></div><button type="button" class="timer-unit-settings" data-unit-manager="1" data-unit-manager-subj="${t.subj}" aria-label="단원 관리" title="단원 관리">⚙</button></div>` : ''}`;
+      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj && unitsOf(t.subj).length ? `<select id="tt-unit">${unitOptions(t.subj, t.unit)}</select>` : ''}`;
     }else if(lbl){
       const u = t.subj ? unitsOf(t.subj).find(x => x.id === t.unit) : null;
       el.hidden = false; el.innerHTML = `<p class="chip-limit-note" style="text-align:center">🎯 ${t.subj ? t.subj + (u ? ' · ' + u.name : '') : '과목 미지정'}</p>`;
     }else{ el.hidden = true; el.innerHTML = ''; }
   }
   document.getElementById('timer-target').addEventListener('click', e => {
-    const manager = e.target.closest('[data-unit-manager]');
-    if(manager){
-      const subj = manager.dataset.unitManagerSubj || timerTarget().subj;
-      if(subj) unitManagerOpen(subj);
-      return;
-    }
     const c = e.target.closest('[data-tt]'), a = e.target.closest('[data-tt-all]');
     if(c){ const t = timerTarget(); setTimerTarget(t.subj === c.dataset.tt ? null : c.dataset.tt, null); }
     else if(a){ ttAll = true; renderTimerTarget(); }
@@ -10762,46 +10710,6 @@ function renderRpgQuests(){
     if(t){ setTimerTarget(t.dataset.tgtSubj, t.dataset.tgtUnit); showToast('🎯 타이머 목표로 지정했어요.'); }
   });
   document.getElementById('spell-modal-body').addEventListener('click', e => {
-    const um = e.target.closest('[data-unitmgr]');
-    if(um){
-      const body = document.getElementById('spell-modal-body');
-      const subj = (body && body.dataset.unitManagerSubject) || unitManagerSubject;
-      if(!subj) return;
-      const k = um.dataset.unitmgr;
-      if(k === 'add'){
-        const input = document.getElementById('unitmgr-new');
-        const name = input ? input.value.trim() : '';
-        if(!name){ showToast('단원 이름을 입력해주세요.'); return; }
-        const id = 'u' + Date.now().toString(36);
-        unitsOf(subj).push({ id, name, subs:[] });
-        saveState(); renderTimerTarget(); renderSpirit(); unitManagerOpen(subj);
-        return;
-      }
-      if(k === 'rename'){ unitManagerOpen(subj, um.dataset.id); return; }
-      if(k === 'rename-cancel'){ unitManagerOpen(subj); return; }
-      if(k === 'rename-save'){
-        const input = document.getElementById('unitmgr-rename-input');
-        const name = input ? input.value.trim() : '';
-        const u = unitsOf(subj).find(x => x.id === um.dataset.id);
-        if(!u) return;
-        if(!name){ showToast('단원 이름을 입력해주세요.'); return; }
-        u.name = name;
-        logList().forEach(e => { if(e.subject === subj && e.unit === u.id) e.unitName = name; });
-        saveState(); renderTimerTarget(); renderSpirit(); unitManagerOpen(subj);
-        showToast('단원 이름을 바꿨어요.');
-        return;
-      }
-      if(k === 'delete'){
-        const u = unitsOf(subj).find(x => x.id === um.dataset.id);
-        if(!u) return;
-        if(logList().some(e => e.subject === subj && e.unit === u.id)){ showToast('이 단원에 기록이 있어 삭제할 수 없어요. 이름을 바꾸거나 기록을 먼저 지워 주세요.'); return; }
-        if(!armOrConfirm(um, 'unitmgr-del-' + u.id)) return;
-        gs('units')[subj] = unitsOf(subj).filter(x => x.id !== u.id);
-        const t = timerTarget(); if(t.subj === subj && t.unit === u.id) state.timerTarget.unit = null;
-        saveState(); renderTimerTarget(); renderSpirit(); unitManagerOpen(subj);
-        return;
-      }
-    }
     const delSub = e.target.closest('[data-subtopic-del]');
     if(delSub){
       captureLog();
@@ -11605,6 +11513,7 @@ function renderRpgQuests(){
     const prevClass = classInfoForStats(prevStatCounts);
     const prevTodayScorable = scorableEntries(dateStr).length;
     const prevBestOtherDay = bestDailyScorableExcluding(dateStr);
+    const prevGateInfo = weeklyGateInfo(); // 이번 스탬프가 관문지기에게 준 피해량을 나중에 계산하기 위한 스냅샷
     const isFirstOfDay = (entriesFor(dateStr).length === 0);
     const gapDays = isFirstOfDay ? daysSinceLastEntryBeforeToday() : 0;
     rec.sections[period].push(emoji);
@@ -11652,6 +11561,8 @@ function renderRpgQuests(){
     if(didClassShift && prevClass.id !== DEFAULT_CLASS_TITLE.id) state.hasShiftedClass = true;
     // 관문지기(이번 주 목표)는 순수하게 공부 스탬프로만 여는 관문
     const gateCleared = checkWeeklyGateClear();
+    const gateInfoAfter = weeklyGateInfo();
+    const gateDamage = gateInfoAfter.dealt - prevGateInfo.dealt;
     const innkeeperQuestCleared = checkInnkeeperQuest();
     const defeatedRegionBosses = checkRegionBossDefeats();
     const offeredEncounter = maybeOfferChoiceEncounter(emoji);
@@ -11681,6 +11592,11 @@ function renderRpgQuests(){
       celebrateBestDay(originEl || document.getElementById('stamp-btn'), newTodayScorable);
     }
     leveledUpStats.forEach(s => celebrateStatLevelUp(s, statLevelIndexFor(newStatCounts[s.key]||0)));
+    // 이번 스탬프가 관문지기에게 실제로 입힌 피해만큼만 짧게 알려준다 — 완전히 깎였을 때는
+    // 이 토스트 대신 아래 celebrateGateClear()의 큰 격파 모달이 뜬다.
+    if(gateDamage > 0 && !gateInfoAfter.cleared){
+      showToast(`⚔️ ${gateInfoAfter.type.icon} ${gateInfoAfter.label} 관문지기에게 ${gateDamage}의 피해! (${gateInfoAfter.hpLeft}/${gateInfoAfter.hpMax} 남음)`);
+    }
     if(gateCleared) celebrateGateClear();
     if(innkeeperQuestCleared) celebrateInnkeeperQuest();
     if(defeatedRegionBosses.length) celebrateRegionBossDefeats(defeatedRegionBosses);
