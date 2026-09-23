@@ -3418,11 +3418,12 @@
   .spirit-bubble{flex:1;margin:0;font-family:'Noto Serif KR',serif;font-style:italic;font-size:.8rem;line-height:1.6;color:var(--ink-soft);}
   .spirit-name{display:block;font-family:'Noto Sans KR',sans-serif;font-style:normal;font-size:.68rem;font-weight:700;color:var(--gold);}
   .spirit-map{margin-top:12px;}
-  .spirit-row{display:grid;grid-template-columns:66px 1fr auto;gap:8px;align-items:center;font-size:.72rem;color:var(--ink-soft);padding:3px 0;}
-  .spirit-row__subj{display:flex;align-items:center;gap:5px;min-width:0;}
+  .spirit-row{display:grid;grid-template-columns:78px 1fr auto;gap:8px;align-items:center;font-size:.72rem;color:var(--ink-soft);padding:3px 0;}
+  .spirit-row__subj{display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap;}
   .spirit-row__dot{flex:none;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 2px var(--paper-card);}
   .spirit-row__bar{height:7px;border-radius:7px;background:var(--c-e9e2cf);overflow:hidden;}
   .spirit-row__fill{height:100%;background:var(--m,var(--gold));}
+  .spirit-row__stat{text-align:right;white-space:nowrap;}
   .spirit-row small{color:var(--muted);font-size:.6rem;}
   .spirit-note{margin:8px 0 0;font-size:.7rem;color:var(--ink-soft);line-height:1.6;}
   .spirit-note--muted{color:var(--muted);font-size:.62rem;}
@@ -10552,16 +10553,21 @@ function renderRpgQuests(){
     el.dataset.sig = sig;
     if(sel){
       el.hidden = false;
-      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj && unitsOf(t.subj).length ? `<select id="tt-unit">${unitOptions(t.subj, t.unit)}</select>` : ''}`;
+      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj ? (unitsOf(t.subj).length ? `<div class="spell-row" style="margin-top:6px"><select id="tt-unit">${unitOptions(t.subj, t.unit)}</select><button type="button" class="spell-btn" data-tt-manage="1" style="flex:none;padding:6px 10px" aria-label="단원 관리">⚙</button></div>` : `<div class="spell-row" style="margin-top:6px"><button type="button" class="spell-btn" data-tt-manage="1" style="width:100%">＋ ${t.subj} 단원 추가</button></div>`) : ''}`;
     }else if(lbl){
       const u = t.subj ? unitsOf(t.subj).find(x => x.id === t.unit) : null;
       el.hidden = false; el.innerHTML = `<p class="chip-limit-note" style="text-align:center">🎯 ${t.subj ? t.subj + (u ? ' · ' + u.name : '') : '과목 미지정'}</p>`;
     }else{ el.hidden = true; el.innerHTML = ''; }
   }
   document.getElementById('timer-target').addEventListener('click', e => {
-    const c = e.target.closest('[data-tt]'), a = e.target.closest('[data-tt-all]');
+    const c = e.target.closest('[data-tt]'), a = e.target.closest('[data-tt-all]'), mg = e.target.closest('[data-tt-manage]');
     if(c){ const t = timerTarget(); setTimerTarget(t.subj === c.dataset.tt ? null : c.dataset.tt, null); }
     else if(a){ ttAll = true; renderTimerTarget(); }
+    else if(mg){
+      const t = timerTarget();
+      if(!t.subj){ showToast('먼저 과목을 골라주세요.'); return; }
+      openUnitPicker(t.subj, t.unit, (subj, unit) => setTimerTarget(subj, unit));
+    }
   });
   document.getElementById('timer-target').addEventListener('change', e => { if(e.target.id === 'tt-unit'){ const t = timerTarget(); setTimerTarget(t.subj, e.target.value || null); } });
   // ---- 세션이 끝나면 시간은 자동 기록, 내용은 휴식 중 카드에서 (터치 전까지 유지) ----
@@ -10619,6 +10625,13 @@ function renderRpgQuests(){
   document.getElementById('session-note').addEventListener('change', e => { if(e.target.id === 'sn-subj') document.getElementById('sn-unit').innerHTML = unitOptions(e.target.value, null); });
   // ---- 직접 기록 · 수정 · 삭제 ----
   function logNew(){ logDraft = {}; logOpen(); }
+  // 타이머 시작 화면처럼 "과목·단원만 빨리 고르고 싶은" 자리에서 쓰는 가벼운 모달 —
+  // 전체 기록 폼(시간·이해도·메모 등)은 다 빼고, 단원 추가·이름변경·삭제와 고르기만 담는다.
+  // onPick(subj, unit) — "이 단원 선택" 버튼을 누르면 호출된다.
+  function openUnitPicker(subj, unit, onPick){
+    logDraft = { subj: subj || curSubj() || MISSIONS[0], unit, slim: true, onPick };
+    logOpen();
+  }
   function logEdit(id){
     const e = logList().find(x => x.id === id);
     if(!e) return;
@@ -10627,16 +10640,26 @@ function renderRpgQuests(){
   }
   function captureLog(){
     const g = id => document.getElementById(id), d = logDraft;
+    if(g('log-unit')) d.unit = g('log-unit').value;
     if(!g('log-min')) return;
     d.min = g('log-min').value; d.kind = g('log-kind').value; d.note = g('log-note').value; d.ease = Number(g('log-ease').value) || 0; d.round = g('log-round').checked;
     d.problems = g('log-problems') ? g('log-problems').value : d.problems; d.wrongRetry = g('log-wrong') ? g('log-wrong').value : d.wrongRetry;
-    if(g('log-unit')) d.unit = g('log-unit').value;
   }
   function logOpen(){
     const d = logDraft;
     d.subj = d.subj || curSubj() || MISSIONS[0];
     const us = unitStats(d.subj);
     if(!us.find(u => u.id === d.unit)) d.unit = us.length ? us[0].id : null;
+    if(d.slim){
+      spellOpen(`<div class="spell-form">
+        <select id="log-subj" data-log="subj">${MISSIONS.map(m => `<option${m === d.subj ? ' selected' : ''}>${m}</option>`).join('')}</select>
+        ${us.length ? `<select id="log-unit">${us.map(u => `<option value="${u.id}"${u.id === d.unit ? ' selected' : ''}>${u.name} · ${u.rounds}회독</option>`).join('')}</select><div class="spell-row"><button type="button" class="spell-btn" data-log="renunit">단원 이름 변경</button><button type="button" class="spell-btn" data-log="delunit">단원 삭제</button></div>` : '<p class="modal-sub">아직 단원이 없어요. 아래에서 추가해 주세요.</p>'}
+        <div class="spell-row" style="margin-top:8px"><input type="text" id="log-newunit" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-log="addunit" style="flex:none;margin-bottom:8px">추가</button></div>
+        ${subtopicSectionHTML(d.subj, d.unit)}
+        ${us.length ? `<div class="spell-row" style="margin-top:8px"><button type="button" class="spell-btn spell-btn--main" data-log="slimdone" style="width:100%">이 단원 선택</button></div>` : ''}
+      </div>`, '⚙ 단원 관리');
+      return;
+    }
     d.kind = d.kind || '미지정'; d.ease = d.ease || 0;
     spellOpen(`<div class="spell-form">
       <select id="log-subj" data-log="subj">${MISSIONS.map(m => `<option${m === d.subj ? ' selected' : ''}>${m}</option>`).join('')}</select>
@@ -10754,9 +10777,20 @@ function renderRpgQuests(){
     }else if(k === 'delunit'){
       const u = unitsOf(d.subj).find(x => x.id === (g('log-unit') || {}).value);
       if(!u) return;
-      if(logList().some(e => e.subject === d.subj && e.unit === u.id)){ showToast('이 단원에 기록이 있어 삭제할 수 없어요. 이름을 바꾸거나 기록을 먼저 지워 주세요.'); return; }
+      const linkedCount = logList().filter(e => e.subject === d.subj && e.unit === u.id).length;
+      // [편의성 개선] 예전엔 기록이 있으면 아예 삭제가 막혀서 답답하다는 피드백이 있었다.
+      // 이제는 "진짜요? (다시 탭)" 확인만 거치면 삭제되고, 연결된 기록은 지우지 않고
+      // 단원 연결만 끊는다 — 기록 목록엔 unitName이 그대로 남아 계속 보인다.
       if(!armOrConfirm(b, 'delunit-' + u.id)) return;
-      captureLog(); gs('units')[d.subj] = unitsOf(d.subj).filter(x => x.id !== u.id); d.unit = null; saveState(); logOpen();
+      captureLog();
+      gs('units')[d.subj] = unitsOf(d.subj).filter(x => x.id !== u.id);
+      logList().forEach(e => { if(e.subject === d.subj && e.unit === u.id) e.unit = null; });
+      d.unit = null; saveState(); logOpen();
+      showToast(linkedCount ? `🗑 단원을 삭제했어요. 연결된 기록 ${linkedCount}개는 남아있고, 앞으로 통계 집계에서만 빠져요.` : '🗑 단원을 삭제했어요.');
+    }else if(k === 'slimdone'){
+      captureLog();
+      if(typeof d.onPick === 'function') d.onPick(d.subj, d.unit);
+      spellClose();
     }else if(k === 'addsub'){
       const name = (g('log-newsub') || {}).value ? g('log-newsub').value.trim() : '';
       if(!name || !d.unit) return;
