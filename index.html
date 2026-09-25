@@ -3377,14 +3377,27 @@
   .rpg-track__chip.is-done{opacity:0.62;}
   .rpg-track__chip:disabled{opacity:0.4;cursor:not-allowed;}
   /* 뽀모도로 전투 */
-  .battle-strip{display:flex;align-items:center;gap:10px;margin:0 auto 12px;max-width:340px;padding:8px 12px;border:1px solid var(--parch-edge);border-radius:12px;background:linear-gradient(180deg,var(--parch),var(--parch-2));text-align:left;}
+  .battle-strip{margin:0 auto 12px;max-width:400px;border-radius:14px;overflow:hidden;border:1px solid var(--parch-edge);background:linear-gradient(180deg,var(--parch),var(--parch-2));text-align:left;}
   .battle-strip[hidden]{display:none;}
+  .battle-strip__name{display:block;font-size:.78rem;font-weight:700;}
+  .battle-strip__sub{display:block;font-size:.64rem;margin:1px 0 5px;}
+  .battle-strip__bar{height:7px;border-radius:8px;background:rgba(0,0,0,.16);overflow:hidden;}
+  .battle-strip__fill{height:100%;background:linear-gradient(90deg,var(--c-c25a4f),var(--c-e08a3e));transition:width 1s linear;}
+  /* 보스 원화가 없을 때(훈련용 허수아비 등 대체 상대) — 예전처럼 이모지 아이콘 한 줄 레이아웃 */
+  .battle-strip__body-wrap{display:flex;align-items:center;gap:10px;padding:8px 12px;}
   .battle-strip__icon{font-size:1.7rem;animation:foeIdle 2.4s ease-in-out infinite;}
   .battle-strip__body{flex:1;min-width:0;}
-  .battle-strip__name{display:block;font-size:.72rem;font-weight:700;color:var(--ink-soft);margin-bottom:4px;}
-  .battle-strip__bar{height:8px;border-radius:8px;background:rgba(0,0,0,.14);overflow:hidden;}
-  .battle-strip__fill{height:100%;background:linear-gradient(90deg,var(--c-c25a4f),var(--c-e08a3e));transition:width 1s linear;}
-  .battle-strip.low .battle-strip__icon{animation:foeWobble .5s ease-in-out infinite;}
+  .battle-strip__body .battle-strip__name{color:var(--ink-soft);}
+  .battle-strip__body .battle-strip__sub{color:var(--muted);}
+  .battle-strip__body .battle-strip__bar{background:rgba(0,0,0,.14);}
+  /* 보스 원화가 있을 때 — 가로로 넓게 배너로 깔고, 아래쪽 그라데이션 위에 이름·과목/단원·HP바를 자막처럼 얹는다 */
+  .battle-strip__art{position:relative;aspect-ratio:2.6/1;background-size:cover;background-position:center 58%;background-color:var(--parch-2);}
+  .battle-strip__scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,8,0) 38%,rgba(20,16,8,.82) 100%);}
+  .battle-strip__info{position:absolute;left:0;right:0;bottom:0;padding:8px 12px 9px;}
+  .battle-strip__info .battle-strip__name{color:#fbf6e8;text-shadow:0 1px 3px rgba(0,0,0,.65);}
+  .battle-strip__info .battle-strip__sub{color:#e7dcc0;text-shadow:0 1px 2px rgba(0,0,0,.65);}
+  .battle-strip__info .battle-strip__bar{background:rgba(0,0,0,.35);}
+  .battle-strip.low .battle-strip__icon,.battle-strip.low .battle-strip__art{animation:foeWobble .5s ease-in-out infinite;}
   @keyframes foeIdle{50%{transform:translateY(-3px);}}
   @keyframes foeWobble{25%{transform:rotate(-9deg);}75%{transform:rotate(9deg);}}
   /* 주문 영창 */
@@ -3394,6 +3407,7 @@
   .spell-card{padding:16px;border:1px solid var(--parch-edge);border-radius:12px;background:linear-gradient(180deg,var(--parch),var(--parch-2));margin-bottom:12px;white-space:pre-wrap;font-family:'Noto Serif KR',serif;line-height:1.7;font-size:.9rem;color:var(--ink);}
   .spell-card small{display:block;color:var(--gold);font-family:'Noto Sans KR',sans-serif;font-size:.68rem;margin-bottom:6px;font-weight:700;}
   .spell-form textarea,.spell-form select{width:100%;margin-bottom:8px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:.85rem;}
+  .spell-form select{appearance:none;-webkit-appearance:none;-moz-appearance:none;}
   .spell-row{display:flex;gap:8px;}
   /* 골드 연출 */
   .gold-pop{position:fixed;z-index:999;pointer-events:none;font-family:'Noto Serif KR',serif;font-weight:900;font-size:.95rem;color:var(--gold);text-shadow:0 1px 2px rgba(0,0,0,.35);white-space:nowrap;animation:goldPop 1.1s ease-out forwards;}
@@ -3493,6 +3507,17 @@
   .timer-target{margin:0 0 12px;}
   .timer-target .spirit-chips{justify-content:center;align-items:center;}
   .timer-target select,.session-note select,.session-note input[type=text]{width:100%;box-sizing:border-box;margin:8px 0 0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--c-fbf8f1);color:var(--ink);font:inherit;font-size:1rem;}
+  /* select/input과 옆에 붙는 버튼의 세로 규격을 정확히 맞춰(둘 다 40px) 한 줄처럼 붙어 보이게 하는 공용 규칙.
+     select는 네이티브 화살표(appearance)도 함께 제거한다. 해당 행에 row-controls-align 클래스를 추가해서 쓴다. */
+  .row-controls-align{align-items:stretch;}
+  .row-controls-align>select,.row-controls-align>input[type=text]{
+    height:40px;margin-top:0;
+    appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  }
+  .row-controls-align>button{
+    flex:none;height:40px;padding:0 14px;
+    display:inline-flex;align-items:center;justify-content:center;
+  }
   .session-note{margin-top:14px;padding:12px;border:1px solid var(--parch-edge);border-radius:12px;background:linear-gradient(180deg,var(--parch),var(--parch-2));text-align:left;}
   .session-note[hidden],.timer-target[hidden]{display:none;}
   .session-note__head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.8rem;font-weight:700;color:var(--ink);}
@@ -4549,6 +4574,13 @@
   const SUBJECT_BOSSES = {
     '헌법':'헌정의 수호자', '민법':'계약의 미궁왕', '형법':'죄형의 감시자', '행정법':'관료의 문지기',
     '상법':'상인의 대공', '민사소송법':'소송의 재판관', '형사소송법':'진실의 추적자', '선택과목':'비밀길의 파수꾼'
+  };
+  // 과목별 보스 원화(웹툰형 일러스트). index.html과 같은 폴더에 둔다.
+  const SUBJECT_BOSS_IMG = {
+    '헌법':'boss-constitution-guardian.webp', '민법':'boss-contract-labyrinthking.webp',
+    '형법':'boss-sentence-executor.webp', '행정법':'boss-dominance-administrator.webp',
+    '상법':'boss-seadevil-kraken.webp', '민사소송법':'boss-dispute-arbiter.webp',
+    '형사소송법':'boss-truth-seeker.webp', '선택과목':'boss-gold-exactor.webp'
   };
   // 스탬프를 찍을 때 낮은 확률로 뜨는 "돌발 이벤트" 문구 풀 — 전부 순수 보너스뿐이라 실패나
   // 손해로 이어지는 조합은 없다(패널티형 이벤트는 의도적으로 배제).
@@ -9771,12 +9803,15 @@ function renderRpgQuests(){
     // [버그 수정] 예전엔 오늘의 미션 목록 중 첫 번째(ms[0])를 무조건 보스로 띄워서,
     // 타이머 시작 전 고른 과목(curSubj)과 실제로 싸우는 보스가 서로 다르게 보이는 문제가 있었다.
     // 타이머 목표로 지정한 과목을 최우선으로 삼고, 지정한 게 없을 때만 오늘의 미션으로 되돌아간다.
-    const subj = curSubj();
-    if(subj && SUBJECT_BOSSES[subj]) return { icon:(JOURNEY_REGIONS[subj]||{}).icon || '👹', name:SUBJECT_BOSSES[subj], tag:subj };
+    const t = timerTarget(), subj = curSubj();
+    if(subj && SUBJECT_BOSSES[subj]){
+      const u = unitsOf(subj).find(x => x.id === t.unit);
+      return { icon:(JOURNEY_REGIONS[subj]||{}).icon || '👹', name:SUBJECT_BOSSES[subj], tag:subj, unitName:u ? u.name : '', img:SUBJECT_BOSS_IMG[subj] || null };
+    }
     const ms = ((state.missions||{})[formatDate(today)] || []).filter(n => SUBJECT_BOSSES[n]);
-    if(ms.length) return { icon:(JOURNEY_REGIONS[ms[0]]||{}).icon || '👹', name:SUBJECT_BOSSES[ms[0]], tag:ms[0] };
+    if(ms.length) return { icon:(JOURNEY_REGIONS[ms[0]]||{}).icon || '👹', name:SUBJECT_BOSSES[ms[0]], tag:ms[0], unitName:'', img:SUBJECT_BOSS_IMG[ms[0]] || null };
     const tl = townLevel('training');
-    return tl >= 3 ? { icon:'🐲', name:'결전의 시험관', tag:'훈련 결전' } : tl >= 2 ? { icon:'🗿', name:'정예 훈련 골렘', tag:'훈련' } : tl >= 1 ? { icon:'🎯', name:'훈련용 허수아비', tag:'훈련' } : { icon:'🗿', name:'게으름의 그림자', tag:'오늘의 적' };
+    return tl >= 3 ? { icon:'🐲', name:'결전의 시험관', tag:'훈련 결전', unitName:'', img:null } : tl >= 2 ? { icon:'🗿', name:'정예 훈련 골렘', tag:'훈련', unitName:'', img:null } : tl >= 1 ? { icon:'🎯', name:'훈련용 허수아비', tag:'훈련', unitName:'', img:null } : { icon:'🗿', name:'게으름의 그림자', tag:'오늘의 적', unitName:'', img:null };
   }
   function battleVictory(count){
     const f = battleFoe(), bonus = (3 + townLevel('training') + (heartPerk('knight') ? 2 : 0)) * count;
@@ -10522,9 +10557,9 @@ function renderRpgQuests(){
     return `<div class="subtopic-section">
       <p class="modal-sub" style="margin-bottom:6px">세부목차${subs.length ? ` · ${doneCount}/${subs.length} 완료${allDone ? ' · 🎉 다 끝냈어요! 아래 회독 체크로 마무리해보세요' : ''}` : ' (선택)'}</p>
       ${subs.length ? rows : '<p class="subtopic-empty">아직 세부목차가 없어요. 아래에서 추가해두면 계속 골라 쓸 수 있어요.</p>'}
-      <div class="spell-row" style="margin-top:4px">
+      <div class="spell-row row-controls-align" style="margin-top:4px">
         <input type="text" id="log-newsub" maxlength="40" placeholder="＋ 세부목차 추가 (예: 제3장 2절)">
-        <button type="button" class="spell-btn" data-log="addsub" style="flex:none">추가</button>
+        <button type="button" class="spell-btn" data-log="addsub">추가</button>
       </div>
     </div>`;
   }
@@ -10569,23 +10604,31 @@ function renderRpgQuests(){
     const el = document.getElementById('timer-target');
     if(!el) return;
     const p = state.pomodoro, t = timerTarget();
-    const sel = ['idle','breakReady','breakDone'].includes(p.phase), lbl = p.phase === 'focus' || (p.phase === 'paused' && p.pausedFrom === 'focus');
+    const sel = ['idle','breakReady','breakDone'].includes(p.phase);
     const ms = ((state.missions || {})[formatDate(today)] || []).filter(m => MISSIONS.includes(m));
     const list = (ttAll || !ms.length) ? MISSIONS : Array.from(new Set(ms.concat(t.subj ? [t.subj] : [])));
-    const sig = `${sel ? 1 : lbl ? 2 : 0}|${t.subj}|${t.unit}|${list.join()}|${ttAll}`;
+    const sig = `${sel ? 1 : 0}|${t.subj}|${t.unit}|${list.join()}|${ttAll}`;
     if(el.dataset.sig === sig) return;
     el.dataset.sig = sig;
     if(sel){
       el.hidden = false;
-      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj ? (unitsOf(t.subj).length ? `<div class="spell-row" style="margin-top:6px"><select id="tt-unit">${unitOptions(t.subj, t.unit)}</select><button type="button" class="spell-btn" data-tt-manage="1" style="flex:none;padding:6px 10px" aria-label="단원 관리">⚙</button></div>` : `<div class="spell-row" style="margin-top:6px"><button type="button" class="spell-btn" data-tt-manage="1" style="width:100%">＋ ${t.subj} 단원 추가</button></div>`) : ''}`;
-    }else if(lbl){
-      const u = t.subj ? unitsOf(t.subj).find(x => x.id === t.unit) : null;
-      el.hidden = false; el.innerHTML = `<p class="chip-limit-note" style="text-align:center">🎯 ${t.subj ? t.subj + (u ? ' · ' + u.name : '') : '과목 미지정'}</p>`;
-    }else{ el.hidden = true; el.innerHTML = ''; }
+      el.innerHTML = `<div class="spirit-chips">🎯 ${list.map(m => `<button type="button" class="spirit-chip${t.subj === m ? ' on' : ''}" style="--m:${missionColor(m)}" data-tt="${m}">${m}</button>`).join('')}${(!ttAll && ms.length) ? '<button type="button" class="spirit-chip" data-tt-all="1">＋다른 과목</button>' : ''}</div>${t.subj ? (unitsOf(t.subj).length ? `<div class="spell-row row-controls-align" style="margin-top:6px"><select id="tt-unit">${unitOptions(t.subj, t.unit)}</select><button type="button" class="spell-btn" data-tt-manage="1" aria-label="단원 관리">⚙</button></div>` : `<div class="spell-row" style="margin-top:6px"><button type="button" class="spell-btn" data-tt-manage="1" style="width:100%">＋ ${t.subj} 단원 추가</button></div>`) : ''}`;
+    }else{
+      // 타이머 진행 중(focus)엔 과목·단원 정보가 보스 배너(#battle-strip)에 이미 나오므로
+      // 여기서 "🎯 과목명" 라벨을 따로 또 띄우지 않는다 — 같은 정보가 두 번 떠서 어수선했던 부분.
+      el.hidden = true; el.innerHTML = '';
+    }
   }
   document.getElementById('timer-target').addEventListener('click', e => {
     const c = e.target.closest('[data-tt]'), a = e.target.closest('[data-tt-all]'), mg = e.target.closest('[data-tt-manage]');
-    if(c){ const t = timerTarget(); setTimerTarget(t.subj === c.dataset.tt ? null : c.dataset.tt, null); }
+    if(c){
+      // [버그 수정] 과목 칩이 토글 방식이라, 이미 선택된 과목을 다시 누르면 선택이 풀렸다.
+      // 한 과목을 몇 시간 이어서 할 때 쉬는 시간마다 습관적으로 다시 누르게 되고, 그때마다
+      // 선택이 풀려서 매번 새로 골라야 하는 것처럼 느껴지는 원인이었다. 날짜가 바뀔 때 초기화되는
+      // 건 그대로 두고, 이미 켜진 칩을 또 누르는 경우만 무시(그대로 유지)하도록 고친다.
+      const t = timerTarget();
+      if(t.subj !== c.dataset.tt) setTimerTarget(c.dataset.tt, null);
+    }
     else if(a){ ttAll = true; renderTimerTarget(); }
     else if(mg){
       const t = timerTarget();
@@ -10678,7 +10721,7 @@ function renderRpgQuests(){
       spellOpen(`<div class="spell-form">
         <select id="log-subj" data-log="subj">${MISSIONS.map(m => `<option${m === d.subj ? ' selected' : ''}>${m}</option>`).join('')}</select>
         ${us.length ? `<select id="log-unit">${us.map(u => `<option value="${u.id}"${u.id === d.unit ? ' selected' : ''}>${u.name} · ${u.rounds}회독</option>`).join('')}</select><div class="spell-row"><button type="button" class="spell-btn" data-log="renunit">단원 이름 변경</button><button type="button" class="spell-btn" data-log="delunit">단원 삭제</button></div>` : '<p class="modal-sub">아직 단원이 없어요. 아래에서 추가해 주세요.</p>'}
-        <div class="spell-row" style="margin-top:8px"><input type="text" id="log-newunit" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-log="addunit" style="flex:none;margin-bottom:8px">추가</button></div>
+        <div class="spell-row row-controls-align" style="margin-top:8px"><input type="text" id="log-newunit" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-log="addunit">추가</button></div>
         ${subtopicSectionHTML(d.subj, d.unit)}
         ${us.length ? `<div class="spell-row" style="margin-top:8px"><button type="button" class="spell-btn spell-btn--main" data-log="slimdone" style="width:100%">이 단원 선택</button></div>` : ''}
       </div>`, '⚙ 단원 관리');
@@ -10688,7 +10731,7 @@ function renderRpgQuests(){
     spellOpen(`<div class="spell-form">
       <select id="log-subj" data-log="subj">${MISSIONS.map(m => `<option${m === d.subj ? ' selected' : ''}>${m}</option>`).join('')}</select>
       ${us.length ? `<select id="log-unit">${us.map(u => `<option value="${u.id}"${u.id === d.unit ? ' selected' : ''}>${u.name} · ${u.rounds}회독</option>`).join('')}</select><div class="spell-row"><button type="button" class="spell-btn" data-log="renunit">단원 이름 변경</button><button type="button" class="spell-btn" data-log="delunit">단원 삭제</button></div>` : '<p class="modal-sub">아직 단원이 없어요. 아래에서 추가해 주세요.</p>'}
-      <div class="spell-row" style="margin-top:8px"><input type="text" id="log-newunit" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-log="addunit" style="flex:none;margin-bottom:8px">추가</button></div>
+      <div class="spell-row row-controls-align" style="margin-top:8px"><input type="text" id="log-newunit" maxlength="30" placeholder="＋ 새 단원 이름"><button type="button" class="spell-btn" data-log="addunit">추가</button></div>
       ${subtopicSectionHTML(d.subj, d.unit)}
       <select id="log-kind">${KINDS.map(k => `<option${k === d.kind ? ' selected' : ''}>${k}</option>`).join('')}</select>
       <input type="number" id="log-min" min="0" max="600" step="5" value="${d.min != null && d.min !== '' ? d.min : 50}">
@@ -10996,9 +11039,14 @@ function renderRpgQuests(){
       bs.hidden = !fighting;
       if(fighting){
         const f = battleFoe();
-        if(bs.dataset.foe !== f.name){
-          bs.dataset.foe = f.name;
-          bs.innerHTML = `<span class="battle-strip__icon">${f.icon}</span><div class="battle-strip__body"><span class="battle-strip__name">${f.name} · ${f.tag}</span><div class="battle-strip__bar"><div class="battle-strip__fill"></div></div></div>`;
+        const foeSig = `${f.name}|${f.img}|${f.tag}|${f.unitName}`;
+        if(bs.dataset.foe !== foeSig){
+          bs.dataset.foe = foeSig;
+          const subLine = f.img ? `${f.tag}${f.unitName ? ' · ' + f.unitName : ''}` : f.tag;
+          bs.classList.toggle('has-art', !!f.img);
+          bs.innerHTML = f.img
+            ? `<div class="battle-strip__art" style="background-image:url('${f.img}')"><div class="battle-strip__scrim"></div><div class="battle-strip__info"><span class="battle-strip__name">${f.name}</span><span class="battle-strip__sub">${subLine}</span><div class="battle-strip__bar"><div class="battle-strip__fill"></div></div></div></div>`
+            : `<div class="battle-strip__body-wrap"><span class="battle-strip__icon">${f.icon}</span><div class="battle-strip__body"><span class="battle-strip__name">${f.name}</span><span class="battle-strip__sub">${subLine}</span><div class="battle-strip__bar"><div class="battle-strip__fill"></div></div></div></div>`;
         }
         bs.querySelector('.battle-strip__fill').style.width = (100 - pct).toFixed(1) + '%';
         bs.classList.toggle('low', pct >= 80);
